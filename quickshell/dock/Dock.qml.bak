@@ -17,8 +17,6 @@ PanelWindow {
     // Høyre side: system-apper
     property list<string> systemApps: ["thunar", "kitty"]
 
-    property int size: 60
-
     property bool revealed: false
 
     // Vinduslisten
@@ -132,14 +130,14 @@ PanelWindow {
 
         function bounce() { bounceAnim.restart() }
 
-        width: dock.size
-        height: dock.size
+        width: 48
+        height: 48
 
         Image {
             id: iconImage
             anchors.centerIn: parent
-            width: dock.size - 8
-            height: dock.size - 8
+            width: 40
+            height: 40
             sourceSize: Qt.size(96, 96)
             source: icon.source
             transformOrigin: Item.Bottom
@@ -287,7 +285,7 @@ PanelWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         width: dockRect.width
-        height: dock.size + 28
+        height: 64 + 8 + 4
 
         HoverHandler {
             id: dockHover
@@ -308,9 +306,9 @@ PanelWindow {
             id: dockRect
             anchors.horizontalCenter: parent.horizontalCenter
             width: row.implicitWidth + 16
-            height: dock.size + 16
+            height: 64
             y: dock.revealed ? parent.height - height - 8 : parent.height + 4
-            radius: 20
+            radius: 18
             color: Tokens.surface
             border.color: Tokens.border
             border.width: 1
@@ -340,7 +338,7 @@ PanelWindow {
                 Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     width: 1
-                    height: dock.size * 0.7
+                    height: 36
                     color: Tokens.border
                 }
 

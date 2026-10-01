@@ -1,6 +1,7 @@
 -- ~/.config/hypr/keybinds.lua
 -- Converted from keybinds.conf (hyprlang -> Lua, Hyprland 0.55+)
 
+local qs = "qs -p /home/tallman/Documents/GitHub/mac-hypr-rice/quickshell ipc call "
 local terminal    = "kitty"
 local fileManager = "thunar"
 local mainMod      = "SUPER"
@@ -11,7 +12,9 @@ local mainMod      = "SUPER"
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("qs -p /home/tallman/Documents/GitHub/mac-hypr-rice/quickshell ipc call launcher toggle"))
-hl.bind("F6", hl.dsp.exec_cmd("hyprshot -m region"))
+hl.bind("Print", hl.dsp.exec_cmd(qs .. "screenshot region"))
+hl.bind("F6", hl.dsp.exec_cmd(qs .. "screenshot region"))
+hl.bind("SHIFT + Print", hl.dsp.exec_cmd(qs .. "screenshot screen"))
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("hyprpicker -a"))
 
 ------------------------
@@ -22,6 +25,7 @@ hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + M", hl.dsp.window.move({ workspace = "special:minimized", follow = false }))
 hl.bind(mainMod .. " + SHIFT + M", hl.dsp.workspace.toggle_special("minimized"))
 hl.bind(mainMod .. " + ESCAPE", hl.dsp.exec_cmd("qs -p /home/tallman/Documents/GitHub/mac-hypr-rice/quickshell ipc call lock lock"))
+hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd("qs -p /home/tallman/Documents/GitHub/mac-hypr-rice/quickshell ipc call mission toggle"))
 ------------------
 ---- WORKSPACES ----
 ------------------
@@ -92,3 +96,4 @@ hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true 
 ---- MISC ----
 ------------
 hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("hyprctl dispatch dpms off && sleep 1 && hyprctl dispatch dpms on"))
+hl.layer_rule({ match = { namespace = "missioncontrol" }, blur = true, ignore_alpha = 0.1 })

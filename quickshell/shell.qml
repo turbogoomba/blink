@@ -9,6 +9,8 @@ import "./lockscreen" as LockUI
 import "./settings" as SettingsUI
 import "./services"
 import "./theme" as Theme
+import "./screenshot" as ScreenshotUI
+import "./missioncontrol" as MissionUI
 
 ShellRoot {
     Component.onCompleted: {
@@ -38,10 +40,16 @@ ShellRoot {
     CCUI.ControlCenter {}
 
     // Launcher
-    LauncherUI.Launcher {}
+	LauncherUI.Launcher {}
 
-    // Låseskjerm
-    LockUI.LockScreen {}
+    // Skjermbilder
+	ScreenshotUI.Screenshot {}
+
+	// Mission Control
+	MissionUI.Mission {}
+
+    // // Låseskjerm
+    // LockUI.LockScreen {}
 
     // Settings lastes bare når den er åpen
     LazyLoader {
