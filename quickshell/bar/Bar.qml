@@ -1,3 +1,4 @@
+import Quickshell.Wayland
 import QtQuick
 import Quickshell
 import "../theme"
@@ -11,6 +12,19 @@ PanelWindow {
     SystemClock {
         id: clock
         precision: SystemClock.Minutes
+	}
+
+    Text {
+        anchors.left: parent.left
+        anchors.leftMargin: Tokens.spacing
+        anchors.verticalCenter: parent.verticalCenter
+        text: ToplevelManager.activeToplevel?.title ?? ""
+        color: Tokens.textPrimary
+        font.family: Tokens.fontFamily
+        font.pixelSize: 13
+        font.weight: Font.Bold
+        elide: Text.ElideRight
+        width: parent.width / 3
     }
 
     Text {
