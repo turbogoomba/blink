@@ -5,6 +5,8 @@ import Quickshell
 
 Singleton {
 	//Colors
+	readonly property int barHeight: 28
+	readonly property color barBg: Qt.rgba(0.11, 0.11, 0.12, 0.75)
 	readonly property color bg: "#1c1c1e"
 	readonly property color surface: "#2c2c2e"
 	readonly property color surfaceAlt: "#242426"

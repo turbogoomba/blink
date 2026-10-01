@@ -1,15 +1,25 @@
 import QtQuick
-import QtQml
+import Quickshell
+import "./bar" as BarUI
 import "./settings" as SettingsUI
-import "./services" as Services
 import "./theme" as Theme
 
-Item {
-	Component.onCompleted: {
-		console.log("Shell started")
-		console.log("accent color:", Theme.Tokens.accent)
-	}
-	SettingsUI.Settings {
-		visible: true
-	}
+ShellRoot {
+    Component.onCompleted: {
+        console.log("Shell started")
+        console.log("accent color:", Theme.Tokens.accent)
+    }
+
+    // Én bar per skjerm
+    Variants {
+        model: Quickshell.screens
+        BarUI.Bar {
+            required property var modelData
+            screen: modelData
+        }
+    }
+
+    SettingsUI.Settings {
+        visible: true
+    }
 }
