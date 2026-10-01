@@ -2,14 +2,16 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import "../theme"
+import "../services"
 
 PanelWindow {
     id: bar
     anchors { top: true; left: true; right: true }
 
-    // Plass til at notchen stikker ned under baren
+    // Vinduet er høyt nok til at notchen kan vokse ned.
+    // exclusiveZone holder bare av plass til selve baren.
     readonly property int notchDrop: 8
-    implicitHeight: Tokens.barHeight + notchDrop
+    implicitHeight: 260
     exclusiveZone: Tokens.barHeight
     color: "transparent"
 
@@ -53,17 +55,20 @@ PanelWindow {
             font.family: Tokens.fontFamily
             font.pixelSize: 13
             font.weight: Font.Medium
+
+            MouseArea {
+                anchors.fill: parent
+                anchors.margins: -6
+                onClicked: ShellState.controlCenterOpen = !ShellState.controlCenterOpen
+            }
         }
     }
 
-    // Notch
-    Rectangle {
+    // Notch (ligger i Notch.qml)
+    Notch {
         id: notch
         anchors.horizontalCenter: parent.horizontalCenter
         y: 0
-        width: 200
-        height: Tokens.barHeight + bar.notchDrop
-        radius: 10
-        color: Tokens.barBg
+        baseHeight: Tokens.barHeight + bar.notchDrop
     }
 }

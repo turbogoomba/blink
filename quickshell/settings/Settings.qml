@@ -2,79 +2,110 @@ import QtQuick
 import Quickshell
 import "../theme" as Theme
 
-PanelWindow {
-	id: settingsWindow
-	visible: false
+FloatingWindow {
+    id: settingsWindow
+    title: "Settings"
+    implicitWidth: 960
+    implicitHeight: 640
+    color: Theme.Tokens.bg
 
-	implicitWidth: 1320
-	implicitHeight: 860
+    property string activePanel: "wifi"
 
-	color: Theme.Tokens.bg
+    // Alle panelene. ready = false viser "Coming soon".
+    readonly property var panels: [
+        { id: "wifi",      label: "Wi-Fi",     icon: "network-wireless-symbolic",   source: "panels/WifiPanel.qml",      ready: true },
+        { id: "bluetooth", label: "Bluetooth", icon: "bluetooth-active-symbolic",   source: "panels/BluetoothPanel.qml", ready: true },
+        { id: "sound",     label: "Sound",     icon: "audio-volume-high-symbolic",  source: "panels/SoundPanel.qml",     ready: true },
+        { id: "hyprland",  label: "Hyprland",  icon: "preferences-system-windows",  source: "panels/HyprlandPanel.qml",  ready: true }
+    ]
+    readonly property var current: panels.find(p => p.id === activePanel)
 
-	property string activePanel: "wifi"
+    // ---------- Sidepanel ----------
+    Rectangle {
+        id: sidebar
+        anchors { top: parent.top; bottom: parent.bottom; left: parent.left }
+        width: 220
+        color: Theme.Tokens.surfaceAlt
 
-	Row {
-		anchors.fill: parent
+        // Skillelinje mot innholdet
+        Rectangle {
+            anchors { top: parent.top; bottom: parent.bottom; right: parent.right }
+            width: 1
+            color: Theme.Tokens.border
+        }
 
-		//Sidebar
-		Rectangle {
-			width: 120
-			height: parent.height
-			color: Theme.Tokens.surface
+        Column {
+            anchors { top: parent.top; left: parent.left; right: parent.right }
+            anchors.topMargin: 20
+            anchors.leftMargin: 10
+            anchors.rightMargin: 11
+            spacing: 2
 
-			Column {
-				anchors.top: parent.top
-				anchors.left: parent.left
-				anchors.right: parent.right
-				anchors.margins: 8
-				spacing: 4
+            Repeater {
+                model: settingsWindow.panels
 
-				Repeater {
-					model: [
-						{ id: "wifi", label: "Wifi" },
-						{ id: "bluetooth", label: "Bluetooth" },
-						{ id: "sound", label: "Sound" }
-					]
-					delegate: Rectangle {
-						width: parent.width
-						height: 32
-						radius: Theme.Tokens.radius
-						color: modelData.id === settingsWindow.activePanel
-							? Theme.Tokens.surfaceAlt
-							: "transparent"
+                delegate: Rectangle {
+                    id: item
+                    required property var modelData
+                    readonly property bool selected: modelData.id === settingsWindow.activePanel
 
-						Text {
-							anchors.verticalCenter: parent.verticalCenter
-							anchors.left: parent.left
-							anchors.leftMargin: 8
-							text: modelData.label
-							color: modelData.id === settingsWindow.activePanel
-								? Theme.Tokens.accent
-								: Theme.Tokens.textSecondary
-							font.family: Theme.Tokens.fontFamily
-							font.pixelSize: 13
-						}
+                    width: parent.width
+                    height: 32
+                    radius: 7
+                    color: selected ? Theme.Tokens.accent
+                         : itemMouse.containsMouse ? Theme.Tokens.surface
+                         : "transparent"
 
-						MouseArea {
-							anchors.fill: parent
-							onClicked: settingsWindow.activePanel = modelData.id
-						}
-					}
-				}
-			}
-		}
-		Rectangle {
-			width: parent.width - 120
-			height: parent.height
-			color: Theme.Tokens.bg
+                    Image {
+                        id: itemIcon
+                        anchors.left: parent.left
+                        anchors.leftMargin: 10
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 16
+                        height: 16
+                        sourceSize: Qt.size(32, 32)
+                        source: Quickshell.iconPath(item.modelData.icon, "application-x-executable")
+                    }
 
-			Loader {
-				anchors.fill: parent
-				source: settingsWindow.activePanel === "wifi"
-					? "panels/WifiPanel.qml"
-					: ""
-				}
-			}
-		}
-	}
+                    Text {
+                        anchors.left: itemIcon.right
+                        anchors.leftMargin: 10
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: item.modelData.label
+                        color: Theme.Tokens.textPrimary
+                        font.family: Theme.Tokens.fontFamily
+                        font.pixelSize: 13
+                        font.weight: item.selected ? Font.Medium : Font.Normal
+                    }
 
+                    MouseArea {
+                        id: itemMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onClicked: settingsWindow.activePanel = item.modelData.id
+                    }
+                }
+            }
+        }
+    }
+
+    // ---------- Innhold ----------
+    Item {
+        anchors { top: parent.top; bottom: parent.bottom; left: sidebar.right; right: parent.right }
+
+        Loader {
+            anchors.fill: parent
+            source: settingsWindow.current?.ready ? settingsWindow.current.source : ""
+        }
+
+        Text {
+            anchors.centerIn: parent
+            visible: !(settingsWindow.current?.ready ?? false)
+            text: (settingsWindow.current?.label ?? "") + "\nComing soon"
+            horizontalAlignment: Text.AlignHCenter
+            color: Theme.Tokens.textSecondary
+            font.family: Theme.Tokens.fontFamily
+            font.pixelSize: 15
+        }
+    }
+}
