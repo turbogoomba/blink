@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import "./dock" as DockUI
 import "./bar" as BarUI
 import "./settings" as SettingsUI
 import "./theme" as Theme
@@ -14,6 +15,14 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         BarUI.Bar {
+            required property var modelData
+            screen: modelData
+        }
+	}
+	// Dock på hver skjerm
+    Variants {
+        model: Quickshell.screens
+        DockUI.Dock {
             required property var modelData
             screen: modelData
         }
