@@ -777,12 +777,88 @@ Rectangle {
                 anchors.bottom: parent.bottom
                 width: 1
                 color: Tokens.surface
+              }
+
+            // Timetable (shown instead of buses when a timetable link exists)
+            Column {
+                anchors { right: parent.right; top: parent.top }
+                width: (parent.width - 41) / 2
+                spacing: 6
+                visible: TimetableService.enabled
+
+                Text {
+                    width: parent.width
+                    text: TimetableService.error !== "" ? TimetableService.error
+                        : TimetableService.upcoming.length === 0 ? "No upcoming classes"
+                        : "Timetable"
+                    color: Tokens.textPrimary
+                    font.family: Tokens.fontFamily
+                    font.pixelSize: 13
+                    font.weight: Font.DemiBold
+                    elide: Text.ElideRight
+                }
+
+                Repeater {
+                    model: TimetableService.upcoming
+
+                    delegate: Item {
+                        id: cls
+                        required property var modelData
+                        readonly property bool live: TimetableService.now && TimetableService.isNow(modelData)
+
+                        width: parent.width
+                        height: 18
+
+                        Rectangle {
+                            id: codeBadge
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: Math.max(28, codeText.implicitWidth + 10)
+                            height: 18
+                            radius: 4
+                            color: cls.live ? "#30d158" : Tokens.accent
+
+                            Text {
+                                id: codeText
+                                anchors.centerIn: parent
+                                text: TimetableService.shortTitle(cls.modelData)
+                                color: "white"
+                                font.family: Tokens.fontFamily
+                                font.pixelSize: 11
+                                font.weight: Font.Bold
+                            }
+                        }
+
+                        Text {
+                            anchors.left: codeBadge.right
+                            anchors.leftMargin: 8
+                            anchors.right: whenText.left
+                            anchors.rightMargin: 8
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: cls.modelData.location || cls.modelData.title || ""
+                            color: Tokens.textPrimary
+                            font.family: Tokens.fontFamily
+                            font.pixelSize: 12
+                            elide: Text.ElideRight
+                        }
+
+                        Text {
+                            id: whenText
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: TimetableService.now && TimetableService.whenText(cls.modelData)
+                            color: cls.live ? "#30d158" : Tokens.textSecondary
+                            font.family: Tokens.fontFamily
+                            font.pixelSize: 12
+                        }
+                    }
+                }
             }
 
             Column {
                 anchors { right: parent.right; top: parent.top }
                 width: (parent.width - 41) / 2
                 spacing: 6
+                visible: !TimetableService.enabled
 
                 Text {
                     width: parent.width
