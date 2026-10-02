@@ -22,6 +22,10 @@ Singleton {
     // Dock
     property alias dockSize: adapter.dockSize
 
+    // Night Shift
+    property alias nightLight: adapter.nightLight
+    property alias nightTemp: adapter.nightTemp
+
     readonly property string dir: Quickshell.env("HOME") + "/.config/mac-hypr-rice"
 
     Process {
@@ -49,6 +53,8 @@ Singleton {
             property string notchRight: "auto"
             property string timetableUrl: ""
             property int dockSize: 60
+            property bool nightLight: false
+            property int nightTemp: 4000
         }
     }
 }

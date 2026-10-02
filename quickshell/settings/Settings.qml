@@ -17,7 +17,7 @@ FloatingWindow {
         { id: "bluetooth",     label: "Bluetooth",     icon: "bluetooth-active-symbolic",       source: "panels/BluetoothPanel.qml", ready: true },
         { id: "sound",         label: "Sound",         icon: "audio-volume-high-symbolic",      source: "panels/SoundPanel.qml",     ready: true },
         { id: "notifications", label: "Notifications", icon: "preferences-system-notifications", source: "panels/ShellPanel.qml",    ready: true, page: "notifications" },
-        { id: "desktop",       label: "Desktop & Dock", icon: "preferences-desktop-wallpaper",  source: "panels/ShellPanel.qml",     ready: true, page: "desktop" },
+        { id: "desktop",       label: "Display & Dock",  icon: "preferences-desktop-wallpaper",  source: "panels/ShellPanel.qml",     ready: true, page: "desktop" },
         { id: "corners",       label: "Hot Corners",   icon: "input-mouse",                     source: "panels/ShellPanel.qml",     ready: true, page: "corners" },
         { id: "notch",         label: "Notch",         icon: "x-office-calendar",               source: "panels/ShellPanel.qml",     ready: true, page: "notch" },
         { id: "hyprland",      label: "Hyprland",      icon: "preferences-system-windows",      source: "panels/HyprlandPanel.qml",  ready: true }

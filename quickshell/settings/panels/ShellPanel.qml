@@ -345,7 +345,7 @@ Flickable {
         spacing: 10
 
         Text {
-            text: panel.page === "desktop" ? "Desktop & Dock"
+            text: panel.page === "desktop" ? "Display & Dock"
                 : panel.page === "corners" ? "Hot Corners"
                 : panel.page === "notch" ? "Notch"
                 : "Notifications"
@@ -374,6 +374,30 @@ Flickable {
                             ipc.command = ["qs", "-p", Quickshell.shellDir, "ipc", "call", "wallpaper", "toggle"]
                             ipc.running = true
                         }
+                    }
+                }
+            }
+
+            SectionTitle { text: "Night Shift" }
+            Group {
+                SettingRow {
+                    title: "Night Shift"
+                    subtitle: NightLightService.available ? "Warmer colors, easier on the eyes at night"
+                        : "Install hyprsunset to use this"
+                    Toggle {
+                        checked: SettingsService.nightLight
+                        apply: function(v) { SettingsService.nightLight = v }
+                    }
+                }
+                SettingRow {
+                    title: "Warmth"
+                    subtitle: "Lower is warmer"
+                    divider: false
+                    ValueSlider {
+                        from: 2500; to: 6000; step: 100
+                        value: SettingsService.nightTemp
+                        suffix: " K"
+                        apply: function(v) { SettingsService.nightTemp = v }
                     }
                 }
             }

@@ -458,11 +458,13 @@ PanelWindow {
                 Card {
                     order: 0
                     Layout.fillWidth: true
+                    Layout.fillHeight: true
                     Layout.preferredWidth: 1
-                    implicitHeight: 104
 
                     ColumnLayout {
-                        anchors.fill: parent
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
                         anchors.margins: 6
                         spacing: 4
 
@@ -492,6 +494,21 @@ PanelWindow {
                             onClicked: {
                                 if (cc.btAdapter)
                                     cc.btAdapter.enabled = !cc.btAdapter.enabled
+                            }
+                          }
+
+                        ToggleRow {
+                            Layout.fillWidth: true
+                            readonly property bool airplane: !NetworkService.wifiEnabled && !(cc.btAdapter?.enabled ?? false)
+                            icon: "airplane-mode-symbolic"
+                            fallback: "airplane-mode"
+                            title: "Airplane Mode"
+                            subtitle: airplane ? "On" : "Off"
+                            active: airplane
+                            onClicked: {
+                                const on = !airplane
+                                if (NetworkService.wifiEnabled === on) NetworkService.toggleWifi()
+                                if (cc.btAdapter) cc.btAdapter.enabled = !on
                             }
                         }
                     }
@@ -532,6 +549,24 @@ PanelWindow {
                             subtitle: StyleService.mode === "floating" ? "Floating" : "Tiling"
                             active: StyleService.mode === "floating"
                             onClicked: StyleService.toggle()
+                        }
+                    }
+
+                    Card {
+                        order: 2
+                        Layout.fillWidth: true
+                        implicitHeight: 47
+                        visible: NightLightService.available
+
+                        ToggleRow {
+                            anchors.fill: parent
+                            anchors.margins: 2
+                            icon: "night-light-symbolic"
+                            fallback: "weather-clear-night"
+                            title: "Night Shift"
+                            subtitle: NightLightService.enabled ? NightLightService.temperature + " K" : "Off"
+                            active: NightLightService.enabled
+                            onClicked: NightLightService.toggle()
                         }
                     }
                 }
