@@ -5,12 +5,12 @@ import "./bar" as BarUI
 import "./dock" as DockUI
 import "./controlcenter" as CCUI
 import "./launcher" as LauncherUI
-import "./lockscreen" as LockUI
+import "./screenshot" as ScreenshotUI
+import "./missioncontrol" as MissionUI
 import "./settings" as SettingsUI
 import "./services"
 import "./theme" as Theme
-import "./screenshot" as ScreenshotUI
-import "./missioncontrol" as MissionUI
+import "./wallpaper" as WallpaperUI
 
 ShellRoot {
     Component.onCompleted: {
@@ -27,6 +27,9 @@ ShellRoot {
         }
     }
 
+    // Ramme rundt skjermen
+    BarUI.Frame {}
+
     // Dock på hver skjerm
     Variants {
         model: Quickshell.screens
@@ -40,16 +43,16 @@ ShellRoot {
     CCUI.ControlCenter {}
 
     // Launcher
-	LauncherUI.Launcher {}
+    LauncherUI.Launcher {}
 
     // Skjermbilder
-	ScreenshotUI.Screenshot {}
+    ScreenshotUI.Screenshot {}
 
-	// Mission Control
-	MissionUI.Mission {}
+    // Mission Control
+    MissionUI.Mission {}
 
-    // // Låseskjerm
-    // LockUI.LockScreen {}
+    // Bakgrunnsvelger
+    WallpaperUI.WallpaperPicker {}
 
     // Settings lastes bare når den er åpen
     LazyLoader {
@@ -64,9 +67,5 @@ ShellRoot {
     IpcHandler {
         target: "launcher"
         function toggle(): void { ShellState.launcherOpen = !ShellState.launcherOpen }
-    }
-    IpcHandler {
-        target: "lock"
-        function lock(): void { ShellState.locked = true }
     }
 }

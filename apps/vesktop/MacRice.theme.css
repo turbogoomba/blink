@@ -1,0 +1,120 @@
+/**
+ * @name Mac Rice
+ * @author turbogoomba
+ * @description Mørkt Mac-tema som matcher Quickshell-oppsettet
+ * @version 1.0.0
+ */
+
+/* ============================================
+   Farger
+   Discord har både gamle og nye variabelnavn,
+   så vi setter begge.
+   ============================================ */
+:root,
+.theme-dark,
+.theme-darker,
+.theme-midnight,
+.visual-refresh {
+  --mr-bg: #1c1c1e;
+  --mr-bg-deep: #161618;
+  --mr-surface: #242426;
+  --mr-surface-high: #2c2c2e;
+  --mr-border: #3a3a3c;
+  --mr-text: #e5e5e7;
+  --mr-text-dim: #98989d;
+  --mr-accent: #5fa8d3;
+
+  /* Bakgrunner (gamle navn) */
+  --background-primary: var(--mr-bg) !important;
+  --background-secondary: var(--mr-bg-deep) !important;
+  --background-secondary-alt: var(--mr-surface) !important;
+  --background-tertiary: var(--mr-bg-deep) !important;
+  --background-floating: var(--mr-surface-high) !important;
+  --channeltextarea-background: var(--mr-surface) !important;
+  --modal-background: var(--mr-bg) !important;
+  --modal-footer-background: var(--mr-bg-deep) !important;
+
+  /* Bakgrunner (nye navn) */
+  --background-base-low: var(--mr-bg) !important;
+  --background-base-lower: var(--mr-bg-deep) !important;
+  --background-base-lowest: var(--mr-bg-deep) !important;
+  --background-surface-high: var(--mr-surface-high) !important;
+  --background-surface-higher: var(--mr-surface-high) !important;
+  --background-surface-highest: var(--mr-border) !important;
+  --chat-background-default: var(--mr-bg) !important;
+  --input-background-default: var(--mr-surface) !important;
+
+  /* Hover og valgt */
+  --background-modifier-hover: rgba(255, 255, 255, 0.05) !important;
+  --background-modifier-active: rgba(255, 255, 255, 0.08) !important;
+  --background-modifier-selected: rgba(255, 255, 255, 0.1) !important;
+  --background-modifier-accent: var(--mr-border) !important;
+
+  /* Tekst */
+  --text-normal: var(--mr-text) !important;
+  --text-default: var(--mr-text) !important;
+  --text-strong: #ffffff !important;
+  --text-muted: var(--mr-text-dim) !important;
+  --header-primary: #ffffff !important;
+  --header-secondary: var(--mr-text-dim) !important;
+  --channels-default: var(--mr-text-dim) !important;
+  --interactive-normal: var(--mr-text-dim) !important;
+  --interactive-hover: var(--mr-text) !important;
+  --interactive-active: #ffffff !important;
+  --interactive-muted: #5a5a5e !important;
+
+  /* Aksent */
+  --brand-500: var(--mr-accent) !important;
+  --brand-560: #4f97c2 !important;
+  --brand-600: #4589b3 !important;
+  --brand-experiment: var(--mr-accent) !important;
+  --text-link: var(--mr-accent) !important;
+
+  /* Font */
+  --font-primary: "IBM Plex Sans", sans-serif !important;
+  --font-display: "IBM Plex Sans", sans-serif !important;
+  --font-headline: "IBM Plex Sans", sans-serif !important;
+}
+
+/* ============================================
+   Detaljer
+   ============================================ */
+
+/* Avrundet skrivefelt */
+[class*="channelTextArea_"] {
+  border-radius: 12px !important;
+}
+
+/* Myke, avrundede popup-menyer */
+[class*="menu_"][role="menu"] {
+  border-radius: 10px !important;
+  border: 1px solid var(--mr-border) !important;
+}
+[class*="menu_"] [role="menuitem"] {
+  border-radius: 6px !important;
+}
+[class*="menu_"] [role="menuitem"]:hover,
+[class*="menu_"] [role="menuitem"][class*="focused_"] {
+  background-color: var(--mr-accent) !important;
+  color: white !important;
+}
+
+/* Tynne scrollbarer */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--mr-border) !important;
+  border-radius: 4px !important;
+  border: none !important;
+}
+::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+/* Skjul gave-knappen i skrivefeltet */
+button[aria-label="Send a gift"],
+button[aria-label="Send en gave"] {
+  display: none !important;
+}

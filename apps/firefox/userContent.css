@@ -1,0 +1,6 @@
+/* Mac Rice — mørk bakgrunn på nye faner */
+@-moz-document url("about:newtab"), url("about:home"), url("about:blank") {
+  body {
+    background-color: #1c1c1e !important;
+  }
+}

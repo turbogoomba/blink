@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Hyprland
 import Quickshell.Services.UPower
 import "../theme"
 import "../services"
@@ -21,7 +22,7 @@ PanelWindow {
         const p = battery?.percentage ?? 0
         return p > 1 ? p / 100 : p
     }
-    readonly property bool charging: battery?.state === UPowerDeviceState.Charging
+    readonly property bool charging: !UPower.onBattery
 
     function iconFile(name) { return Qt.resolvedUrl("../icons/" + name + ".svg") }
 
@@ -84,18 +85,130 @@ PanelWindow {
         height: Tokens.barHeight
         color: Tokens.barBg
 
-        // ---------- Venstre: aktivt vindu ----------
-        Text {
+        // ---------- Venstre: arbeidsflater + aktivt vindu ----------
+        Row {
             anchors.left: parent.left
             anchors.leftMargin: Tokens.spacing
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width / 3
-            text: ToplevelManager.activeToplevel?.title ?? ""
-            color: Tokens.textPrimary
-            font.family: Tokens.fontFamily
-            font.pixelSize: 13
-            font.weight: Font.Bold
-            elide: Text.ElideRight
+            spacing: 14
+
+            // Arbeidsflater
+            Rectangle {
+                id: wsArea
+                anchors.verticalCenter: parent.verticalCenter
+                width: wsRow.implicitWidth + 16
+                height: 18
+                radius: 9
+                color: Qt.rgba(1, 1, 1, 0.07)
+
+                readonly property var monitor: Hyprland.monitorFor(bar.screen)
+                readonly property var workspaces: Hyprland.workspaces.values
+                    .filter(w => w.id > 0 && w.monitor?.name === monitor?.name)
+                    .sort((a, b) => a.id - b.id)
+                readonly property int activeIndex:
+                    workspaces.findIndex(w => w.id === monitor?.activeWorkspace?.id)
+
+                readonly property int dot: 7
+                readonly property int gap: 10
+                readonly property int pillWidth: 20
+                property int lastIndex: 0
+
+                function centerOf(i) { return 8 + i * (dot + gap) + dot / 2 }
+
+                // Flytt pillen med "væske"-effekt
+                function moveTo(i, animate) {
+                    if (i < 0) return
+                    const c = centerOf(i)
+                    const goingRight = i > lastIndex
+                    leftAnim.to = c - pillWidth / 2
+                    rightAnim.to = c + pillWidth / 2
+                    leftAnim.duration = goingRight ? 320 : 160
+                    rightAnim.duration = goingRight ? 160 : 320
+                    lastIndex = i
+                    if (animate) {
+                        liquid.restart()
+                    } else {
+                        pill.lx = leftAnim.to
+                        pill.rx = rightAnim.to
+                    }
+                }
+
+                onActiveIndexChanged: moveTo(activeIndex, true)
+                onWorkspacesChanged: moveTo(activeIndex, false)
+                Component.onCompleted: moveTo(activeIndex, false)
+
+                // Prikkene
+                Row {
+                    id: wsRow
+                    x: 8
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: wsArea.gap
+
+                    Repeater {
+                        model: wsArea.workspaces
+
+                        delegate: Rectangle {
+                            id: ws
+                            required property var modelData
+
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: wsArea.dot
+                            height: wsArea.dot
+                            radius: wsArea.dot / 2
+                            color: wsMouse.containsMouse ? Tokens.textPrimary : Tokens.textSecondary
+                            Behavior on color { ColorAnimation { duration: 150 } }
+
+                            MouseArea {
+                                id: wsMouse
+                                anchors.fill: parent
+                                anchors.margins: -5
+                                hoverEnabled: true
+                                onClicked: Hyprland.dispatch(`hl.dsp.focus({ workspace = "${ws.modelData.id}" })`)
+                            }
+                        }
+                    }
+                }
+
+                // Den aktive pillen
+                Rectangle {
+                    id: pill
+                    property real lx: 0
+                    property real rx: 0
+
+                    x: lx
+                    width: rx - lx
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: wsArea.dot
+                    radius: wsArea.dot / 2
+                    color: Tokens.accent
+
+                    ParallelAnimation {
+                        id: liquid
+                        NumberAnimation { id: leftAnim;  target: pill; property: "lx"; easing.type: Easing.OutCubic }
+                        NumberAnimation { id: rightAnim; target: pill; property: "rx"; easing.type: Easing.OutCubic }
+                    }
+                }
+
+                // Scroll for å bla mellom arbeidsflater
+                WheelHandler {
+                    onWheel: event => {
+                        const dir = event.angleDelta.y > 0 ? "e-1" : "e+1"
+                        Hyprland.dispatch(`hl.dsp.focus({ workspace = "${dir}" })`)
+                    }
+                }
+            }
+
+            // Aktivt vindu
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                width: barRect.width / 3
+                text: ToplevelManager.activeToplevel?.title ?? ""
+                color: Tokens.textPrimary
+                font.family: Tokens.fontFamily
+                font.pixelSize: 13
+                font.weight: Font.Bold
+                elide: Text.ElideRight
+            }
         }
 
         // ---------- Høyre ----------
@@ -145,7 +258,7 @@ PanelWindow {
                     Row {
                         visible: bar.hasBattery
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 5
+                        spacing: 6
 
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
@@ -155,14 +268,49 @@ PanelWindow {
                             font.pixelSize: 12
                             font.weight: Font.Medium
                         }
-                        Image {
+
+                        // Liggende batteri
+                        Item {
+                            id: batIcon
                             anchors.verticalCenter: parent.verticalCenter
-                            width: 18
-                            height: 18
-                            sourceSize: Qt.size(36, 36)
-                            source: Quickshell.iconPath(
-                                "battery-level-" + Math.round(bar.batteryLevel * 10) * 10
-                                + (bar.charging ? "-charging" : "") + "-symbolic", "battery")
+                            width: 24
+                            height: 11
+
+                            readonly property color fillColor:
+                                  bar.charging ? "#30d158"
+                                : bar.batteryLevel < 0.2 ? "#ff453a"
+                                : Tokens.textPrimary
+
+                            Rectangle {
+                                id: batBody
+                                width: 21
+                                height: parent.height
+                                radius: 3
+                                color: "transparent"
+                                border.color: Qt.rgba(1, 1, 1, 0.45)
+                                border.width: 1
+
+                                Rectangle {
+                                    x: 2
+                                    y: 2
+                                    width: Math.max(2, (parent.width - 4) * bar.batteryLevel)
+                                    height: parent.height - 4
+                                    radius: 1.5
+                                    color: batIcon.fillColor
+                                    Behavior on width { NumberAnimation { duration: 300 } }
+                                    Behavior on color { ColorAnimation { duration: 200 } }
+                                }
+                            }
+
+                            Rectangle {
+                                anchors.left: batBody.right
+                                anchors.leftMargin: 1
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 2
+                                height: 4
+                                radius: 1
+                                color: Qt.rgba(1, 1, 1, 0.45)
+                            }
                         }
                     }
 

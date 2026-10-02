@@ -1,0 +1,56 @@
+/* ============================================
+   Mac Rice — Spotify
+   ============================================ */
+
+:root {
+  --mr-radius: 10px;
+}
+
+body,
+button,
+input,
+.encore-text {
+  font-family: "IBM Plex Sans", sans-serif !important;
+}
+
+/* Avrundede hovedpaneler */
+.Root__main-view,
+.Root__nav-bar,
+.Root__right-sidebar {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+/* Kort (album, spillelister) */
+.main-card-card {
+  border-radius: var(--mr-radius) !important;
+  background: var(--spice-card) !important;
+  transition: background 150ms ease !important;
+}
+.main-card-card:hover {
+  background: var(--spice-main-elevated) !important;
+}
+.main-card-card img {
+  border-radius: 8px !important;
+}
+
+/* Spilleren nederst */
+.Root__now-playing-bar {
+  background: var(--spice-player) !important;
+  border-top: 1px solid var(--spice-misc) !important;
+}
+
+/* Fremdrift og volum i aksentfargen */
+.progress-bar {
+  --fg-color: var(--spice-button) !important;
+  --bg-color: var(--spice-misc) !important;
+}
+
+/* Tynne, diskré scrollbarer */
+::-webkit-scrollbar {
+  width: 8px !important;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--spice-misc) !important;
+  border-radius: 4px !important;
+}

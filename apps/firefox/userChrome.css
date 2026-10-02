@@ -1,0 +1,125 @@
+/* ============================================
+   Mac Rice — Firefox
+   ============================================ */
+
+:root {
+  --mr-bg: #1c1c1e;
+  --mr-surface: #2c2c2e;
+  --mr-surface-alt: #242426;
+  --mr-border: #3a3a3c;
+  --mr-text: #e5e5e7;
+  --mr-text-dim: #98989d;
+  --mr-accent: #5fa8d3;
+  --mr-radius: 8px;
+
+  /* Firefox sine egne fargevariabler */
+  --toolbar-bgcolor: var(--mr-bg) !important;
+  --toolbar-color: var(--mr-text) !important;
+  --lwt-accent-color: var(--mr-bg) !important;
+  --lwt-text-color: var(--mr-text) !important;
+  --tab-selected-bgcolor: var(--mr-surface) !important;
+  --tab-selected-textcolor: var(--mr-text) !important;
+  --toolbar-field-background-color: var(--mr-surface-alt) !important;
+  --toolbar-field-focus-background-color: var(--mr-surface) !important;
+  --toolbar-field-color: var(--mr-text) !important;
+  --toolbar-field-focus-color: var(--mr-text) !important;
+  --toolbar-field-border-color: transparent !important;
+  --toolbar-field-focus-border-color: var(--mr-accent) !important;
+  --focus-outline-color: var(--mr-accent) !important;
+  --arrowpanel-background: var(--mr-surface) !important;
+  --arrowpanel-color: var(--mr-text) !important;
+  --arrowpanel-border-color: var(--mr-border) !important;
+  --arrowpanel-border-radius: 12px !important;
+  --sidebar-background-color: var(--mr-bg) !important;
+  --chrome-content-separator-color: transparent !important;
+  --tabs-border-color: transparent !important;
+}
+
+* {
+  font-family: "IBM Plex Sans", sans-serif !important;
+}
+
+/* ---------- Én flat verktøylinje ---------- */
+#navigator-toolbox {
+  background: var(--mr-bg) !important;
+  border-bottom: none !important;
+}
+#nav-bar,
+#TabsToolbar,
+#PersonalToolbar {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Skjul vindusknapper (Hyprland trenger dem ikke) */
+.titlebar-spacer,
+.titlebar-buttonbox-container {
+  display: none !important;
+}
+
+/* ---------- Faner som avrundede piller ---------- */
+.tabbrowser-tab {
+  padding-inline: 2px !important;
+}
+.tab-background {
+  border-radius: var(--mr-radius) !important;
+  margin-block: 5px !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.tabbrowser-tab:not([selected]):hover .tab-background {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+.tab-background[selected] {
+  background: var(--mr-surface) !important;
+}
+.tab-label {
+  font-size: 12px !important;
+}
+.tabbrowser-tab:not([selected]) .tab-label {
+  color: var(--mr-text-dim) !important;
+}
+/* Lukkeknapp bare ved hover */
+.tabbrowser-tab:not(:hover) .tab-close-button {
+  opacity: 0 !important;
+}
+
+/* ---------- Adressefelt ---------- */
+#urlbar-background {
+  border-radius: var(--mr-radius) !important;
+  border: none !important;
+}
+#urlbar[focused] #urlbar-background {
+  outline: 2px solid var(--mr-accent) !important;
+  outline-offset: -1px !important;
+}
+/* Midtstilt adresse som i Safari, venstrestilt når du skriver */
+#urlbar:not([focused]) #urlbar-input {
+  text-align: center !important;
+}
+
+/* ---------- Menyer ---------- */
+menupopup {
+  --panel-background: var(--mr-surface) !important;
+  --panel-color: var(--mr-text) !important;
+  --panel-border-color: var(--mr-border) !important;
+  --panel-border-radius: 10px !important;
+}
+menuitem,
+menu {
+  border-radius: 6px !important;
+}
+menuitem[_moz-menuactive],
+menu[_moz-menuactive] {
+  background-color: var(--mr-accent) !important;
+  color: white !important;
+}
+
+/* ---------- Avrundet nettside med luft rundt ---------- */
+#tabbrowser-tabpanels {
+  background: var(--mr-bg) !important;
+}
+.browserStack > browser {
+  border-radius: 10px !important;
+  margin: 0 6px 6px !important;
+}
