@@ -29,6 +29,7 @@ ShellRoot {
 
     // Ramme rundt skjermen
     BarUI.Frame {}
+    BarUI.HotCorners {}
 
     // Dock på hver skjerm
     Variants {
