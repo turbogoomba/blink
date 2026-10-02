@@ -6,33 +6,36 @@ import Quickshell.Hyprland
 import "../services"
 import "../theme"
 
-// Hot corners: top left -> Mission Control, top right -> Control Center
+// Hot corners. What each corner does is set in Settings > Hot Corners.
+// Actions: "mission", "controlcenter", "launcher", "wallpaper", "none"
 Scope {
     id: root
 
-    // How long the cursor must stay in the corner (ms)
-    property int dwell: 250
-
     Process {
-        id: missionProc
-        command: ["qs", "-p", Quickshell.shellDir, "ipc", "call", "mission", "toggle"]
+        id: ipc
     }
 
-    function openMission() {
-        missionProc.running = true
+    function callIpc(target) {
+        ipc.command = ["qs", "-p", Quickshell.shellDir, "ipc", "call", target, "toggle"]
+        ipc.running = true
     }
 
-    function openControlCenter() {
-        ShellState.controlCenterOpen = !ShellState.controlCenterOpen
+    function run(action) {
+        if (action === "mission") callIpc("mission")
+        else if (action === "wallpaper") callIpc("wallpaper")
+        else if (action === "launcher") ShellState.launcherOpen = !ShellState.launcherOpen
+        else if (action === "controlcenter") ShellState.controlCenterOpen = !ShellState.controlCenterOpen
     }
 
     component Corner: PanelWindow {
         id: win
         required property var modelData
         property bool right: false
-        property var action
+        property string action: "none"
+        readonly property bool active: SettingsService.hotCornersEnabled && action !== "none"
 
         screen: modelData
+        visible: active
         color: "transparent"
         anchors.top: true
         anchors.left: !right
@@ -55,7 +58,6 @@ Scope {
 
         // Glow
         Rectangle {
-            id: glow
             width: 56
             height: 56
             radius: 28
@@ -90,10 +92,10 @@ Scope {
 
         Timer {
             id: timer
-            interval: root.dwell
+            interval: SettingsService.cornerDelay
             onTriggered: {
                 win.armed = false
-                win.action()
+                root.run(win.action)
             }
         }
     }
@@ -102,7 +104,7 @@ Scope {
         model: Quickshell.screens
         Corner {
             right: false
-            action: root.openMission
+            action: SettingsService.cornerTopLeft
         }
     }
 
@@ -110,7 +112,7 @@ Scope {
         model: Quickshell.screens
         Corner {
             right: true
-            action: root.openControlCenter
+            action: SettingsService.cornerTopRight
         }
     }
 }

@@ -5,32 +5,31 @@ import Quickshell
 import Quickshell.Io
 
 // Reads the OsloMet timetable (ICS link) and exposes the next classes.
-// Only enabled on the machines in timetableHosts; the others show buses.
-// The link lives in ~/.config/mac-hypr-rice/timetable-url (outside the repo).
+// Settings > Notch decides: auto (timetable if a link exists), timetable or buses.
+// The link comes from Settings, or ~/.config/mac-hypr-rice/timetable-url as fallback.
 Singleton {
     id: root
 
-    // Machines that show the timetable instead of buses
-    readonly property var timetableHosts: ["archie"]
+    property string fileUrl: ""
+    readonly property string url: SettingsService.timetableUrl.trim() !== ""
+        ? SettingsService.timetableUrl.trim() : root.fileUrl
+    readonly property bool enabled: SettingsService.notchRight === "timetable"
+        || (SettingsService.notchRight === "auto" && root.url !== "")
 
-    property bool enabled: false
     property string error: ""
-    property string url: ""
     property var events: []      // all future events, sorted
     property var upcoming: []    // the next few (today and onwards)
     property date now: new Date()
 
-    // Reads the hostname and the link (link file is outside the repo)
+    onUrlChanged: refresh()
+    onEnabledChanged: refresh()
+
+    // Old link file (fallback)
     Process {
         id: readCfg
-        command: ["sh", "-c", "uname -n; cat \"$HOME/.config/mac-hypr-rice/timetable-url\" 2>/dev/null"]
+        command: ["sh", "-c", "cat \"$HOME/.config/mac-hypr-rice/timetable-url\" 2>/dev/null"]
         stdout: StdioCollector {
-            onStreamFinished: {
-                const lines = text.split("\n").map(l => l.trim())
-                root.enabled = root.timetableHosts.indexOf(lines[0]) !== -1
-                root.url = lines[1] || ""
-                root.refresh()
-            }
+            onStreamFinished: root.fileUrl = text.trim()
         }
     }
 
@@ -40,6 +39,8 @@ Singleton {
         if (!root.enabled) return
         if (root.url === "") {
             root.error = "No timetable link"
+            root.events = []
+            root.upcoming = []
             return
         }
         fetch.command = ["curl", "-sfL", "--max-time", "15", root.url]

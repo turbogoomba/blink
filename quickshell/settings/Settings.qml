@@ -13,10 +13,14 @@ FloatingWindow {
 
     // Alle panelene. ready = false viser "Coming soon".
     readonly property var panels: [
-        { id: "wifi",      label: "Wi-Fi",     icon: "network-wireless-symbolic",   source: "panels/WifiPanel.qml",      ready: true },
-        { id: "bluetooth", label: "Bluetooth", icon: "bluetooth-active-symbolic",   source: "panels/BluetoothPanel.qml", ready: true },
-        { id: "sound",     label: "Sound",     icon: "audio-volume-high-symbolic",  source: "panels/SoundPanel.qml",     ready: true },
-        { id: "hyprland",  label: "Hyprland",  icon: "preferences-system-windows",  source: "panels/HyprlandPanel.qml",  ready: true }
+        { id: "wifi",          label: "Wi-Fi",         icon: "network-wireless-symbolic",       source: "panels/WifiPanel.qml",      ready: true },
+        { id: "bluetooth",     label: "Bluetooth",     icon: "bluetooth-active-symbolic",       source: "panels/BluetoothPanel.qml", ready: true },
+        { id: "sound",         label: "Sound",         icon: "audio-volume-high-symbolic",      source: "panels/SoundPanel.qml",     ready: true },
+        { id: "notifications", label: "Notifications", icon: "preferences-system-notifications", source: "panels/ShellPanel.qml",    ready: true, page: "notifications" },
+        { id: "desktop",       label: "Desktop & Dock", icon: "preferences-desktop-wallpaper",  source: "panels/ShellPanel.qml",     ready: true, page: "desktop" },
+        { id: "corners",       label: "Hot Corners",   icon: "input-mouse",                     source: "panels/ShellPanel.qml",     ready: true, page: "corners" },
+        { id: "notch",         label: "Notch",         icon: "x-office-calendar",               source: "panels/ShellPanel.qml",     ready: true, page: "notch" },
+        { id: "hyprland",      label: "Hyprland",      icon: "preferences-system-windows",      source: "panels/HyprlandPanel.qml",  ready: true }
     ]
     readonly property var current: panels.find(p => p.id === activePanel)
 
@@ -94,8 +98,17 @@ FloatingWindow {
         anchors { top: parent.top; bottom: parent.bottom; left: sidebar.right; right: parent.right }
 
         Loader {
+            id: panelLoader
             anchors.fill: parent
             source: settingsWindow.current?.ready ? settingsWindow.current.source : ""
+        }
+
+        // Tells ShellPanel which page to show
+        Binding {
+            target: panelLoader.item
+            property: "page"
+            value: settingsWindow.current?.page ?? ""
+            when: panelLoader.item !== null && (settingsWindow.current?.page ?? "") !== ""
         }
 
         Text {

@@ -17,7 +17,7 @@ PanelWindow {
     // Høyre side: system-apper
     property list<string> systemApps: ["thunar", "kitty"]
 
-    property int size: 60
+    property int size: SettingsService.dockSize
 
     property bool revealed: false
 
