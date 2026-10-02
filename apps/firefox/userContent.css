@@ -4,3 +4,30 @@
     background-color: #1c1c1e !important;
   }
 }
+
+/* Mac Rice — minimal new tab */
+@-moz-document url("about:newtab"), url("about:home") {
+  body { background: #1c1c1e !important; }
+
+  .logo-and-wordmark-wrapper, .logo-and-wordmark, .logo,
+  .top-sites, .top-sites-list,
+  .weather, .weatherCard,
+  .personalize-button,
+  [class*="widget"], [class*="Widget"],
+  .discovery-stream, .wallpaper-attribution {
+    display: none !important;
+  }
+
+  .search-wrapper {
+    padding-top: 34vh !important;
+  }
+
+  .search-handoff-button,
+  .search-inner-wrapper input {
+    background-color: #2c2c2e !important;
+    border: 1px solid #3a3a3c !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    color: #e5e5e7 !important;
+  }
+}

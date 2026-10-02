@@ -11,6 +11,7 @@ import "./settings" as SettingsUI
 import "./services"
 import "./theme" as Theme
 import "./wallpaper" as WallpaperUI
+import "./lock" as LockUI
 
 ShellRoot {
     Component.onCompleted: {
@@ -31,6 +32,7 @@ ShellRoot {
     BarUI.Frame {}
     BarUI.HotCorners {}
     BarUI.Osd {}
+    LockUI.Lock {}
 
     // Dock på hver skjerm
     Variants {

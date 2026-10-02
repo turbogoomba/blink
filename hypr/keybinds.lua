@@ -11,7 +11,7 @@ local mainMod      = "SUPER"
 ----------------------
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
-hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("qs -p /home/tallman/Documents/GitHub/mac-hypr-rice/quickshell ipc call launcher toggle"))
+hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("loginctl lock-session"))
 hl.bind("Print", hl.dsp.exec_cmd(qs .. "screenshot region"))
 hl.bind("F6", hl.dsp.exec_cmd(qs .. "screenshot region"))
 hl.bind("SHIFT + Print", hl.dsp.exec_cmd(qs .. "screenshot screen"))

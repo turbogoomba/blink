@@ -1,0 +1,10 @@
+[SddmGreeterTheme]
+Name=Mac Rice
+Description=Login screen matching the Mac Rice shell
+Author=turbogoomba
+Type=sddm-theme
+Version=1.0
+Website=https://github.com/turbogoomba/mac-hypr-rice
+MainScript=Main.qml
+ConfigFile=theme.conf
+QtVersion=6
