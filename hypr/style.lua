@@ -29,11 +29,18 @@ hl.config({
 ---------------------
 ---- ANIMASJONER ----
 ---------------------
-hl.curve("mac", { type = "bezier", points = { { 0.2, 0.9 }, { 0.3, 1 } } })
-hl.animation({ leaf = "windows", enabled = true, speed = 1.5, bezier = "mac", style = "popin" })
-hl.animation({ leaf = "fade", enabled = true, speed = 1.5, bezier = "mac" })
-hl.animation({ leaf = "workspaces", enabled = true, speed = 2.5, bezier = "mac", style = "slide" })
-hl.animation({ leaf = "layers", enabled = false })
+-- Same feel as the shell: soft ease-out, a small bounce on open, quick close
+hl.curve("macOut", { type = "bezier", points = { { 0.33, 1 }, { 0.68, 1 } } })
+hl.curve("macPop", { type = "bezier", points = { { 0.34, 1.36 }, { 0.64, 1 } } })
+hl.curve("macIn",  { type = "bezier", points = { { 0.32, 0 }, { 0.67, 0 } } })
+
+hl.animation({ leaf = "windowsIn",   enabled = true, speed = 1.8, bezier = "macPop", style = "popin 88%" })
+hl.animation({ leaf = "windowsOut",  enabled = true, speed = 1.2,   bezier = "macIn",  style = "popin 92%" })
+hl.animation({ leaf = "windowsMove", enabled = true, speed = 1.8, bezier = "macOut" })
+hl.animation({ leaf = "fade",        enabled = true, speed = 1.5, bezier = "macOut" })
+hl.animation({ leaf = "workspaces",  enabled = true, speed = 2.5,   bezier = "macOut", style = "slide" })
+hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 2.5, bezier = "macOut", style = "slidevert" })
+hl.animation({ leaf = "layers",      enabled = false })
 
 -------------------------
 ---- TO MODUSER ----

@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Widgets
 import Quickshell.Bluetooth
 import Quickshell.Services.Mpris
+import Quickshell.Services.UPower
 import "../theme"
 import "../services"
 
@@ -27,11 +28,38 @@ Rectangle {
     property var btDevice: null
     property bool btConnected: false
 
+    // Where the mouse is along the bar (-1 left ... 1 right), NaN = not over the bar.
+    // Set by Bar.qml so the eyes can follow the mouse.
+    property real lookTarget: NaN
+
+    // Short face reactions: "charging", "surprised" or ""
+    property string reaction: ""
+    function react(r) {
+        if (!OsdService.ready) return
+        reaction = r
+        reactTimer.restart()
+    }
+    Timer {
+        id: reactTimer
+        interval: 2200
+        onTriggered: notch.reaction = ""
+    }
+    Connections {
+        target: UPower
+        function onOnBatteryChanged() { if (!UPower.onBattery) notch.react("charging") }
+    }
+    Connections {
+        target: ShellState
+        function onScreenshotTickChanged() { notch.react("surprised") }
+    }
+
     // Hva som vises, i prioritert rekkefølge
-    readonly property bool showNotif: notif !== null && !open
-    readonly property bool showBt: btDevice !== null && !open && !showNotif
-    readonly property bool peek: !open && !showNotif && !showBt && hover.hovered && hasMusic
-    readonly property bool compact: !open && !showNotif && !showBt && !peek && (hasMusic || hasShelf)
+    readonly property bool showOsd: OsdService.shown && !open
+    readonly property bool showNotif: notif !== null && !open && !showOsd
+    readonly property bool showBt: btDevice !== null && !open && !showNotif && !showOsd
+    readonly property bool peek: !open && !showOsd && !showNotif && !showBt && hover.hovered && hasMusic
+    readonly property bool compact: !open && !showOsd && !showNotif && !showBt && !peek
+        && reaction === "" && (hasMusic || hasShelf)
 
     onDraggingChanged: {
         if (dragging) {
@@ -63,22 +91,25 @@ Rectangle {
 
     // ---------- Størrelse ----------
     width: open ? 660
+         : showOsd ? 300
          : showNotif ? 400
          : showBt ? 360
          : peek ? 420
          : compact ? 280
          : 200
     height: open ? openContent.implicitHeight + 30
+          : showOsd ? baseHeight + 8
           : showNotif ? 84
           : showBt ? 64
           : peek ? 110
           : baseHeight
-    radius: open || showNotif || peek ? 24 : showBt ? 22 : 10
+    radius: open || showNotif || peek ? 24 : showBt || showOsd ? 18 : 8
     color: Tokens.barBg
     clip: true
 
-    Behavior on width  { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
-    Behavior on height { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+    // Springy morph, like the Dynamic Island
+    Behavior on width  { NumberAnimation { duration: 340; easing.type: Easing.OutBack; easing.overshoot: 0.7 } }
+    Behavior on height { NumberAnimation { duration: 340; easing.type: Easing.OutBack; easing.overshoot: 0.7 } }
     Behavior on radius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
 
     // ---------- Bluetooth: lytt etter til/frakobling ----------
@@ -303,9 +334,11 @@ Rectangle {
         Rectangle {
             anchors.centerIn: parent
             visible: eye.mood !== "happy"
-            width: eye.mood === "sleepy" || eye.mood === "excited" ? 7 : 5
+            width: eye.mood === "surprised" ? 8
+                 : eye.mood === "sleepy" || eye.mood === "excited" ? 7 : 5
             height: eye.mood === "blink" ? 1
                   : eye.mood === "sleepy" ? 2
+                  : eye.mood === "surprised" ? 8
                   : eye.mood === "excited" ? 10
                   : 8
             radius: Math.min(width, height) / 2
@@ -335,7 +368,9 @@ Rectangle {
         id: face
         readonly property int hour: clock.date.getHours()
         readonly property string baseMood:
-              hover.hovered ? "excited"
+              notch.reaction === "surprised" ? "surprised"
+            : notch.reaction === "charging" ? "happy"
+            : hover.hovered ? "excited"
             : (hour >= 23 || hour < 6) ? "sleepy"
             : (notch.player?.isPlaying ?? false) ? "happy"
             : "normal"
@@ -349,13 +384,14 @@ Rectangle {
         y: (notch.baseHeight - height) / 2 + 1
         width: 40
         height: 20
-        opacity: !notch.open && !notch.showNotif && !notch.showBt && !notch.peek ? 1 : 0
+        opacity: !notch.open && !notch.showOsd && !notch.showNotif && !notch.showBt && !notch.peek ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 150 } }
 
         Row {
             id: eyes
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.horizontalCenterOffset: face.look * 2
+            // Follow the mouse along the bar, otherwise glance around now and then
+            anchors.horizontalCenterOffset: (isNaN(notch.lookTarget) ? face.look : notch.lookTarget) * 3
             y: face.smiling ? 0 : 4
             spacing: 8
 
@@ -387,6 +423,47 @@ Rectangle {
             Component.onCompleted: requestPaint()
         }
 
+        // Small "o" mouth when surprised
+        Rectangle {
+            anchors.horizontalCenter: eyes.horizontalCenter
+            anchors.top: eyes.bottom
+            anchors.topMargin: 2
+            width: 5
+            height: 5
+            radius: 2.5
+            color: "transparent"
+            border.color: Tokens.textPrimary
+            border.width: 1.5
+            opacity: face.mood === "surprised" ? 1 : 0
+            scale: face.mood === "surprised" ? 1 : 0.3
+            Behavior on opacity { NumberAnimation { duration: 120 } }
+            Behavior on scale { NumberAnimation { duration: 220; easing.type: Easing.OutBack } }
+        }
+
+        // Green bolt next to the face when the charger is plugged in
+        Canvas {
+            anchors.left: eyes.right
+            anchors.leftMargin: 7
+            anchors.verticalCenter: eyes.verticalCenter
+            width: 8
+            height: 12
+            opacity: notch.reaction === "charging" ? 1 : 0
+            scale: notch.reaction === "charging" ? 1 : 0.2
+            Behavior on opacity { NumberAnimation { duration: 150 } }
+            Behavior on scale { NumberAnimation { duration: 280; easing.type: Easing.OutBack; easing.overshoot: 2 } }
+            onPaint: {
+                const c = getContext("2d")
+                c.reset()
+                c.fillStyle = "#30d158"
+                c.beginPath()
+                c.moveTo(5, 0); c.lineTo(0, 7); c.lineTo(3.5, 7)
+                c.lineTo(2.5, 12); c.lineTo(8, 4.5); c.lineTo(4.5, 4.5)
+                c.closePath()
+                c.fill()
+            }
+            Component.onCompleted: requestPaint()
+        }
+
         Timer {
             interval: 3000
             running: face.opacity > 0
@@ -411,6 +488,62 @@ Rectangle {
                 face.look = r < 0.25 ? -1 : r < 0.5 ? 1 : 0
                 interval = 3000 + Math.random() * 5000
             }
+        }
+    }
+
+    // ============================================================
+    // VOLUM / LYSSTYRKE (Dynamic Island)
+    // ============================================================
+    Item {
+        anchors.fill: parent
+        anchors.leftMargin: 18
+        anchors.rightMargin: 18
+        opacity: notch.showOsd ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: 120 } }
+
+        Image {
+            id: osdIcon
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            width: 18
+            height: 18
+            sourceSize: Qt.size(36, 36)
+            source: Quickshell.iconPath(OsdService.iconName(), "audio-volume-high-symbolic")
+        }
+
+        Rectangle {
+            id: osdTrack
+            anchors.left: osdIcon.right
+            anchors.leftMargin: 12
+            anchors.right: osdPct.left
+            anchors.rightMargin: 12
+            anchors.verticalCenter: parent.verticalCenter
+            height: 6
+            radius: 3
+            color: Qt.rgba(1, 1, 1, 0.15)
+
+            Rectangle {
+                width: parent.width * (OsdService.muted ? 0 : OsdService.value)
+                height: parent.height
+                radius: 3
+                color: OsdService.kind === "brightness" ? "#ffd60a" : Tokens.textPrimary
+                Behavior on width { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+            }
+        }
+
+        Text {
+            id: osdPct
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            width: 34
+            horizontalAlignment: Text.AlignRight
+            text: OsdService.muted ? "Mute" : Math.round(OsdService.value * 100) + "%"
+            color: Tokens.textSecondary
+            font.family: Tokens.fontFamily
+            font.pixelSize: 12
+            font.weight: Font.Medium
+            font.features: { "tnum": 1 }
         }
     }
 
@@ -1115,6 +1248,10 @@ Rectangle {
         opacity: notch.showNotif ? 1 : 0
         visible: opacity > 0
         Behavior on opacity { NumberAnimation { duration: 150 } }
+        transform: Translate {
+            y: notch.showNotif ? 0 : -14
+            Behavior on y { NumberAnimation { duration: 320; easing.type: Easing.OutBack } }
+        }
 
         ClippingRectangle {
             id: notifIcon

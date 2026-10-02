@@ -32,6 +32,7 @@ ShellRoot {
     BarUI.Frame {}
     BarUI.HotCorners {}
     BarUI.Osd {}
+    BarUI.Calendar {}
     LockUI.Lock {}
 
     // Dock på hver skjerm

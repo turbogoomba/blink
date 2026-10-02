@@ -10,7 +10,7 @@ PanelWindow {
     id: bar
     anchors { top: true; left: true; right: true }
 
-    readonly property int notchDrop: 8
+    readonly property int notchDrop: 14
     implicitHeight: 320
     exclusiveZone: Tokens.barHeight
     color: "transparent"
@@ -84,6 +84,9 @@ PanelWindow {
         anchors { top: parent.top; left: parent.left; right: parent.right }
         height: Tokens.barHeight
         color: Tokens.barBg
+
+        // The notch face looks toward the mouse while it is over the bar
+        HoverHandler { id: barHover }
 
         // ---------- Venstre: arbeidsflater + aktivt vindu ----------
         Row {
@@ -255,6 +258,38 @@ PanelWindow {
                     id: ccRow
                     spacing: 14
 
+                    // Control Center icon: two little switches
+                    Item {
+                        id: ccIcon
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 15
+                        height: 12
+                        opacity: ShellState.controlCenterOpen ? 1 : 0.85
+
+                        Repeater {
+                            model: 2
+                            Rectangle {
+                                required property int index
+                                y: index * 7
+                                width: 15
+                                height: 5
+                                radius: 2.5
+                                color: "transparent"
+                                border.color: Tokens.textPrimary
+                                border.width: 1.2
+
+                                Rectangle {
+                                    x: index === 0 ? 1.5 : parent.width - width - 1.5
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: 3
+                                    height: 3
+                                    radius: 1.5
+                                    color: Tokens.textPrimary
+                                }
+                            }
+                        }
+                    }
+
                     Row {
                         visible: bar.hasBattery
                         anchors.verticalCenter: parent.verticalCenter
@@ -315,6 +350,7 @@ PanelWindow {
                     }
 
                     Text {
+                        id: clockText
                         anchors.verticalCenter: parent.verticalCenter
                         text: Qt.formatDateTime(clock.date, "ddd d. MMM  HH:mm")
                         color: Tokens.textPrimary
@@ -324,19 +360,54 @@ PanelWindow {
                     }
                 }
 
+                // Clock opens the calendar, the rest (icon + battery) the Control Center
                 MouseArea {
                     anchors.fill: parent
                     anchors.margins: -6
-                    onClicked: ShellState.controlCenterOpen = !ShellState.controlCenterOpen
+                    onClicked: mouse => {
+                        if (mouse.x - 6 >= clockText.x - 7)
+                            ShellState.calendarOpen = !ShellState.calendarOpen
+                        else
+                            ShellState.controlCenterOpen = !ShellState.controlCenterOpen
+                    }
                 }
             }
         }
     }
+
+    // Concave corners where the notch meets the bar
+    // Never taller than the straight part of the notch's side, so it always lines up
+    readonly property real filletSize: Math.max(0, Math.min(10, notch.height - Tokens.barHeight - notch.radius))
+
+    component NotchFillet: Canvas {
+        property bool mirrored: false
+        y: Tokens.barHeight
+        width: bar.filletSize
+        height: bar.filletSize
+        visible: bar.filletSize >= 1
+        onWidthChanged: requestPaint()
+        onPaint: {
+            const c = getContext("2d")
+            const r = width
+            c.reset()
+            c.fillStyle = Tokens.barBg
+            c.fillRect(0, 0, r, r)
+            c.globalCompositeOperation = "destination-out"
+            c.beginPath()
+            c.arc(mirrored ? r : 0, r, r, 0, Math.PI * 2)
+            c.fill()
+        }
+    }
+    NotchFillet { x: notch.x - bar.filletSize }
+    NotchFillet { x: notch.x + notch.width; mirrored: true }
 
     Notch {
         id: notch
         anchors.horizontalCenter: parent.horizontalCenter
         y: 0
         baseHeight: Tokens.barHeight + bar.notchDrop
+        lookTarget: barHover.hovered
+            ? Math.max(-1, Math.min(1, (barHover.point.position.x - bar.width / 2) / (bar.width / 3)))
+            : NaN
     }
 }

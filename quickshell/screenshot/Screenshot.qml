@@ -4,6 +4,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import "../theme"
+import "../services"
 
 Scope {
     id: root
@@ -20,6 +21,7 @@ Scope {
             `mkdir -p "${dir}" && grim ${grimArgs} "${file}" && wl-copy < "${file}" && ` +
             `notify-send -a "Screenshot" -i "${file}" "Screenshot saved" "${name}"`]
         shot.running = true
+        ShellState.screenshotTick++
     }
 
     Process { id: shot }

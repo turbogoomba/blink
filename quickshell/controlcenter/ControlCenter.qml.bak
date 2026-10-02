@@ -22,16 +22,7 @@ PanelWindow {
     readonly property bool open: ShellState.controlCenterOpen
     property real progress: open ? 1 : 0
     Behavior on progress { NumberAnimation { duration: 380; easing.type: Easing.OutCubic } }
-    // Height of the sheet: grows out of the bar with a little bounce
-    property real reveal: open ? 1 : 0
-    Behavior on reveal {
-        NumberAnimation {
-            duration: cc.open ? 460 : 260
-            easing.type: cc.open ? Easing.OutBack : Easing.InCubic
-            easing.overshoot: 0.9
-        }
-    }
-    visible: open || progress > 0 || reveal > 0
+    visible: open || progress > 0
 
     onOpenChanged: {
         if (open) {
@@ -431,59 +422,25 @@ PanelWindow {
         onClicked: cc.close()
     }
 
-    // Concave corners where the sheet meets the bar and the right edge
-    component Fillet: Canvas {
-        width: 14
-        height: 14
-        opacity: Math.min(1, cc.reveal * 4)
-        onPaint: {
-            const c = getContext("2d")
-            c.reset()
-            c.fillStyle = Tokens.barBg
-            c.fillRect(0, 0, 14, 14)
-            c.globalCompositeOperation = "destination-out"
-            c.beginPath()
-            c.arc(0, 14, 14, 0, Math.PI * 2)
-            c.fill()
-        }
-    }
-
-    Fillet {
-        id: filletTop
-        x: panel.x - 14
-        y: panel.y
-    }
-
-    Fillet {
-        id: filletSide
-        x: panel.x + panel.width - 14
-        y: panel.y + panel.height
-        visible: panel.height > 1
-    }
-
-    Item {
+    Rectangle {
         id: panel
         anchors.top: parent.top
         anchors.right: parent.right
-        anchors.topMargin: Tokens.barHeight
-        anchors.rightMargin: 6
+        anchors.topMargin: Tokens.barHeight + 8
+        anchors.rightMargin: 8
         width: 340
-        readonly property real fullHeight: content.implicitHeight + 24
-        height: fullHeight * Math.max(0, cc.reveal)
-        clip: true
+        height: content.implicitHeight + 24
+        radius: 20
+        color: Tokens.bg
+        border.color: Qt.rgba(1, 1, 1, 0.08)
+        border.width: 1
+
+        opacity: Math.min(1, cc.progress * 2)
+        scale: 0.92 + 0.08 * cc.progress
+        transformOrigin: Item.TopRight
 
         focus: true
         Keys.onEscapePressed: cc.close()
-
-        // Same black as the bar and frame. Only the bottom-left corner is rounded.
-        Rectangle {
-            x: 0
-            y: -20
-            width: parent.width + 20
-            height: parent.height + 20
-            radius: 20
-            color: Tokens.barBg
-        }
 
         // Klikk inni panelet skal ikke lukke
         MouseArea { anchors.fill: parent }
@@ -643,23 +600,15 @@ PanelWindow {
             Card {
                 order: 5
                 Layout.fillWidth: true
-                implicitHeight: 64 + 40
+                implicitHeight: 64
                 visible: cc.hasBattery
-
-                // Top part: battery, status and percentage
-                Item {
-                    id: batTop
-                    anchors.top: parent.top
-                    width: parent.width
-                    height: 64
-                }
 
                 // Samme liggende batteri som i baren, bare større
                 Item {
                     id: bigBattery
                     anchors.left: parent.left
                     anchors.leftMargin: 16
-                    anchors.verticalCenter: batTop.verticalCenter
+                    anchors.verticalCenter: parent.verticalCenter
                     width: 36
                     height: 17
 
@@ -705,7 +654,7 @@ PanelWindow {
                     anchors.leftMargin: 14
                     anchors.right: bigPct.left
                     anchors.rightMargin: 10
-                    anchors.verticalCenter: batTop.verticalCenter
+                    anchors.verticalCenter: parent.verticalCenter
                     spacing: 1
 
                     Text {
@@ -729,69 +678,13 @@ PanelWindow {
                     id: bigPct
                     anchors.right: parent.right
                     anchors.rightMargin: 16
-                    anchors.verticalCenter: batTop.verticalCenter
+                    anchors.verticalCenter: parent.verticalCenter
                     text: Math.round(cc.batteryLevel * 100) + "%"
                     color: Tokens.textPrimary
                     font.family: Tokens.fontFamily
                     font.pixelSize: 18
                     font.weight: Font.DemiBold
                     font.features: { "tnum": 1 }
-                }
-
-                // Power mode (needs power-profiles-daemon)
-                Row {
-                    id: profiles
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    anchors.margins: 10
-                    height: 28
-                    spacing: 6
-
-                    readonly property var options: [
-                        { label: "Saver", value: PowerProfile.PowerSaver },
-                        { label: "Balanced", value: PowerProfile.Balanced },
-                        { label: "Performance", value: PowerProfile.Performance }
-                    ]
-
-                    Repeater {
-                        model: profiles.options
-
-                        Rectangle {
-                            id: prof
-                            required property var modelData
-                            readonly property bool selected: PowerProfiles.profile === modelData.value
-                            readonly property bool usable: modelData.value !== PowerProfile.Performance
-                                || PowerProfiles.hasPerformanceProfile
-
-                            width: (profiles.width - profiles.spacing * 2) / 3
-                            height: profiles.height
-                            radius: 8
-                            opacity: usable ? 1 : 0.4
-                            color: selected ? Tokens.accent
-                                 : profMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.06)
-                            scale: profMouse.pressed ? 0.95 : 1
-                            Behavior on color { ColorAnimation { duration: 150 } }
-                            Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: prof.modelData.label
-                                color: prof.selected ? "white" : Tokens.textPrimary
-                                font.family: Tokens.fontFamily
-                                font.pixelSize: 11
-                                font.weight: prof.selected ? Font.DemiBold : Font.Normal
-                            }
-
-                            MouseArea {
-                                id: profMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                enabled: prof.usable
-                                onClicked: PowerProfiles.profile = prof.modelData.value
-                            }
-                        }
-                    }
                 }
             }
 

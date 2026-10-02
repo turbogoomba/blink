@@ -130,7 +130,20 @@ PanelWindow {
             return 1 + 0.35 * Math.max(0, 1 - d / 110)
         }
 
-        function bounce() { bounceAnim.restart() }
+        // Bounce like on a Mac: keeps hopping until the app's window shows up (max 8 s)
+        property bool launching: false
+        function bounce() {
+            launching = true
+            launchTimeout.restart()
+            if (!bounceAnim.running) bounceAnim.start()
+        }
+        function stopBounce() { launching = false }
+
+        Timer {
+            id: launchTimeout
+            interval: 8000
+            onTriggered: icon.launching = false
+        }
 
         width: dock.size
         height: dock.size
@@ -149,13 +162,30 @@ PanelWindow {
             transform: Translate { id: lift; y: 0 }
         }
 
-        // Hopp når appen starter
+        // Hopp når appen starter. Repeats while launching, then one small last hop.
         SequentialAnimation {
             id: bounceAnim
-            NumberAnimation { target: lift; property: "y"; to: -16; duration: 180; easing.type: Easing.OutQuad }
-            NumberAnimation { target: lift; property: "y"; to: 0;   duration: 180; easing.type: Easing.InQuad }
-            NumberAnimation { target: lift; property: "y"; to: -8;  duration: 140; easing.type: Easing.OutQuad }
-            NumberAnimation { target: lift; property: "y"; to: 0;   duration: 140; easing.type: Easing.InQuad }
+            NumberAnimation { target: lift; property: "y"; to: -18; duration: 220; easing.type: Easing.OutQuad }
+            NumberAnimation { target: lift; property: "y"; to: 0;   duration: 220; easing.type: Easing.InQuad }
+            onFinished: {
+                if (icon.launching) bounceAnim.start()
+                else settleAnim.start()
+            }
+        }
+        SequentialAnimation {
+            id: settleAnim
+            NumberAnimation { target: lift; property: "y"; to: -6; duration: 120; easing.type: Easing.OutQuad }
+            NumberAnimation { target: lift; property: "y"; to: 0;  duration: 120; easing.type: Easing.InQuad }
+        }
+
+        // New icons (apps that start running) pop in
+        scale: 0.4
+        opacity: 0
+        Component.onCompleted: popIn.start()
+        ParallelAnimation {
+            id: popIn
+            NumberAnimation { target: icon; property: "scale"; to: 1; duration: 320; easing.type: Easing.OutBack }
+            NumberAnimation { target: icon; property: "opacity"; to: 1; duration: 160 }
         }
 
         // Navnelapp over ikonet
@@ -210,6 +240,7 @@ PanelWindow {
         source: Quickshell.iconPath(entry?.icon ?? modelData.toLowerCase(), "application-x-executable")
         label: entry?.name ?? modelData
         running: wins.length > 0
+        onRunningChanged: if (running) appIcon.stopBounce()
         dimmed: running && wins.every(w => dock.isMinimized(w))
         onClicked: dock.appClicked(modelData, entry, appIcon)
     }
@@ -315,7 +346,7 @@ PanelWindow {
             border.color: Tokens.border
             border.width: 1
 
-            Behavior on y { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+            Behavior on y { NumberAnimation { duration: 260; easing.type: Easing.OutBack; easing.overshoot: 0.8 } }
 
             Row {
                 id: row

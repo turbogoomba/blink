@@ -6,14 +6,24 @@ import "../services"
 
 PanelWindow {
     id: launcher
-    visible: ShellState.launcherOpen
     anchors { top: true; bottom: true; left: true; right: true }
     exclusionMode: ExclusionMode.Ignore
     color: "transparent"
 
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+    WlrLayershell.keyboardFocus: ShellState.launcherOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     WlrLayershell.namespace: "launcher"
+
+    // 0 = tucked into the notch, 1 = fully open. Grows with a little bounce.
+    property real reveal: ShellState.launcherOpen ? 1 : 0
+    Behavior on reveal {
+        NumberAnimation {
+            duration: ShellState.launcherOpen ? 420 : 220
+            easing.type: ShellState.launcherOpen ? Easing.OutBack : Easing.InCubic
+            easing.overshoot: 0.8
+        }
+    }
+    visible: ShellState.launcherOpen || reveal > 0.01
 
     property int selected: 0
 
@@ -47,12 +57,14 @@ PanelWindow {
         close()
     }
 
-    onVisibleChanged: {
-        if (visible) {
-            search.text = ""
-            selected = 0
-            search.forceActiveFocus()
-            openAnim.restart()
+    Connections {
+        target: ShellState
+        function onLauncherOpenChanged() {
+            if (ShellState.launcherOpen) {
+                search.text = ""
+                launcher.selected = 0
+                search.forceActiveFocus()
+            }
         }
     }
 
@@ -62,25 +74,50 @@ PanelWindow {
         onClicked: launcher.close()
     }
 
-    Rectangle {
+    // Concave corners where the sheet meets the bar
+    component Fillet: Canvas {
+        property bool mirrored: false
+        y: Tokens.barHeight
+        width: 14
+        height: 14
+        opacity: Math.min(1, launcher.reveal * 4)
+        onPaint: {
+            const c = getContext("2d")
+            c.reset()
+            c.fillStyle = Tokens.barBg
+            c.fillRect(0, 0, 14, 14)
+            c.globalCompositeOperation = "destination-out"
+            c.beginPath()
+            c.arc(mirrored ? 14 : 0, 14, 14, 0, Math.PI * 2)
+            c.fill()
+        }
+    }
+    Fillet { x: box.x - 14 }
+    Fillet { x: box.x + box.width; mirrored: true }
+
+    // The sheet: starts as the notch and grows down out of it
+    Item {
         id: box
+        readonly property real topPad: Tokens.barHeight + 6
+        readonly property real fullW: 640
+        readonly property real startW: 200
+        readonly property real startH: Tokens.barHeight + 8
+        property real fullH: topPad + content.implicitHeight + 8
+        Behavior on fullH { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+
         anchors.horizontalCenter: parent.horizontalCenter
-        y: parent.height * 0.22
-        width: 640
-        height: content.implicitHeight
-        radius: 16
-        color: Tokens.bg
-        border.color: Tokens.border
-        border.width: 1
+        y: 0
+        width: startW + (fullW - startW) * launcher.reveal
+        height: startH + (fullH - startH) * Math.max(0, launcher.reveal)
         clip: true
 
-        Behavior on height { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
-
-        // Popin + fade når den åpnes
-        ParallelAnimation {
-            id: openAnim
-            NumberAnimation { target: box; property: "opacity"; from: 0; to: 1; duration: 150 }
-            NumberAnimation { target: box; property: "scale"; from: 0.96; to: 1; duration: 150; easing.type: Easing.OutCubic }
+        // Same black as the bar. Top corners hide under the bar, bottom ones are round.
+        Rectangle {
+            y: -24
+            width: parent.width
+            height: parent.height + 24
+            radius: 22
+            color: Tokens.barBg
         }
 
         // Klikk inni boksen skal ikke lukke
@@ -88,17 +125,32 @@ PanelWindow {
 
         Column {
             id: content
-            width: parent.width
+            x: (box.width - box.fullW) / 2
+            y: box.topPad
+            width: box.fullW
+            opacity: Math.max(0, Math.min(1, (launcher.reveal - 0.35) / 0.5))
 
             // ---------- Søkefelt ----------
             Item {
                 width: parent.width
                 height: 56
 
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    anchors.topMargin: 4
+                    anchors.bottomMargin: 4
+                    radius: 14
+                    color: Qt.rgba(1, 1, 1, 0.07)
+                    border.color: Qt.rgba(1, 1, 1, 0.06)
+                    border.width: 1
+                }
+
                 Image {
                     id: searchIcon
                     anchors.left: parent.left
-                    anchors.leftMargin: 18
+                    anchors.leftMargin: 24
                     anchors.verticalCenter: parent.verticalCenter
                     width: 20
                     height: 20
@@ -147,10 +199,9 @@ PanelWindow {
             }
 
             // ---------- Skillelinje ----------
-            Rectangle {
+            Item {
                 width: parent.width
-                height: 1
-                color: Tokens.border
+                height: 4
                 visible: launcher.results.length > 0
             }
 
