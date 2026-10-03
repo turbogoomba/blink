@@ -5,9 +5,10 @@ and everything grows out of the bar.
 
 ![Control Center](screenshots/control-center.png)
 
-<p>
-  <img src="screenshots/desktop.png" width="49%">
-  <img src="screenshots/Screenshot_2026-10-03_15-42-37.png" width="49%">
+![Desktop](screenshots/desktop.png)
+
+<p align="center">
+  <img src="screenshots/notch.png" width="420">
 </p>
 
 ## Features
