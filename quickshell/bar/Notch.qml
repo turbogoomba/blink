@@ -53,12 +53,33 @@ Rectangle {
         function onScreenshotTickChanged() { notch.react("surprised") }
     }
 
+    // ---------- Next class (live activity) ----------
+    // Shows from 10 minutes before a class until it starts. Click to hide it.
+    readonly property var nextClass: TimetableService.enabled ? (TimetableService.upcoming[0] ?? null) : null
+    readonly property int classMins: nextClass && TimetableService.now
+        ? Math.ceil((nextClass.start - TimetableService.now) / 60000) : -1
+    property real dismissedClass: 0
+    readonly property bool classSoon: nextClass !== null && classMins > 0 && classMins <= 10
+        && nextClass.start.getTime() !== dismissedClass
+
+    // ---------- Music progress ----------
+    readonly property real progress: (player?.lengthSupported ?? false) && (player?.length ?? 0) > 0
+        ? Math.max(0, Math.min(1, player.position / player.length)) : 0
+    Timer {
+        // Mpris does not push position updates, so ask for them while it is visible
+        interval: 1000
+        repeat: true
+        running: notch.hasMusic && (notch.peek || notch.open) && (notch.player?.isPlaying ?? false)
+        onTriggered: notch.player.positionChanged()
+    }
+
     // Hva som vises, i prioritert rekkefølge
     readonly property bool showOsd: OsdService.shown && !open
     readonly property bool showNotif: notif !== null && !open && !showOsd
     readonly property bool showBt: btDevice !== null && !open && !showNotif && !showOsd
-    readonly property bool peek: !open && !showOsd && !showNotif && !showBt && hover.hovered && hasMusic
-    readonly property bool compact: !open && !showOsd && !showNotif && !showBt && !peek
+    readonly property bool showClass: classSoon && !open && !showOsd && !showNotif && !showBt
+    readonly property bool peek: !open && !showOsd && !showNotif && !showBt && !showClass && hover.hovered && hasMusic
+    readonly property bool compact: !open && !showOsd && !showNotif && !showBt && !showClass && !peek
         && reaction === "" && (hasMusic || hasShelf)
 
     onDraggingChanged: {
@@ -90,20 +111,26 @@ Rectangle {
     }
 
     // ---------- Størrelse ----------
+    readonly property bool showRec: RecordService.recording && !open && !showOsd && !showNotif
+        && !showBt && !showClass && !peek
+
     width: open ? 660
          : showOsd ? 300
          : showNotif ? 400
+         : showClass ? 360
          : showBt ? 360
          : peek ? 420
-         : compact ? 280
+         : compact ? (showRec ? 340 : 280)
+         : showRec ? 260
          : 200
     height: open ? openContent.implicitHeight + 30
           : showOsd ? baseHeight + 8
           : showNotif ? 84
+          : showClass ? baseHeight + 22
           : showBt ? 64
           : peek ? 110
           : baseHeight
-    radius: open || showNotif || peek ? 24 : showBt || showOsd ? 18 : 8
+    radius: open || showNotif || peek ? 24 : showBt || showOsd || showClass ? 18 : 8
     color: Tokens.barBg
     clip: true
 
@@ -155,6 +182,10 @@ Rectangle {
         anchors.fill: parent
         enabled: !notch.open && !notch.showNotif
         onClicked: {
+            if (notch.showClass) {
+                notch.dismissedClass = notch.nextClass.start.getTime()
+                return
+            }
             notch.tab = "nook"
             notch.open = true
         }
@@ -384,7 +415,7 @@ Rectangle {
         y: (notch.baseHeight - height) / 2 + 1
         width: 40
         height: 20
-        opacity: !notch.open && !notch.showOsd && !notch.showNotif && !notch.showBt && !notch.peek ? 1 : 0
+        opacity: !notch.open && !notch.showOsd && !notch.showNotif && !notch.showBt && !notch.showClass && !notch.peek ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 150 } }
 
         Row {
@@ -508,6 +539,81 @@ Rectangle {
     }
 
     // ============================================================
+    // NESTE TIME (live activity)
+    // ============================================================
+    Item {
+        anchors.fill: parent
+        anchors.leftMargin: 18
+        anchors.rightMargin: 18
+        anchors.topMargin: Tokens.barHeight - 6
+        opacity: notch.showClass ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: 150 } }
+        transform: Translate {
+            y: notch.showClass ? 0 : -10
+            Behavior on y { NumberAnimation { duration: 320; easing.type: Easing.OutBack } }
+        }
+
+        Rectangle {
+            id: classBadge
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            width: Math.max(30, classCode.implicitWidth + 12)
+            height: 22
+            radius: 6
+            color: Tokens.accent
+
+            Text {
+                id: classCode
+                anchors.centerIn: parent
+                text: notch.nextClass ? TimetableService.shortTitle(notch.nextClass) : ""
+                color: "white"
+                font.family: Tokens.fontFamily
+                font.pixelSize: 12
+                font.weight: Font.Bold
+            }
+        }
+
+        Column {
+            anchors.left: classBadge.right
+            anchors.leftMargin: 10
+            anchors.right: classMinsText.left
+            anchors.rightMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 0
+
+            Text {
+                width: parent.width
+                text: "Next class"
+                color: Tokens.textSecondary
+                font.family: Tokens.fontFamily
+                font.pixelSize: 10
+            }
+            Text {
+                width: parent.width
+                text: notch.nextClass ? (notch.nextClass.location || notch.nextClass.title || "") : ""
+                color: Tokens.textPrimary
+                font.family: Tokens.fontFamily
+                font.pixelSize: 13
+                font.weight: Font.DemiBold
+                elide: Text.ElideRight
+            }
+        }
+
+        Text {
+            id: classMinsText
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            text: notch.classMins + " min"
+            color: notch.classMins <= 3 ? "#ff9f0a" : Tokens.accent
+            font.family: Tokens.fontFamily
+            font.pixelSize: 15
+            font.weight: Font.DemiBold
+            font.features: { "tnum": 1 }
+        }
+    }
+
+    // ============================================================
     // VOLUM / LYSSTYRKE (Dynamic Island)
     // ============================================================
     Item {
@@ -561,6 +667,58 @@ Rectangle {
             font.weight: Font.Medium
             font.features: { "tnum": 1 }
         }
+    }
+
+    // ============================================================
+    // OPPTAK: rød prikk + tid (klikk for å stoppe)
+    // ============================================================
+    Row {
+        anchors.right: parent.right
+        anchors.rightMargin: 14
+        y: (notch.baseHeight - height) / 2 + 1
+        height: 20
+        spacing: 6
+        opacity: notch.showRec ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: 150 } }
+
+        Rectangle {
+            id: recDot
+            anchors.verticalCenter: parent.verticalCenter
+            width: 9
+            height: 9
+            radius: 4.5
+            color: "#ff453a"
+
+            SequentialAnimation on opacity {
+                running: notch.showRec
+                loops: Animation.Infinite
+                NumberAnimation { to: 0.35; duration: 700; easing.type: Easing.InOutSine }
+                NumberAnimation { to: 1; duration: 700; easing.type: Easing.InOutSine }
+            }
+        }
+
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: RecordService.elapsed
+            color: "#ff453a"
+            font.family: Tokens.fontFamily
+            font.pixelSize: 12
+            font.weight: Font.DemiBold
+            font.features: { "tnum": 1 }
+        }
+
+    }
+
+    // Stop button area over the indicator
+    MouseArea {
+        anchors.right: parent.right
+        width: 70
+        height: notch.baseHeight
+        visible: notch.showRec
+        z: 10
+        cursorShape: Qt.PointingHandCursor
+        onClicked: RecordService.stop()
     }
 
     // ============================================================
@@ -697,6 +855,26 @@ Rectangle {
             CtrlButton {
                 icon: "media-skip-forward-symbolic"
                 onClicked: notch.player?.next()
+            }
+        }
+
+        // How far into the song
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: -8
+            height: 3
+            radius: 1.5
+            color: Qt.rgba(1, 1, 1, 0.12)
+            visible: notch.progress > 0
+
+            Rectangle {
+                width: parent.width * notch.progress
+                height: parent.height
+                radius: 1.5
+                color: Tokens.textPrimary
+                Behavior on width { NumberAnimation { duration: 900; easing.type: Easing.Linear } }
             }
         }
     }
@@ -905,6 +1083,22 @@ Rectangle {
                             icon: "media-skip-forward-symbolic"
                             size: 16
                             onClicked: notch.player?.next()
+                        }
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: 3
+                        radius: 1.5
+                        color: Qt.rgba(1, 1, 1, 0.12)
+                        visible: notch.progress > 0
+
+                        Rectangle {
+                            width: parent.width * notch.progress
+                            height: parent.height
+                            radius: 1.5
+                            color: Tokens.accent
+                            Behavior on width { NumberAnimation { duration: 900; easing.type: Easing.Linear } }
                         }
                     }
                 }

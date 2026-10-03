@@ -13,7 +13,9 @@ Singleton {
 	readonly property color border: "#3a3a3c"
 	readonly property color textPrimary: "#e5e5e7"
 	readonly property color textSecondary: "#98989d"
-	readonly property color accent: "#5fa8d3"
+	// Accent: picked from the wallpaper by AccentService (falls back to the blue)
+	readonly property color defaultAccent: "#5fa8d3"
+	property color accent: defaultAccent
 
 	//Spacing
 	readonly property int radius: 8

@@ -22,6 +22,9 @@ Singleton {
     // Dock
     property alias dockSize: adapter.dockSize
 
+    // Accent color from the wallpaper
+    property alias accentFromWallpaper: adapter.accentFromWallpaper
+
     // Night Shift
     property alias nightLight: adapter.nightLight
     property alias nightTemp: adapter.nightTemp
@@ -53,6 +56,7 @@ Singleton {
             property string notchRight: "auto"
             property string timetableUrl: ""
             property int dockSize: 60
+            property bool accentFromWallpaper: true
             property bool nightLight: false
             property int nightTemp: 4000
         }

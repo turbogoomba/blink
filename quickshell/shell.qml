@@ -12,12 +12,15 @@ import "./services"
 import "./theme" as Theme
 import "./wallpaper" as WallpaperUI
 import "./lock" as LockUI
+import "./switcher" as SwitcherUI
 
 ShellRoot {
     Component.onCompleted: {
         console.log("Shell started")
         console.log("accent color:", Theme.Tokens.accent)
         ModeService.modes   // start the mode watcher
+        AccentService.enabled   // start the wallpaper accent
+        RecordService.recording // start the recorder (keys)
     }
 
     // Bar på hver skjerm
@@ -35,6 +38,8 @@ ShellRoot {
     BarUI.Osd {}
     BarUI.Calendar {}
     BarUI.Weather {}
+    BarUI.SoundMenu {}
+    SwitcherUI.Switcher {}
     LockUI.Lock {}
 
     // Dock på hver skjerm

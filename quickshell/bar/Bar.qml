@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Services.UPower
+import Quickshell.Services.Pipewire
 import "../theme"
 import "../services"
 
@@ -76,6 +77,92 @@ PanelWindow {
             anchors.margins: -6
             hoverEnabled: true
             onClicked: bi.clicked()
+        }
+    }
+
+    // Hollow ring that fills up with the usage. Orange over 70 %, red over 85 %.
+    component RingStat: Item {
+        id: rs
+        property string label: ""
+        property real value: 0
+        property color baseColor: Tokens.accent
+
+        property real shown: Math.max(0, Math.min(1, value))
+        Behavior on shown { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
+
+        readonly property color ringColor: value > 0.85 ? "#ff453a"
+            : value > 0.7 ? "#ff9f0a" : baseColor
+
+        implicitWidth: rsRow.implicitWidth
+        implicitHeight: 16
+
+        Row {
+            id: rsRow
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 5
+
+            Canvas {
+                id: ring
+                anchors.verticalCenter: parent.verticalCenter
+                width: 15
+                height: 15
+
+                property real v: rs.shown
+                property color c: rs.ringColor
+                onVChanged: requestPaint()
+                onCChanged: requestPaint()
+
+                onPaint: {
+                    const ctx = getContext("2d")
+                    ctx.reset()
+                    const r = width / 2 - 1.5
+                    ctx.lineWidth = 2.5
+                    ctx.lineCap = "round"
+                    ctx.strokeStyle = "rgba(255,255,255,0.15)"
+                    ctx.beginPath()
+                    ctx.arc(width / 2, height / 2, r, 0, 2 * Math.PI)
+                    ctx.stroke()
+                    if (v > 0.005) {
+                        ctx.strokeStyle = c.toString()
+                        ctx.beginPath()
+                        ctx.arc(width / 2, height / 2, r, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * v)
+                        ctx.stroke()
+                    }
+                }
+                Component.onCompleted: requestPaint()
+            }
+        }
+
+        // Name under the bar while hovering
+        Rectangle {
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: Tokens.barHeight - 2
+            width: tipText.implicitWidth + 14
+            height: 22
+            radius: 7
+            color: Tokens.surface
+            border.color: Tokens.border
+            border.width: 1
+            opacity: rsMouse.containsMouse ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { NumberAnimation { duration: 120 } }
+
+            Text {
+                id: tipText
+                anchors.centerIn: parent
+                text: rs.label + "  " + Math.round(rs.value * 100) + " %"
+                color: Tokens.textPrimary
+                font.family: Tokens.fontFamily
+                font.pixelSize: 11
+            }
+        }
+
+        MouseArea {
+            id: rsMouse
+            anchors.fill: parent
+            anchors.margins: -6
+            hoverEnabled: true
+            onClicked: Quickshell.execDetached(["kitty", "-e", "btop"])
         }
     }
 
@@ -234,22 +321,65 @@ PanelWindow {
                 }
             }
 
-            // CPU
-            BarItem {
+            // CPU og RAM som ringer
+            RingStat {
                 anchors.verticalCenter: parent.verticalCenter
-                iconSource: bar.iconFile("cpu")
-                text: Math.round(SystemService.cpu * 100) + "%"
-                textColor: SystemService.cpu > 0.85 ? "#ff453a" : Tokens.textPrimary
-                onClicked: Quickshell.execDetached(["kitty", "-e", "btop"])
+                label: "CPU"
+                value: SystemService.cpu
+                baseColor: Tokens.accent
+            }
+            RingStat {
+                anchors.verticalCenter: parent.verticalCenter
+                label: "Memory"
+                value: SystemService.ram
+                baseColor: "#bf5af2"
             }
 
-            // RAM
-            BarItem {
+            // Lyd: ikonet viser volumet, klikk åpner lydmenyen
+            Item {
+                id: soundItem
                 anchors.verticalCenter: parent.verticalCenter
-                iconSource: bar.iconFile("memory")
-                text: Math.round(SystemService.ram * 100) + "%"
-                textColor: SystemService.ram > 0.85 ? "#ff453a" : Tokens.textPrimary
-                onClicked: Quickshell.execDetached(["kitty", "-e", "btop"])
+                implicitWidth: 16
+                implicitHeight: 16
+
+                readonly property var audio: Pipewire.defaultAudioSink?.audio ?? null
+                readonly property real vol: audio?.volume ?? 0
+                readonly property bool muted: audio?.muted ?? false
+
+                PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
+
+                Image {
+                    anchors.centerIn: parent
+                    width: 16
+                    height: 16
+                    sourceSize: Qt.size(32, 32)
+                    opacity: ShellState.soundOpen || soundMouse.containsMouse ? 1 : 0.85
+                    source: Quickshell.iconPath(
+                          soundItem.muted || soundItem.vol === 0 ? "audio-volume-muted-symbolic"
+                        : soundItem.vol < 0.34 ? "audio-volume-low-symbolic"
+                        : soundItem.vol < 0.67 ? "audio-volume-medium-symbolic"
+                        : "audio-volume-high-symbolic", "audio-volume-high")
+                }
+
+                MouseArea {
+                    id: soundMouse
+                    anchors.fill: parent
+                    anchors.margins: -6
+                    hoverEnabled: true
+                    onClicked: {
+                        ShellState.soundAnchorX = soundItem.mapToItem(null, soundItem.width / 2, 0).x
+                        ShellState.soundOpen = !ShellState.soundOpen
+                    }
+                }
+
+                // Scroll on the icon to change the volume
+                WheelHandler {
+                    onWheel: event => {
+                        if (!soundItem.audio) return
+                        soundItem.audio.muted = false
+                        soundItem.audio.volume = Math.max(0, Math.min(1, soundItem.audio.volume + (event.angleDelta.y > 0 ? 0.05 : -0.05)))
+                    }
+                }
             }
 
             // Batteri + klokke (klikk åpner kontrollpanelet)

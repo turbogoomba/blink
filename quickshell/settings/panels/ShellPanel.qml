@@ -378,6 +378,19 @@ Flickable {
                 }
             }
 
+            SectionTitle { text: "Accent color" }
+            Group {
+                SettingRow {
+                    title: "Match the wallpaper"
+                    subtitle: "Pick the accent color from the current wallpaper"
+                    divider: false
+                    Toggle {
+                        checked: SettingsService.accentFromWallpaper
+                        apply: function(v) { SettingsService.accentFromWallpaper = v }
+                    }
+                }
+            }
+
             SectionTitle { text: "Night Shift" }
             Group {
                 SettingRow {

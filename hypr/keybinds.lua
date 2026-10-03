@@ -104,3 +104,8 @@ hl.layer_rule({ match = { namespace = "missioncontrol" }, blur = true, ignore_al
 
 -- Bakgrunnsvelger
 hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("qs -p /home/tallman/Documents/GitHub/mac-hypr-rice/quickshell ipc call wallpaper toggle"))
+
+---- ALT+TAB ----
+local sw = "qs -p /home/tallman/Documents/GitHub/mac-hypr-rice/quickshell ipc call switcher "
+hl.bind("ALT + TAB", hl.dsp.exec_cmd(sw .. "next"))
+hl.bind("ALT + SHIFT + TAB", hl.dsp.exec_cmd(sw .. "prev"))

@@ -119,6 +119,36 @@ PanelWindow {
     // BYGGEKLOSSER
     // ============================================================
 
+    // Small pill button (screen recording card)
+    component SmallButton: Rectangle {
+        id: sb
+        property string label: ""
+        property bool on: false
+        signal clicked()
+        width: sbText.implicitWidth + 18
+        height: 26
+        radius: 13
+        color: on ? Tokens.accent
+             : sbMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.08)
+        scale: sbMouse.pressed ? 0.94 : 1
+        Behavior on color { ColorAnimation { duration: 120 } }
+        Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
+        Text {
+            id: sbText
+            anchors.centerIn: parent
+            text: sb.label
+            color: sb.on ? "white" : Tokens.textPrimary
+            font.family: Tokens.fontFamily
+            font.pixelSize: 11
+        }
+        MouseArea {
+            id: sbMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: sb.clicked()
+        }
+    }
+
     // Kort som glir inn og lyser litt opp ved hover
     component Card: Rectangle {
         id: card
@@ -716,6 +746,73 @@ PanelWindow {
                                 hoverEnabled: true
                                 onClicked: ModeService.toggle(mrow.modelData.id)
                             }
+                        }
+                    }
+                }
+            }
+
+            // ---------- Screen recording ----------
+            Card {
+                order: 2
+                Layout.fillWidth: true
+                implicitHeight: 52
+
+                ToggleRow {
+                    anchors.left: parent.left
+                    anchors.right: recButtons.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.margins: 4
+                    icon: "media-record-symbolic"
+                    fallback: "media-record"
+                    title: "Screen Recording"
+                    subtitle: RecordService.recording ? "Recording · " + RecordService.elapsed
+                        : RecordService.compressing ? "Shrinking for Discord..."
+                        : (RecordService.withAudio ? "With sound" : "No sound")
+                          + (RecordService.forDiscord ? " · under 20 MB" : "")
+                    active: RecordService.recording
+                    onClicked: {
+                        if (RecordService.recording) {
+                            RecordService.stop()
+                        } else {
+                            cc.close()
+                            startDelay.mode = "screen"
+                            startDelay.restart()
+                        }
+                    }
+                }
+
+                // Wait for the panel to slide away so it is not in the video
+                Timer {
+                    id: startDelay
+                    property string mode: "screen"
+                    interval: 400
+                    onTriggered: RecordService.start(mode)
+                }
+
+                Row {
+                    id: recButtons
+                    anchors.right: parent.right
+                    anchors.rightMargin: 10
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 6
+                    visible: !RecordService.recording
+
+                    SmallButton {
+                        label: "Sound"
+                        on: RecordService.withAudio
+                        onClicked: RecordService.withAudio = !RecordService.withAudio
+                    }
+                    SmallButton {
+                        label: "Discord"
+                        on: RecordService.forDiscord
+                        onClicked: RecordService.forDiscord = !RecordService.forDiscord
+                    }
+                    SmallButton {
+                        label: "Area"
+                        onClicked: {
+                            cc.close()
+                            startDelay.mode = "area"
+                            startDelay.restart()
                         }
                     }
                 }
