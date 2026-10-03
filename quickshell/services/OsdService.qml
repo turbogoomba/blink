@@ -3,12 +3,13 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Services.Pipewire
+import Quickshell.Hyprland
 
 // Volume / brightness changes. The notch shows them (bar/Notch.qml).
 Singleton {
     id: root
 
-    property string kind: "volume"     // "volume" or "brightness"
+    property string kind: "volume"     // "volume", "brightness" or "workspace"
     property real value: 0
     property bool muted: false
     property bool shown: false
@@ -29,6 +30,7 @@ Singleton {
         value = Math.max(0, Math.min(1, v))
         muted = m === true
         shown = true
+        hideTimer.interval = k === "workspace" ? 1000 : 1500
         hideTimer.restart()
     }
 
@@ -40,6 +42,23 @@ Singleton {
         target: root.sink?.audio ?? null
         function onVolumeChanged() { root.show("volume", root.sink.audio.volume, root.sink.audio.muted) }
         function onMutedChanged() { root.show("volume", root.sink.audio.volume, root.sink.audio.muted) }
+    }
+
+    // ---------- Workspace switch ----------
+    // The bar sweeps a light out from the notch in that direction
+    property int wsId: Hyprland.focusedWorkspace?.id ?? 1
+    property int wsDir: 1              // 1 = to the right, -1 = to the left
+    property string wsMonitor: ""
+    property int wsTick: 0
+    readonly property int focusedWs: Hyprland.focusedWorkspace?.id ?? 0
+    onFocusedWsChanged: {
+        const id = focusedWs
+        if (id <= 0 || id === wsId) return   // special workspaces (scratchpad, minimized)
+        wsDir = id > wsId ? 1 : -1
+        wsId = id
+        wsMonitor = Hyprland.focusedMonitor?.name ?? ""
+        if (!ready) return
+        wsTick++
     }
 
     // ---------- Brightness ----------

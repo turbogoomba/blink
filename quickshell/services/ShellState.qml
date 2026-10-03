@@ -19,4 +19,7 @@ Singleton {
 
     // Bumped every time a screenshot is taken (the notch face reacts)
     property int screenshotTick: 0
+
+    // Current notch width (set by Bar.qml), so the frame glow can leave a gap for it
+    property real notchWidth: 200
 }

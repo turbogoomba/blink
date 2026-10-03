@@ -13,6 +13,7 @@ import "./theme" as Theme
 import "./wallpaper" as WallpaperUI
 import "./lock" as LockUI
 import "./switcher" as SwitcherUI
+import "./drawer" as DrawerUI
 
 ShellRoot {
     Component.onCompleted: {
@@ -34,6 +35,8 @@ ShellRoot {
 
     // Ramme rundt skjermen
     BarUI.Frame {}
+    BarUI.BootOverlay {}
+    BarUI.FrameViz {}
     BarUI.HotCorners {}
     BarUI.Osd {}
     BarUI.Calendar {}
@@ -50,6 +53,9 @@ ShellRoot {
             screen: modelData
         }
     }
+
+    // Skuff på siden (motsatt av docken): grafer, favoritter, mapper
+    DrawerUI.Drawer {}
 
     // Kontrollpanel
     CCUI.ControlCenter {}

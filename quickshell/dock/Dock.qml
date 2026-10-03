@@ -5,66 +5,100 @@ import Quickshell.Hyprland
 import "../theme"
 import "../services"
 
+// The dock: black, part of the frame, at the bottom, left or right (Settings > Display & Dock).
+// Hidden inside the frame until the mouse touches the edge. Right-click an icon for options.
 PanelWindow {
     id: dock
-    anchors { bottom: true; left: true; right: true }
+
+    readonly property string side: SettingsService.dockPosition
+    readonly property bool horizontal: side === "bottom"
+    readonly property int frameT: 6
+
+    anchors {
+        bottom: true
+        top: !dock.horizontal
+        left: dock.side !== "right"
+        right: dock.side !== "left"
+    }
     exclusionMode: ExclusionMode.Ignore
-    implicitHeight: 360
+    implicitHeight: horizontal ? 360 : 0
+    implicitWidth: horizontal ? 0 : 360
     color: "transparent"
     visible: !ShellState.focusMode
 
-    // Venstre side: festede apper
-    property list<string> apps: ["firefox"]
-    // Høyre side: system-apper
-    property list<string> systemApps: ["thunar", "kitty"]
-
     property int size: SettingsService.dockSize
-
     property bool revealed: false
 
-    // Vinduslisten
+    // Grows out of the frame with a small bounce, tucks back quickly
+    property real reveal: revealed ? 1 : 0
+    Behavior on reveal {
+        NumberAnimation {
+            duration: dock.revealed ? 380 : 220
+            easing.type: dock.revealed ? Easing.OutBack : Easing.InCubic
+            easing.overshoot: 0.8
+        }
+    }
+
+    // Window list (several windows) and right-click menu
     property string menuAppId: ""
-    property real menuX: 0
+    property var contextItem: null      // { id, entry, pinned }
+    property point popupAt: Qt.point(0, 0)
 
-    // Hvor musen er over ikonraden (-1 = ikke over), brukes til forstørrelse
-    readonly property real hoverX: rowHover.hovered ? rowHover.point.position.x : -1
+    // Where the mouse is along the icon row (-1 = not over it), for magnification
+    readonly property real hoverPos: rowHover.hovered
+        ? (horizontal ? rowHover.point.position.x : rowHover.point.position.y) : -1
 
-    // Apper som kjører, men ikke er festet
+    // Input mask. Explicit numbers instead of `item:` so it follows the window
+    // when the compositor gives it its real size after startup.
+    readonly property Item maskItem: revealed ? hoverZone : trigger
+    mask: Region {
+        x: dock.maskItem.x
+        y: dock.maskItem.y
+        width: dock.maskItem.width
+        height: dock.maskItem.height
+        Region { x: windowMenu.x; y: windowMenu.y; width: windowMenu.width; height: windowMenu.height }
+        Region { x: contextMenu.x; y: contextMenu.y; width: contextMenu.width; height: contextMenu.height }
+    }
+
+    // ---------- Apps ----------
+    function findEntry(id) {
+        if (!id) return null
+        return DesktopEntries.byId(id) ?? DesktopEntries.heuristicLookup(id)
+    }
+
+    // Does this window belong to this dock id?
+    function matches(id, appId) {
+        if (!id || !appId) return false
+        const a = appId.toLowerCase()
+        if (id.toLowerCase() === a) return true
+        const e = findEntry(id)
+        return (e?.startupClass ?? "").toLowerCase() === a || (e?.id ?? "").toLowerCase() === a
+    }
+
+    function windowsFor(id) {
+        return Hyprland.toplevels.values.filter(t => matches(id, t.wayland?.appId))
+    }
+
+    // Running apps that are not pinned
     readonly property var runningApps: {
-        const pinned = [...apps, ...systemApps].map(a => a.toLowerCase())
+        const pinned = SettingsService.dockApps
         const ids = []
         for (const t of Hyprland.toplevels.values) {
-            const id = t.wayland?.appId
-            if (!id || id === "org.quickshell") continue
-            if (pinned.includes(id.toLowerCase())) continue
-            if (!ids.includes(id)) ids.push(id)
+            const appId = t.wayland?.appId
+            if (!appId || appId === "org.quickshell") continue
+            if (pinned.some(p => matches(p, appId))) continue
+            const key = findEntry(appId)?.id ?? appId
+            if (!ids.includes(key)) ids.push(key)
         }
         return ids
     }
 
-    mask: Region {
-        item: dock.revealed ? hoverZone : trigger
-        Region { item: windowMenu }
-    }
-
-    // ---------- Hjelpefunksjoner ----------
-    function windowsFor(appId) {
-        const id = appId.toLowerCase()
-        return Hyprland.toplevels.values.filter(t => t.wayland?.appId?.toLowerCase() === id)
-    }
     function addr(t) {
         const a = t.address
         return a.startsWith("0x") ? a : "0x" + a
     }
     function isMinimized(t) {
         return t.workspace?.name === "special:minimized"
-    }
-    function findEntry(appId) {
-        const id = appId.toLowerCase()
-        const all = DesktopEntries.applications.values
-        return all.find(e => e.id.toLowerCase() === id)
-            ?? all.find(e => (e.startupClass ?? "").toLowerCase() === id)
-            ?? null
     }
 
     function showWindow(w) {
@@ -76,46 +110,67 @@ PanelWindow {
         }
     }
 
-    function appClicked(appId, entry, iconItem) {
-        const wins = windowsFor(appId)
+    // Point next to an icon where popups open (above it, or beside it on the sides)
+    function popupPoint(iconItem) {
+        if (horizontal) return iconItem.mapToItem(null, iconItem.width / 2, 0)
+        if (side === "left") return iconItem.mapToItem(null, iconItem.width, iconItem.height / 2)
+        return iconItem.mapToItem(null, 0, iconItem.height / 2)
+    }
 
-        // Kjører ikke: start appen, og la ikonet hoppe
+    function appClicked(id, entry, iconItem) {
+        contextItem = null
+        const wins = windowsFor(id)
+
+        // Not running: start it and bounce
         if (wins.length === 0) {
             entry?.execute()
             iconItem.bounce()
             return
         }
-
-        // Flere vinduer: vis/skjul vinduslisten
+        // Several windows: show the list
         if (wins.length > 1) {
-            if (menuAppId === appId) {
+            if (menuAppId === id) {
                 menuAppId = ""
             } else {
-                menuX = iconItem.mapToItem(null, iconItem.width / 2, 0).x
-                menuAppId = appId
+                popupAt = popupPoint(iconItem)
+                menuAppId = id
             }
             return
         }
-
-        // Ett vindu: gi fokus
         showWindow(wins[0])
     }
 
+    function openContext(id, entry, iconItem) {
+        menuAppId = ""
+        popupAt = popupPoint(iconItem)
+        contextItem = { id: entry?.id ?? id, entry: entry, pinned: SettingsService.isPinned(id), rawId: id }
+    }
+
     function updateHover() {
-        if (dockHover.hovered || menuHover.hovered) hideTimer.stop()
+        if (dockHover.hovered || bodyHover.hovered || menuHover.hovered || contextHover.hovered) hideTimer.stop()
         else hideTimer.restart()
+    }
+
+    // Startup: the dock pops up for a moment
+    Connections {
+        target: BootService
+        function onDockPeekChanged() {
+            if (BootService.dockPeek) dock.revealed = true
+            else dock.updateHover()
+        }
     }
 
     Timer {
         id: hideTimer
-        interval: 400
+        interval: 450
         onTriggered: {
             dock.menuAppId = ""
+            dock.contextItem = null
             dock.revealed = false
         }
     }
 
-    // ---------- Ett ikon i docken ----------
+    // ---------- One icon ----------
     component DockIcon: Item {
         id: icon
         property string source: ""
@@ -123,12 +178,13 @@ PanelWindow {
         property bool running: false
         property bool dimmed: false
         signal clicked()
+        signal rightClicked()
 
-        // Forstørrelse: jo nærmere musen, jo større (maks 1.35)
+        // Magnification: the closer the mouse, the bigger (max 1.35)
         readonly property real mag: {
-            if (dock.hoverX < 0) return 1
-            const d = Math.abs(dock.hoverX - (icon.x + icon.width / 2))
-            return 1 + 0.35 * Math.max(0, 1 - d / 110)
+            if (dock.hoverPos < 0) return 1
+            const c = dock.horizontal ? icon.x + icon.width / 2 : icon.y + icon.height / 2
+            return 1 + 0.35 * Math.max(0, 1 - Math.abs(dock.hoverPos - c) / 110)
         }
 
         // Bounce like on a Mac: keeps hopping until the app's window shows up (max 8 s)
@@ -149,6 +205,11 @@ PanelWindow {
         width: dock.size
         height: dock.size
 
+        // Which way is "away from the edge"
+        readonly property real outX: dock.side === "left" ? 1 : dock.side === "right" ? -1 : 0
+        readonly property real outY: dock.horizontal ? -1 : 0
+        property real hop: 0
+
         Image {
             id: iconImage
             anchors.centerIn: parent
@@ -156,18 +217,16 @@ PanelWindow {
             height: dock.size - 8
             sourceSize: Qt.size(96, 96)
             source: icon.source
-            transformOrigin: Item.Bottom
+            transformOrigin: dock.side === "left" ? Item.Left : dock.side === "right" ? Item.Right : Item.Bottom
             scale: icon.mag
             Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutCubic } }
-
-            transform: Translate { id: lift; y: 0 }
+            transform: Translate { x: icon.hop * icon.outX; y: icon.hop * icon.outY }
         }
 
-        // Hopp når appen starter. Repeats while launching, then one small last hop.
         SequentialAnimation {
             id: bounceAnim
-            NumberAnimation { target: lift; property: "y"; to: -18; duration: 220; easing.type: Easing.OutQuad }
-            NumberAnimation { target: lift; property: "y"; to: 0;   duration: 220; easing.type: Easing.InQuad }
+            NumberAnimation { target: icon; property: "hop"; to: 18; duration: 220; easing.type: Easing.OutQuad }
+            NumberAnimation { target: icon; property: "hop"; to: 0; duration: 220; easing.type: Easing.InQuad }
             onFinished: {
                 if (icon.launching) bounceAnim.start()
                 else settleAnim.start()
@@ -175,11 +234,11 @@ PanelWindow {
         }
         SequentialAnimation {
             id: settleAnim
-            NumberAnimation { target: lift; property: "y"; to: -6; duration: 120; easing.type: Easing.OutQuad }
-            NumberAnimation { target: lift; property: "y"; to: 0;  duration: 120; easing.type: Easing.InQuad }
+            NumberAnimation { target: icon; property: "hop"; to: 6; duration: 120; easing.type: Easing.OutQuad }
+            NumberAnimation { target: icon; property: "hop"; to: 0; duration: 120; easing.type: Easing.InQuad }
         }
 
-        // New icons (apps that start running) pop in
+        // New icons pop in
         scale: 0.4
         opacity: 0
         Component.onCompleted: popIn.start()
@@ -189,17 +248,19 @@ PanelWindow {
             NumberAnimation { target: icon; property: "opacity"; to: 1; duration: 160 }
         }
 
-        // Navnelapp over ikonet
+        // Name label, away from the edge
         Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: -height - 18 - (icon.mag - 1) * 40
+            readonly property real gap: 18 + (icon.mag - 1) * 40
+            x: dock.horizontal ? (parent.width - width) / 2
+             : dock.side === "left" ? parent.width + gap : -width - gap
+            y: dock.horizontal ? -height - gap : (parent.height - height) / 2
             width: labelText.implicitWidth + 16
             height: 24
             radius: 6
             color: Tokens.surface
             border.color: Tokens.border
             border.width: 1
-            visible: iconMouse.containsMouse && icon.label !== ""
+            visible: iconMouse.containsMouse && icon.label !== "" && !dock.contextItem
 
             Text {
                 id: labelText
@@ -211,11 +272,11 @@ PanelWindow {
             }
         }
 
-        // Prikk: hvit = kjører, grå = bare minimert
+        // Dot: white = running, grey = only minimized. Sits on the edge side.
         Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: -4
+            x: dock.horizontal ? (parent.width - width) / 2
+             : dock.side === "left" ? -6 : parent.width + 2
+            y: dock.horizontal ? parent.height + 2 : (parent.height - height) / 2
             width: 4
             height: 4
             radius: 2
@@ -227,11 +288,14 @@ PanelWindow {
             id: iconMouse
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: icon.clicked()
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked: mouse => {
+                if (mouse.button === Qt.RightButton) icon.rightClicked()
+                else icon.clicked()
+            }
         }
     }
 
-    // ---------- En app ----------
     component AppIcon: DockIcon {
         id: appIcon
         required property string modelData
@@ -244,23 +308,57 @@ PanelWindow {
         onRunningChanged: if (running) appIcon.stopBounce()
         dimmed: running && wins.every(w => dock.isMinimized(w))
         onClicked: dock.appClicked(modelData, entry, appIcon)
+        onRightClicked: dock.openContext(modelData, entry, appIcon)
     }
 
-    // ---------- Vinduslisten ----------
-    Rectangle {
+    // ---------- Popups (window list, right-click menu) ----------
+    component PopupBox: Rectangle {
+        radius: 12
+        color: Tokens.bg
+        border.color: Tokens.border
+        border.width: 1
+        // Away from the edge, next to the icon
+        x: dock.horizontal ? Math.max(8, Math.min(dock.width - width - 8, dock.popupAt.x - width / 2))
+         : dock.side === "left" ? dock.popupAt.x + 14 : dock.popupAt.x - width - 14
+        y: dock.horizontal ? dock.popupAt.y - height - 14
+         : Math.max(8, Math.min(dock.height - height - 8, dock.popupAt.y - height / 2))
+    }
+
+    component MenuRow: Rectangle {
+        id: mr
+        property string text: ""
+        property bool danger: false
+        signal activated()
+        width: parent ? parent.width : 0
+        height: 30
+        radius: 7
+        color: mrMouse.containsMouse ? Tokens.accent : "transparent"
+
+        Text {
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+            text: mr.text
+            color: mrMouse.containsMouse ? "white" : mr.danger ? "#ff8a83" : Tokens.textPrimary
+            font.family: Tokens.fontFamily
+            font.pixelSize: 13
+        }
+
+        MouseArea {
+            id: mrMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: mr.activated()
+        }
+    }
+
+    PopupBox {
         id: windowMenu
         readonly property bool open: dock.menuAppId !== ""
         readonly property var wins: open ? dock.windowsFor(dock.menuAppId) : []
-
         width: open ? 260 : 0
         height: open ? menuColumn.implicitHeight + 12 : 0
-        x: Math.max(8, Math.min(parent.width - width - 8, dock.menuX - width / 2))
-        y: hoverZone.y + dockRect.y - height - 8
         visible: open
-        radius: 12
-        color: Tokens.surface
-        border.color: Tokens.border
-        border.width: 1
 
         HoverHandler {
             id: menuHover
@@ -275,51 +373,107 @@ PanelWindow {
             Repeater {
                 model: windowMenu.wins
 
-                Rectangle {
-                    id: menuRow
+                MenuRow {
                     required property var modelData
-                    readonly property bool minimized: dock.isMinimized(modelData)
-
-                    width: menuColumn.width
-                    height: 32
-                    radius: 8
-                    color: rowMouse.containsMouse ? Tokens.border : "transparent"
-
-                    Text {
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.leftMargin: 10
-                        anchors.rightMargin: 10
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: (menuRow.modelData.title || "Untitled")
-                              + (menuRow.minimized ? "  (minimized)" : "")
-                        color: menuRow.minimized ? Tokens.textSecondary : Tokens.textPrimary
-                        font.family: Tokens.fontFamily
-                        font.pixelSize: 13
-                        elide: Text.ElideRight
-                    }
-
-                    MouseArea {
-                        id: rowMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onClicked: {
-                            dock.showWindow(menuRow.modelData)
-                            dock.menuAppId = ""
-                        }
+                    text: (modelData.title || "Untitled") + (dock.isMinimized(modelData) ? "  (minimized)" : "")
+                    onActivated: {
+                        dock.showWindow(modelData)
+                        dock.menuAppId = ""
                     }
                 }
             }
         }
     }
 
-    // ---------- Docken ----------
+    PopupBox {
+        id: contextMenu
+        readonly property bool open: dock.contextItem !== null
+        readonly property var item: dock.contextItem
+        width: open ? 220 : 0
+        height: open ? ctxColumn.implicitHeight + 12 : 0
+        visible: open
+
+        HoverHandler {
+            id: contextHover
+            onHoveredChanged: dock.updateHover()
+        }
+
+        Column {
+            id: ctxColumn
+            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 6 }
+            spacing: 2
+
+            Text {
+                leftPadding: 10
+                topPadding: 4
+                bottomPadding: 4
+                text: contextMenu.item?.entry?.name ?? contextMenu.item?.id ?? ""
+                color: Tokens.textSecondary
+                font.family: Tokens.fontFamily
+                font.pixelSize: 11
+            }
+
+            MenuRow {
+                text: contextMenu.item?.pinned ? "Keep in Dock  ✓" : "Keep in Dock"
+                onActivated: {
+                    const it = contextMenu.item
+                    if (it.pinned) SettingsService.unpin(it.rawId)
+                    else SettingsService.pin(it.id)
+                    dock.contextItem = null
+                }
+            }
+            MenuRow {
+                text: SettingsService.isFavorite(contextMenu.item?.id ?? "") ? "Remove from Favorites" : "Add to Favorites"
+                onActivated: {
+                    const id = contextMenu.item.id
+                    if (SettingsService.isFavorite(id)) SettingsService.removeFavorite(id)
+                    else SettingsService.addFavorite(id)
+                    dock.contextItem = null
+                }
+            }
+            MenuRow {
+                visible: contextMenu.item?.pinned ?? false
+                text: dock.horizontal ? "Move left" : "Move up"
+                onActivated: SettingsService.movePinned(contextMenu.item.rawId, -1)
+            }
+            MenuRow {
+                visible: contextMenu.item?.pinned ?? false
+                text: dock.horizontal ? "Move right" : "Move down"
+                onActivated: SettingsService.movePinned(contextMenu.item.rawId, 1)
+            }
+            MenuRow {
+                visible: !!contextMenu.item?.entry
+                text: "New Window"
+                onActivated: {
+                    contextMenu.item.entry.execute()
+                    dock.contextItem = null
+                }
+            }
+        }
+    }
+
+    // ---------- The dock body ----------
+    readonly property real along: (horizontal ? iconGrid.implicitWidth : iconGrid.implicitHeight) + 24
+    readonly property real across: size + 22
+
+    // Thin strip at the edge that wakes the dock
+    Item {
+        id: trigger
+        x: dock.horizontal ? (dock.width - dock.along) / 2 : dock.side === "left" ? 0 : dock.width - 3
+        y: dock.horizontal ? dock.height - 3 : (dock.height - dock.along) / 2
+        width: dock.horizontal ? dock.along : 3
+        height: dock.horizontal ? 3 : dock.along
+        // Only sets the input mask while hidden. Revealing is done by hoverZone below,
+        // which lies on top of this strip (Qt gives hover to the topmost item only).
+    }
+
+    // Area that keeps the dock open while the mouse is on it
     Item {
         id: hoverZone
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        width: dockRect.width
-        height: dock.size + 28
+        x: dock.horizontal ? body.x - 10 : dock.side === "left" ? 0 : body.x - 10
+        y: dock.horizontal ? body.y - 10 : body.y - 10
+        width: dock.horizontal ? dock.along + 20 : dock.across + dock.frameT + 10
+        height: dock.horizontal ? dock.across + dock.frameT + 10 : dock.along + 20
 
         HoverHandler {
             id: dockHover
@@ -328,67 +482,109 @@ PanelWindow {
                 dock.updateHover()
             }
         }
+    }
 
-        Item {
-            id: trigger
-            anchors.bottom: parent.bottom
-            width: parent.width
-            height: 2
+    // Concave corners where the dock meets the frame (they move with the dock)
+    component Fillet: Canvas {
+        property real cx: 0
+        property real cy: 0
+        width: 14
+        height: 14
+        onPaint: {
+            const c = getContext("2d")
+            c.reset()
+            c.fillStyle = Tokens.barBg
+            c.fillRect(0, 0, 14, 14)
+            c.globalCompositeOperation = "destination-out"
+            c.beginPath()
+            c.arc(cx, cy, 14, 0, Math.PI * 2)
+            c.fill()
+        }
+    }
+
+    // Before the dock (left of it, or above it)
+    Fillet {
+        cx: dock.horizontal ? 0 : dock.side === "left" ? 14 : 0
+        cy: dock.horizontal ? 0 : 0
+        x: dock.horizontal ? body.x - 14 : dock.side === "left" ? body.x : body.x + dock.across - 14
+        y: dock.horizontal ? body.y + dock.across - 14 : body.y - 14
+        opacity: Math.min(1, dock.reveal * 3)
+    }
+    // After the dock (right of it, or below it)
+    Fillet {
+        cx: dock.horizontal ? 14 : dock.side === "left" ? 14 : 0
+        cy: dock.horizontal ? 0 : 14
+        x: dock.horizontal ? body.x + dock.along : dock.side === "left" ? body.x : body.x + dock.across - 14
+        y: dock.horizontal ? body.y + dock.across - 14 : body.y + dock.along
+        opacity: Math.min(1, dock.reveal * 3)
+    }
+
+    Item {
+        id: body
+        // Hidden = pushed out past the frame; revealed = resting on the frame's inner edge
+        readonly property real hiddenShift: (1 - dock.reveal) * (dock.across + dock.frameT + 4)
+        width: dock.horizontal ? dock.along : dock.across
+        height: dock.horizontal ? dock.across : dock.along
+        x: dock.horizontal ? (dock.width - dock.along) / 2
+         : dock.side === "left" ? dock.frameT - hiddenShift
+         : dock.width - dock.frameT - dock.across + hiddenShift
+        y: dock.horizontal ? dock.height - dock.frameT - dock.across + hiddenShift
+         : (dock.height - dock.along) / 2
+
+        // Icons sit on top of hoverZone, so the body tracks hover itself too
+        HoverHandler {
+            id: bodyHover
+            onHoveredChanged: dock.updateHover()
         }
 
+        // Only the corners facing the screen are round: a rounded box,
+        // with the half against the frame filled in square
         Rectangle {
-            id: dockRect
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: row.implicitWidth + 16
-            height: dock.size + 16
-            y: dock.revealed ? parent.height - height - 8 : parent.height + 4
+            anchors.fill: parent
             radius: 20
-            color: Tokens.surface
-            border.color: Tokens.border
-            border.width: 1
+            color: Tokens.barBg
+        }
+        Rectangle {
+            color: Tokens.barBg
+            x: dock.side === "right" ? parent.width / 2 : 0
+            y: dock.horizontal ? parent.height / 2 : 0
+            width: dock.horizontal ? parent.width : parent.width / 2
+            height: dock.horizontal ? parent.height / 2 : parent.height
+        }
 
-            Behavior on y { NumberAnimation { duration: 260; easing.type: Easing.OutBack; easing.overshoot: 0.8 } }
+        Grid {
+            id: iconGrid
+            anchors.centerIn: parent
+            // The dot sits on the edge side, so nudge the icons a little away from it
+            anchors.horizontalCenterOffset: dock.side === "left" ? 2 : dock.side === "right" ? -2 : 0
+            anchors.verticalCenterOffset: dock.horizontal ? -2 : 0
+            columns: dock.horizontal ? 100 : 1
+            spacing: 8
 
-            Row {
-                id: row
-                anchors.centerIn: parent
-                spacing: 8
+            HoverHandler { id: rowHover }
 
-                HoverHandler { id: rowHover }
+            Repeater {
+                model: SettingsService.dockApps
+                AppIcon {}
+            }
 
-                // Festede apper
-                Repeater {
-                    model: dock.apps
-                    AppIcon {}
-                }
+            Repeater {
+                model: dock.runningApps
+                AppIcon {}
+            }
 
-                // Kjørende apper som ikke er festet
-                Repeater {
-                    model: dock.runningApps
-                    AppIcon {}
-                }
+            // Divider
+            Rectangle {
+                width: dock.horizontal ? 1 : dock.size * 0.7
+                height: dock.horizontal ? dock.size * 0.7 : 1
+                color: Tokens.border
+            }
 
-                // Skillelinje
-                Rectangle {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 1
-                    height: dock.size * 0.7
-                    color: Tokens.border
-                }
-
-                // System-apper
-                Repeater {
-                    model: dock.systemApps
-                    AppIcon {}
-                }
-
-                // Innstillinger
-                DockIcon {
-                    source: Quickshell.iconPath("preferences-system", "application-x-executable")
-                    label: "Settings"
-                    running: ShellState.settingsOpen
-                    onClicked: ShellState.settingsOpen = !ShellState.settingsOpen
-                }
+            DockIcon {
+                source: Quickshell.iconPath("preferences-system", "application-x-executable")
+                label: "Settings"
+                running: ShellState.settingsOpen
+                onClicked: ShellState.settingsOpen = !ShellState.settingsOpen
             }
         }
     }

@@ -174,12 +174,52 @@ PanelWindow {
         // The notch face looks toward the mouse while it is over the bar
         HoverHandler { id: barHover }
 
+        // Workspace switch: a streak of light runs out from the notch in that direction
+        Rectangle {
+            id: sweep
+            y: parent.height - 2
+            width: 220
+            height: 2
+            radius: 1
+            opacity: 0
+            visible: opacity > 0
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0; color: "transparent" }
+                GradientStop { position: 0.5; color: Tokens.accent }
+                GradientStop { position: 1; color: "transparent" }
+            }
+
+            Connections {
+                target: OsdService
+                function onWsTickChanged() {
+                    if (OsdService.wsMonitor !== (bar.screen?.name ?? "")) return
+                    const start = barRect.width / 2 - sweep.width / 2
+                    sweepX.from = start
+                    sweepX.to = OsdService.wsDir > 0 ? barRect.width * 0.75 : barRect.width * 0.25 - sweep.width
+                    sweepAnim.restart()
+                }
+            }
+
+            ParallelAnimation {
+                id: sweepAnim
+                NumberAnimation { id: sweepX; target: sweep; property: "x"; duration: 520; easing.type: Easing.OutCubic }
+                SequentialAnimation {
+                    NumberAnimation { target: sweep; property: "opacity"; from: 0; to: 1; duration: 90 }
+                    NumberAnimation { target: sweep; property: "opacity"; to: 0; duration: 430; easing.type: Easing.InQuad }
+                }
+            }
+        }
+
         // ---------- Venstre: arbeidsflater + aktivt vindu ----------
         Row {
             anchors.left: parent.left
             anchors.leftMargin: Tokens.spacing
             anchors.verticalCenter: parent.verticalCenter
             spacing: 14
+            // Startup: slides out from the notch
+            opacity: BootService.bar
+            transform: Translate { x: (1 - BootService.bar) * 60 }
 
             // Arbeidsflater
             Rectangle {
@@ -306,6 +346,8 @@ PanelWindow {
             anchors.rightMargin: Tokens.spacing
             anchors.verticalCenter: parent.verticalCenter
             spacing: 16
+            opacity: BootService.bar
+            transform: Translate { x: -(1 - BootService.bar) * 60 }
 
             // Vær
             BarItem {
@@ -519,6 +561,7 @@ PanelWindow {
         width: bar.filletSize
         height: bar.filletSize
         visible: bar.filletSize >= 1
+        opacity: Math.max(0, Math.min(1, (BootService.notch - 0.6) / 0.4))
         onWidthChanged: requestPaint()
         onPaint: {
             const c = getContext("2d")
@@ -537,9 +580,17 @@ PanelWindow {
 
     Notch {
         id: notch
+        onWidthChanged: ShellState.notchWidth = width
         anchors.horizontalCenter: parent.horizontalCenter
         y: 0
         baseHeight: Tokens.barHeight + bar.notchDrop
+        // Startup: drops out of the bar
+        transform: Scale {
+            origin.x: notch.width / 2
+            origin.y: 0
+            xScale: 0.2 + 0.8 * BootService.notch
+            yScale: Math.max(0, BootService.notch)
+        }
         lookTarget: barHover.hovered
             ? Math.max(-1, Math.min(1, (barHover.point.position.x - bar.width / 2) / (bar.width / 3)))
             : NaN

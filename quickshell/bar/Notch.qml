@@ -5,6 +5,7 @@ import Quickshell.Widgets
 import Quickshell.Bluetooth
 import Quickshell.Services.Mpris
 import Quickshell.Services.UPower
+import Quickshell.Hyprland
 import "../theme"
 import "../services"
 
@@ -115,7 +116,7 @@ Rectangle {
         && !showBt && !showClass && !peek
 
     width: open ? 660
-         : showOsd ? 300
+         : showOsd ? (OsdService.kind === "workspace" ? 230 : 300)
          : showNotif ? 400
          : showClass ? 360
          : showBt ? 360
@@ -425,6 +426,8 @@ Rectangle {
             anchors.horizontalCenterOffset: (isNaN(notch.lookTarget) ? face.look : notch.lookTarget) * 3
             y: face.smiling ? 0 : 4
             spacing: 8
+            // Startup: the eyes open
+            transform: Scale { origin.y: eyes.height / 2; yScale: 0.1 + 0.9 * BootService.eyes }
 
             Behavior on anchors.horizontalCenterOffset { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
             Behavior on y { NumberAnimation { duration: 150 } }
@@ -624,8 +627,51 @@ Rectangle {
         visible: opacity > 0
         Behavior on opacity { NumberAnimation { duration: 120 } }
 
+        readonly property bool isWs: OsdService.kind === "workspace"
+
+        // Workspace switch: "Desktop 3" and the dots, the new one lit
+        Item {
+            anchors.fill: parent
+            visible: parent.isWs
+
+            Text {
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Desktop " + OsdService.wsId
+                color: Tokens.textPrimary
+                font.family: Tokens.fontFamily
+                font.pixelSize: 12
+                font.weight: Font.DemiBold
+            }
+
+            Row {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 6
+
+                Repeater {
+                    model: Hyprland.workspaces.values
+                        .filter(w => w.id > 0 && w.monitor?.name === OsdService.wsMonitor)
+                        .sort((a, b) => a.id - b.id)
+
+                    Rectangle {
+                        required property var modelData
+                        readonly property bool current: modelData.id === OsdService.wsId
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: current ? 18 : 7
+                        height: 7
+                        radius: 3.5
+                        color: current ? Tokens.accent : Tokens.textSecondary
+                        Behavior on width { NumberAnimation { duration: 260; easing.type: Easing.OutBack } }
+                        Behavior on color { ColorAnimation { duration: 200 } }
+                    }
+                }
+            }
+        }
+
         Image {
             id: osdIcon
+            visible: !parent.isWs
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
             width: 18
@@ -636,6 +682,7 @@ Rectangle {
 
         Rectangle {
             id: osdTrack
+            visible: !parent.isWs
             anchors.left: osdIcon.right
             anchors.leftMargin: 12
             anchors.right: osdPct.left
@@ -656,6 +703,7 @@ Rectangle {
 
         Text {
             id: osdPct
+            visible: !parent.isWs
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             width: 34
@@ -751,19 +799,21 @@ Rectangle {
 
         Row {
             anchors.right: parent.right
-            anchors.rightMargin: 12
+            // Make room for the recording dot + time while recording
+            anchors.rightMargin: notch.showRec ? 84 : 12
             anchors.verticalCenter: parent.verticalCenter
             spacing: 2
             visible: notch.hasMusic
+            Behavior on anchors.rightMargin { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
 
             Repeater {
-                model: CavaService.bars
+                model: 4
 
                 Rectangle {
                     required property int index
                     anchors.verticalCenter: parent.verticalCenter
                     width: 3
-                    height: 3 + (CavaService.values[index] ?? 0)
+                    height: 3 + (CavaService.small[index] ?? 0)
                     radius: 1.5
                     color: Tokens.accent
                     Behavior on height { NumberAnimation { duration: 60 } }
@@ -773,7 +823,7 @@ Rectangle {
 
         Text {
             anchors.right: parent.right
-            anchors.rightMargin: 14
+            anchors.rightMargin: notch.showRec ? 86 : 14
             anchors.verticalCenter: parent.verticalCenter
             visible: !notch.hasMusic
             text: ShelfService.files.length

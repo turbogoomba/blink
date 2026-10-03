@@ -391,6 +391,47 @@ Flickable {
                 }
             }
 
+            SectionTitle { text: "Startup" }
+            Group {
+                SettingRow {
+                    title: "Startup animation"
+                    subtitle: "Plays once after you log in"
+                    divider: false
+                    Row {
+                        spacing: 10
+                        PushButton {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "Play"
+                            apply: function() { BootService.play() }
+                        }
+                        Toggle {
+                            anchors.verticalCenter: parent.verticalCenter
+                            checked: SettingsService.bootAnimation
+                            apply: function(v) { SettingsService.bootAnimation = v }
+                        }
+                    }
+                }
+            }
+
+            SectionTitle { text: "Frame visualizer" }
+            Group {
+                Item {
+                    width: col.width
+                    height: 46
+                    Segments {
+                        anchors.centerIn: parent
+                        options: [
+                            { value: "off", label: "Off" },
+                            { value: "glow", label: "Glow" },
+                            { value: "bars", label: "Bars" },
+                            { value: "both", label: "Both" }
+                        ]
+                        current: SettingsService.frameViz
+                        apply: function(v) { SettingsService.frameViz = v }
+                    }
+                }
+            }
+
             SectionTitle { text: "Night Shift" }
             Group {
                 SettingRow {
@@ -417,6 +458,27 @@ Flickable {
 
             SectionTitle { text: "Dock" }
             Group {
+                SettingRow {
+                    title: "Side drawer"
+                    subtitle: "Graphs, favorite apps and folders on the edge opposite the dock"
+                    Toggle {
+                        checked: SettingsService.drawerEnabled
+                        apply: function(v) { SettingsService.drawerEnabled = v }
+                    }
+                }
+                SettingRow {
+                    title: "Position"
+                    subtitle: "The side drawer moves to the opposite edge"
+                    Segments {
+                        options: [
+                            { value: "left", label: "Left" },
+                            { value: "bottom", label: "Bottom" },
+                            { value: "right", label: "Right" }
+                        ]
+                        current: SettingsService.dockPosition
+                        apply: function(v) { SettingsService.dockPosition = v }
+                    }
+                }
                 SettingRow {
                     title: "Size"
                     divider: false

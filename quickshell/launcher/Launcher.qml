@@ -50,9 +50,23 @@ PanelWindow {
         scored.sort((a, b) => b.score - a.score || a.entry.name.localeCompare(b.entry.name))
         return scored.slice(0, 8).map(s => s.entry)
     }
-    onResultsChanged: selected = 0
+    onResultsChanged: {
+        selected = 0
+        menuEntry = null
+    }
+
+    // Right-click menu on a result: Open / Pin to Dock / Add to Favorites
+    property var menuEntry: null
+    property real menuX: 0
+    property real menuY: 0
+    function openMenu(entry, x, y) {
+        menuEntry = entry
+        menuX = Math.min(x, width - menu.width - 8)
+        menuY = y
+    }
 
     function close() {
+        menuEntry = null
         ShellState.launcherOpen = false
     }
     function launch(entry) {
@@ -75,7 +89,7 @@ PanelWindow {
     // Klikk utenfor lukker
     MouseArea {
         anchors.fill: parent
-        onClicked: launcher.close()
+        onClicked: launcher.menuEntry ? launcher.menuEntry = null : launcher.close()
     }
 
     // Concave corners where the sheet meets the bar
@@ -125,7 +139,10 @@ PanelWindow {
         }
 
         // Klikk inni boksen skal ikke lukke
-        MouseArea { anchors.fill: parent }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: launcher.menuEntry = null
+        }
 
         Column {
             id: content
@@ -177,7 +194,8 @@ PanelWindow {
 
                     Keys.onPressed: event => {
                         if (event.key === Qt.Key_Escape) {
-                            launcher.close()
+                            if (launcher.menuEntry) launcher.menuEntry = null
+                            else launcher.close()
                             event.accepted = true
                         } else if (event.key === Qt.Key_Down) {
                             launcher.selected = Math.min(launcher.selected + 1, launcher.results.length - 1)
@@ -272,11 +290,92 @@ PanelWindow {
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
-                            onEntered: launcher.selected = resultRow.index
-                            onClicked: launcher.launch(resultRow.modelData)
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton
+                            onEntered: if (!launcher.menuEntry) launcher.selected = resultRow.index
+                            onClicked: mouse => {
+                                if (mouse.button === Qt.RightButton) {
+                                    launcher.selected = resultRow.index
+                                    const p = mapToItem(null, mouse.x, mouse.y)
+                                    launcher.openMenu(resultRow.modelData, p.x, p.y)
+                                } else {
+                                    launcher.launch(resultRow.modelData)
+                                }
+                            }
                         }
                     }
                 }
+            }
+        }
+    }
+
+    // ---------- Right-click menu ----------
+    component MenuRow: Rectangle {
+        id: row
+        property string label: ""
+        signal triggered()
+        width: parent.width
+        height: 32
+        radius: 7
+        color: rowMouse.containsMouse ? Tokens.accent : "transparent"
+        Text {
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+            text: row.label
+            color: Tokens.textPrimary
+            font.family: Tokens.fontFamily
+            font.pixelSize: 13
+        }
+        MouseArea {
+            id: rowMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: {
+                row.triggered()
+                launcher.menuEntry = null
+            }
+        }
+    }
+
+    Rectangle {
+        id: menu
+        readonly property string entryId: launcher.menuEntry?.id ?? ""
+        x: launcher.menuX
+        y: launcher.menuY
+        width: 210
+        height: menuCol.implicitHeight + 10
+        radius: 12
+        color: "#1c1c1e"
+        border.color: "#3a3a3c"
+        border.width: 1
+        visible: launcher.menuEntry !== null && launcher.reveal > 0.9
+        scale: visible ? 1 : 0.94
+        transformOrigin: Item.TopLeft
+        Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutBack } }
+
+        // Clicks on the menu itself stay here
+        MouseArea { anchors.fill: parent }
+
+        Column {
+            id: menuCol
+            x: 5
+            y: 5
+            width: parent.width - 10
+            spacing: 2
+
+            MenuRow {
+                label: "Open"
+                onTriggered: launcher.launch(launcher.menuEntry)
+            }
+            MenuRow {
+                label: SettingsService.isPinned(menu.entryId) ? "Unpin from Dock" : "Pin to Dock"
+                onTriggered: SettingsService.togglePin(menu.entryId)
+            }
+            MenuRow {
+                label: SettingsService.isFavorite(menu.entryId) ? "Remove from Favorites" : "Add to Favorites"
+                onTriggered: SettingsService.isFavorite(menu.entryId)
+                    ? SettingsService.removeFavorite(menu.entryId)
+                    : SettingsService.addFavorite(menu.entryId)
             }
         }
     }

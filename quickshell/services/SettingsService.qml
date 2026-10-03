@@ -21,6 +21,45 @@ Singleton {
 
     // Dock
     property alias dockSize: adapter.dockSize
+    // "bottom", "left" or "right". The drawer goes on the other side.
+    property alias drawerEnabled: adapter.drawerEnabled
+    property alias bootAnimation: adapter.bootAnimation
+    property alias frameViz: adapter.frameViz
+    property alias dockPosition: adapter.dockPosition
+    // Pinned apps (desktop entry ids), in order
+    property alias dockApps: adapter.dockApps
+
+    // Drawer: favorite apps (desktop entry ids) and folders (paths)
+    property alias favApps: adapter.favApps
+    property alias favFolders: adapter.favFolders
+
+    readonly property string drawerSide: dockPosition === "left" ? "right" : "left"
+
+    // ---------- Helpers for the lists ----------
+    function isPinned(id) { return dockApps.indexOf(id) !== -1 }
+    function pin(id) { if (id && !isPinned(id)) dockApps = [...dockApps, id] }
+    function unpin(id) { dockApps = dockApps.filter(a => a !== id) }
+    function togglePin(id) { isPinned(id) ? unpin(id) : pin(id) }
+    // Move a pinned app one step: dir -1 = left/up, 1 = right/down
+    function movePinned(id, dir) {
+        const list = [...dockApps]
+        const i = list.indexOf(id)
+        const j = i + dir
+        if (i < 0 || j < 0 || j >= list.length) return
+        list[i] = list[j]
+        list[j] = id
+        dockApps = list
+    }
+
+    function isFavorite(id) { return favApps.indexOf(id) !== -1 }
+    function addFavorite(id) { if (id && !isFavorite(id)) favApps = [...favApps, id] }
+    function removeFavorite(id) { favApps = favApps.filter(a => a !== id) }
+
+    function addFolder(path) {
+        const p = decodeURIComponent(path.toString().replace(/^file:\/\//, "").replace(/\/$/, ""))
+        if (p && favFolders.indexOf(p) === -1) favFolders = [...favFolders, p]
+    }
+    function removeFolder(path) { favFolders = favFolders.filter(f => f !== path) }
 
     // Accent color from the wallpaper
     property alias accentFromWallpaper: adapter.accentFromWallpaper
@@ -56,6 +95,13 @@ Singleton {
             property string notchRight: "auto"
             property string timetableUrl: ""
             property int dockSize: 60
+            property bool drawerEnabled: true
+            property bool bootAnimation: true
+            property string frameViz: "glow"
+            property string dockPosition: "bottom"
+            property list<string> dockApps: ["firefox", "thunar", "kitty"]
+            property list<string> favApps: []
+            property list<string> favFolders: []
             property bool accentFromWallpaper: true
             property bool nightLight: false
             property int nightTemp: 4000
