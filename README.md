@@ -1,2 +1,57 @@
-# mac-hypt-rice
- Mac rice for Hyprland
+# mac-hypr-rice
+
+A macOS-inspired desktop for Hyprland, built with Quickshell. Black frame, a notch with a face,
+and everything grows out of the bar.
+
+![Control Center](screenshots/control-center.png)
+
+<p>
+  <img src="screenshots/desktop.png" width="49%">
+  <img src="screenshots/Screenshot_2026-10-03_15-42-37.png" width="49%">
+</p>
+
+## Features
+- **Notch** with a face that reacts (sleepy at night, happy when charging, surprised on screenshots), music, file tray, notifications, timetable and buses
+- **Dynamic Island** style volume and brightness, next class countdown
+- **Control Center** that grows out of the frame: Wi-Fi, Bluetooth, modes, sliders, battery and power profiles, screen recording
+- **Modes**: Do Not Disturb, Focus and Game Mode
+- **Bar sheets**: calendar, weather (MET Norway) and per-app sound
+- **Launcher**, Alt+Tab switcher and Mission Control
+- **Lock screen** and **SDDM login** that match the shell
+- **Accent color** taken from the wallpaper
+- Wallpaper picker with slideshow, hot corners, Settings app
+
+## Requirements
+- Arch Linux based distribution
+- Hyprland 0.56+ (Lua config)
+- Quickshell 0.3+
+- The installer handles the rest!
+
+## Install
+```
+git clone https://github.com/turbogoomba/mac-hypr-rice ~/Documents/GitHub/mac-hypr-rice
+cd ~/Documents/GitHub/mac-hypr-rice
+./install.sh
+```
+Log out and back in when it is done.
+
+## Keybinds
+| Keys | Action |
+|---|---|
+| Super + Space | Launcher |
+| Super + Tab | Mission Control |
+| Alt + Tab | Switch windows |
+| Super + W | Wallpaper picker |
+| Super + T | Tiling / floating |
+| Super + Escape | Lock |
+| Print | Screenshot |
+| Super + Shift + R | Screen recording |
+
+## Structure
+```
+hypr/        Hyprland config (Lua)
+quickshell/  The shell: bar, notch, dock, control center, services
+sddm/        Login screen theme
+apps/        Firefox, Spotify and Vesktop themes
+systemd/     Quickshell service
+```
