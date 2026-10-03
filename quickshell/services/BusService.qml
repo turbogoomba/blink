@@ -48,10 +48,10 @@ Singleton {
         xhr.send(JSON.stringify({ query: q }))
     }
 
-    // Hent nye avganger hvert minutt
+    // Hent nye avganger hvert minutt (bare på maskiner som viser busser, ikke timeplan)
     Timer {
         interval: 60000
-        running: true
+        running: !TimetableService.enabled
         repeat: true
         triggeredOnStart: true
         onTriggered: root.refresh()
@@ -60,7 +60,7 @@ Singleton {
     // Oppdater "om X min" oftere
     Timer {
         interval: 15000
-        running: true
+        running: !TimetableService.enabled
         repeat: true
         onTriggered: root.now = new Date()
     }

@@ -11,7 +11,6 @@ Singleton {
     readonly property bool gameMode: mode === "game"
     property bool settingsOpen: false
     property bool launcherOpen: false
-    property bool locked: false
     property bool calendarOpen: false
     property bool weatherOpen: false
     property real weatherAnchorX: 0

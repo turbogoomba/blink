@@ -131,8 +131,34 @@ Singleton {
         onExited: root.refreshStatus()
     }
 
+    // React when NetworkManager reports a change, instead of asking every 5 seconds
+    Process {
+        id: monitor
+        running: true
+        command: ["sh", "-c", "LC_ALL=C exec nmcli monitor"]
+        stdout: SplitParser {
+            onRead: line => changed.restart()
+        }
+        // NetworkManager restarted: start listening again
+        onExited: restartMonitor.start()
+    }
+
+    // Several events come at once: refresh once after they settle
     Timer {
+        id: changed
+        interval: 400
+        onTriggered: root.refreshStatus()
+    }
+
+    Timer {
+        id: restartMonitor
         interval: 5000
+        onTriggered: monitor.running = true
+    }
+
+    // Signal strength changes without events: refresh often while a panel shows it, rarely otherwise
+    Timer {
+        interval: ShellState.controlCenterOpen || ShellState.settingsOpen ? 5000 : 60000
         running: true
         repeat: true
         onTriggered: root.refreshStatus()

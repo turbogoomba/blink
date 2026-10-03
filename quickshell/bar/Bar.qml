@@ -25,7 +25,6 @@ PanelWindow {
     }
     readonly property bool charging: !UPower.onBattery
 
-    function iconFile(name) { return Qt.resolvedUrl("../icons/" + name + ".svg") }
 
     mask: Region {
         item: barRect

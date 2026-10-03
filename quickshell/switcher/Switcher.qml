@@ -15,6 +15,9 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     color: "transparent"
 
+    // Open on the monitor you are using (matters with two screens)
+    screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0]
+
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "switcher"
     WlrLayershell.keyboardFocus: open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
