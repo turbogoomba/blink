@@ -38,7 +38,7 @@ hl.animation({ leaf = "windowsIn",   enabled = true, speed = 1.8, bezier = "macP
 hl.animation({ leaf = "windowsOut",  enabled = true, speed = 1.2,   bezier = "macIn",  style = "popin 92%" })
 hl.animation({ leaf = "windowsMove", enabled = true, speed = 1.8, bezier = "macOut" })
 hl.animation({ leaf = "fade",        enabled = true, speed = 1.5, bezier = "macOut" })
-hl.animation({ leaf = "workspaces",  enabled = true, speed = 2.5,   bezier = "macOut", style = "slide" })
+hl.animation({ leaf = "workspaces",  enabled = true, speed = 1.6,   bezier = "macOut", style = "slide" })
 hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 2.5, bezier = "macOut", style = "slidevert" })
 hl.animation({ leaf = "layers",      enabled = false })
 
