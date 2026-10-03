@@ -559,7 +559,7 @@ Flickable {
                     divider: false
                     Toggle {
                         checked: ShellState.doNotDisturb
-                        apply: function(v) { ShellState.doNotDisturb = v }
+                        apply: function(v) { ShellState.mode = v ? "dnd" : "" }
                     }
                 }
             }

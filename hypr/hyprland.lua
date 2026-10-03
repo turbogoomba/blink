@@ -8,12 +8,11 @@ local hyprDir = home .. "/.config/hypr/"
 ---- MILJØ ----
 hl.env("XDG_DATA_DIRS", "/var/lib/flatpak/exports/share:" .. home .. "/.local/share/flatpak/exports/share:/usr/local/share:/usr/share")
 hl.env("QS_ICON_THEME", "Papirus-Dark")
-hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
 
 ---- AUTOSTART ----
 hl.on("hyprland.start", function()
     hl.exec_cmd("sh -c 'dbus-update-activation-environment --systemd --all; systemctl --user start quickshell.service hypridle.service'")
-    hl.exec_cmd("qs -p " .. home .. "/Documents/GitHub/mac-hypr-rice/quickshell")
+    hl.exec_cmd("awww-daemon")
 end)
 
 ---- INPUT (felles) ----

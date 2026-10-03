@@ -223,11 +223,15 @@ PanelWindow {
 
             // Vær
             BarItem {
+                id: weatherItem
                 visible: WeatherService.ready
                 anchors.verticalCenter: parent.verticalCenter
                 iconSource: Quickshell.iconPath(WeatherService.icon, "weather-overcast")
                 text: Math.round(WeatherService.temperature) + "°"
-                onClicked: Quickshell.execDetached(["xdg-open", "https://www.yr.no/nb/v%C3%A6rvarsel/daglig-tabell/1-72837/Norge/Oslo/Oslo/Oslo"])
+                onClicked: {
+                    ShellState.weatherAnchorX = weatherItem.mapToItem(null, weatherItem.width / 2, 0).x
+                    ShellState.weatherOpen = !ShellState.weatherOpen
+                }
             }
 
             // CPU
@@ -313,6 +317,7 @@ PanelWindow {
 
                             readonly property color fillColor:
                                   bar.charging ? "#30d158"
+                                : PowerProfiles.profile === PowerProfile.PowerSaver ? "#ff9f0a"
                                 : bar.batteryLevel < 0.2 ? "#ff453a"
                                 : Tokens.textPrimary
 

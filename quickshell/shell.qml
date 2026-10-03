@@ -17,6 +17,7 @@ ShellRoot {
     Component.onCompleted: {
         console.log("Shell started")
         console.log("accent color:", Theme.Tokens.accent)
+        ModeService.modes   // start the mode watcher
     }
 
     // Bar på hver skjerm
@@ -33,6 +34,7 @@ ShellRoot {
     BarUI.HotCorners {}
     BarUI.Osd {}
     BarUI.Calendar {}
+    BarUI.Weather {}
     LockUI.Lock {}
 
     // Dock på hver skjerm

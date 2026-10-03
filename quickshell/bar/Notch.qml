@@ -423,6 +423,22 @@ Rectangle {
             Component.onCompleted: requestPaint()
         }
 
+        // Active mode (moon / gamepad) to the left of the face
+        Image {
+            anchors.right: eyes.left
+            anchors.rightMargin: 9
+            anchors.verticalCenter: eyes.verticalCenter
+            width: 12
+            height: 12
+            sourceSize: Qt.size(24, 24)
+            source: ShellState.mode !== ""
+                ? Quickshell.iconPath(ModeService.info(ShellState.mode)?.icon ?? "", "notifications-disabled-symbolic") : ""
+            opacity: ShellState.mode !== "" ? 0.75 : 0
+            scale: ShellState.mode !== "" ? 1 : 0.3
+            Behavior on opacity { NumberAnimation { duration: 150 } }
+            Behavior on scale { NumberAnimation { duration: 260; easing.type: Easing.OutBack } }
+        }
+
         // Small "o" mouth when surprised
         Rectangle {
             anchors.horizontalCenter: eyes.horizontalCenter

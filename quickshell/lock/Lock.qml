@@ -429,6 +429,7 @@ Scope {
                                     width: (parent.width - 5) * (UPower.displayDevice?.percentage ?? 0)
                                     radius: 1
                                     color: !UPower.onBattery ? "#30d158"
+                                        : PowerProfiles.profile === PowerProfile.PowerSaver ? "#ff9f0a"
                                         : (UPower.displayDevice?.percentage ?? 1) < 0.2 ? "#ff453a" : "#e5e5e7"
                                 }
                             }

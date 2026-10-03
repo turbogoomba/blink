@@ -38,6 +38,7 @@ PanelWindow {
             StyleService.refresh()
             NetworkService.refreshStatus()
             armed = ""
+            modesOpen = false
             panel.forceActiveFocus()
         }
     }
@@ -90,6 +91,9 @@ PanelWindow {
 
     // ---------- Strøm ----------
     property string armed: ""
+
+    // The Modes tile unfolds a list (Do Not Disturb, Focus, Game Mode)
+    property bool modesOpen: false
     Timer {
         id: armTimer
         interval: 3000
@@ -570,12 +574,13 @@ PanelWindow {
                         ToggleRow {
                             anchors.fill: parent
                             anchors.margins: 2
-                            icon: "notifications-disabled-symbolic"
+                            readonly property var current: ModeService.info(ShellState.mode)
+                            icon: current?.icon ?? "notifications-disabled-symbolic"
                             fallback: "notification-disabled"
-                            title: "Focus"
-                            subtitle: ShellState.doNotDisturb ? "On" : "Off"
-                            active: ShellState.doNotDisturb
-                            onClicked: ShellState.doNotDisturb = !ShellState.doNotDisturb
+                            title: current?.label ?? "Modes"
+                            subtitle: current ? "On" : cc.modesOpen ? "Choose a mode" : "Off"
+                            active: current !== null
+                            onClicked: cc.modesOpen = !cc.modesOpen
                         }
                     }
 
@@ -610,6 +615,107 @@ PanelWindow {
                             subtitle: NightLightService.enabled ? NightLightService.temperature + " K" : "Off"
                             active: NightLightService.enabled
                             onClicked: NightLightService.toggle()
+                        }
+                    }
+                }
+            }
+
+            // ---------- Modes (unfolds from the Modes tile) ----------
+            Card {
+                id: modesCard
+                order: 1
+                Layout.fillWidth: true
+                implicitHeight: cc.modesOpen ? modesCol.implicitHeight + 12 : 0
+                visible: implicitHeight > 0.5
+                clip: true
+                Behavior on implicitHeight { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
+
+                Column {
+                    id: modesCol
+                    x: 6
+                    y: 6
+                    width: parent.width - 12
+                    spacing: 2
+                    opacity: cc.modesOpen ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: 200 } }
+
+                    Repeater {
+                        model: ModeService.modes
+
+                        delegate: Item {
+                            id: mrow
+                            required property var modelData
+                            readonly property bool on: ShellState.mode === modelData.id
+
+                            width: modesCol.width
+                            height: 48
+                            scale: mrowMouse.pressed ? 0.97 : 1
+                            Behavior on scale { NumberAnimation { duration: 160; easing.type: Easing.OutBack } }
+
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 10
+                                color: Qt.rgba(1, 1, 1, 0.06)
+                                opacity: mrowMouse.containsMouse ? 1 : 0
+                                Behavior on opacity { NumberAnimation { duration: 120 } }
+                            }
+
+                            IconCircle {
+                                id: mIcon
+                                anchors.left: parent.left
+                                anchors.leftMargin: 8
+                                anchors.verticalCenter: parent.verticalCenter
+                                icon: mrow.modelData.icon
+                                active: mrow.on
+                            }
+
+                            Column {
+                                anchors.left: mIcon.right
+                                anchors.leftMargin: 10
+                                anchors.right: mCheck.left
+                                anchors.rightMargin: 8
+                                anchors.verticalCenter: parent.verticalCenter
+
+                                Text {
+                                    width: parent.width
+                                    text: mrow.modelData.label
+                                    color: Tokens.textPrimary
+                                    font.family: Tokens.fontFamily
+                                    font.pixelSize: 13
+                                    font.weight: Font.DemiBold
+                                    elide: Text.ElideRight
+                                }
+                                Text {
+                                    width: parent.width
+                                    text: mrow.modelData.hint
+                                    color: Tokens.textSecondary
+                                    font.family: Tokens.fontFamily
+                                    font.pixelSize: 11
+                                    elide: Text.ElideRight
+                                }
+                            }
+
+                            Text {
+                                id: mCheck
+                                anchors.right: parent.right
+                                anchors.rightMargin: 12
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "✓"
+                                color: Tokens.accent
+                                font.pixelSize: 15
+                                font.weight: Font.Bold
+                                opacity: mrow.on ? 1 : 0
+                                scale: mrow.on ? 1 : 0.4
+                                Behavior on opacity { NumberAnimation { duration: 150 } }
+                                Behavior on scale { NumberAnimation { duration: 220; easing.type: Easing.OutBack } }
+                            }
+
+                            MouseArea {
+                                id: mrowMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onClicked: ModeService.toggle(mrow.modelData.id)
+                            }
                         }
                     }
                 }
@@ -665,6 +771,7 @@ PanelWindow {
 
                     readonly property color fillColor:
                           cc.charging ? "#30d158"
+                        : PowerProfiles.profile === PowerProfile.PowerSaver ? "#ff9f0a"
                         : cc.batteryLevel < 0.2 ? "#ff453a"
                         : Tokens.textPrimary
 

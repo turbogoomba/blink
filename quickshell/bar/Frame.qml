@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import "../theme"
+import "../services"
 
 Scope {
     id: frame
@@ -11,8 +12,9 @@ Scope {
     property int radius: 14
     property color color: Tokens.barBg
 
+    // Game Mode hides the frame so games get the whole screen
     Variants {
-        model: Quickshell.screens
+        model: ShellState.gameMode ? [] : Quickshell.screens
 
         Scope {
             id: s

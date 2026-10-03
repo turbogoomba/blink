@@ -32,7 +32,7 @@ Scope {
         required property var modelData
         property bool right: false
         property string action: "none"
-        readonly property bool active: SettingsService.hotCornersEnabled && action !== "none"
+        readonly property bool active: SettingsService.hotCornersEnabled && action !== "none" && !ShellState.focusMode
 
         screen: modelData
         visible: active

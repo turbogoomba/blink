@@ -11,6 +11,7 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     implicitHeight: 360
     color: "transparent"
+    visible: !ShellState.focusMode
 
     // Venstre side: festede apper
     property list<string> apps: ["firefox"]
