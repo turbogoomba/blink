@@ -47,8 +47,40 @@ PanelWindow {
             else if (generic.includes(q) || keywords.includes(q)) score = 1
             if (score >= 0) scored.push({ entry: e, score: score })
         }
+
+        // Firefox bookmarks (just below apps with the same kind of match)
+        for (const b of BookmarkService.items) {
+            const title = b.title.toLowerCase()
+            let score = -1
+            if (title.startsWith(q)) score = 2.5
+            else if (title.includes(q)) score = 1.5
+            else if (b.url.toLowerCase().includes(q)) score = 0.5
+            if (score >= 0) scored.push({ entry: webItem(b.title, b.host, b.url), score: score })
+        }
+
         scored.sort((a, b) => b.score - a.score || a.entry.name.localeCompare(b.entry.name))
-        return scored.slice(0, 8).map(s => s.entry)
+        const list = scored.slice(0, 8).map(s => s.entry)
+
+        // Typed an address? Offer to open it directly
+        if (/^[^\s]+\.[a-z]{2,}(\/\S*)?$/i.test(q) && !list.some(e => e.url && e.host === q.replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0])) {
+            const raw = search.text.trim()
+            const url = /^https?:\/\//i.test(raw) ? raw : "https://" + raw
+            list.unshift(webItem("Open " + raw, "Website", url))
+        }
+        return list
+    }
+
+    // A website result that looks like an app entry to the rest of the launcher
+    function webItem(title, subtitle, url) {
+        return {
+            name: title,
+            genericName: subtitle,
+            icon: "firefox",
+            id: "",
+            url: url,
+            host: url.replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0],
+            execute: () => Qt.openUrlExternally(url)
+        }
     }
     onResultsChanged: {
         selected = 0
@@ -79,6 +111,7 @@ PanelWindow {
         target: ShellState
         function onLauncherOpenChanged() {
             if (ShellState.launcherOpen) {
+                BookmarkService.refresh()
                 search.text = ""
                 launcher.selected = 0
                 search.forceActiveFocus()
@@ -368,10 +401,12 @@ PanelWindow {
                 onTriggered: launcher.launch(launcher.menuEntry)
             }
             MenuRow {
+                visible: menu.entryId !== ""
                 label: SettingsService.isPinned(menu.entryId) ? "Unpin from Dock" : "Pin to Dock"
                 onTriggered: SettingsService.togglePin(menu.entryId)
             }
             MenuRow {
+                visible: menu.entryId !== ""
                 label: SettingsService.isFavorite(menu.entryId) ? "Remove from Favorites" : "Add to Favorites"
                 onTriggered: SettingsService.isFavorite(menu.entryId)
                     ? SettingsService.removeFavorite(menu.entryId)
