@@ -1,9 +1,14 @@
 # Blink
 
-Still work in progress and a hobby project!!!
+Still work in progress hobby project!!!
 
 A macOS-inspired desktop for Hyprland, built with Quickshell. Black frame, a notch with a face,
 and everything grows out of the bar.
+
+## Showcase
+[![Blink showcase: click to watch](screenshots/showcase.jpg)](screenshots/showcase.mp4)
+
+*Click the picture to watch the video (1:12).*
 
 ![Control Center](screenshots/control-center.png)
 
@@ -22,7 +27,9 @@ and everything grows out of the bar.
 - **Launcher**, Alt+Tab switcher and Mission Control
 - **Lock screen** and **SDDM login** that match the shell
 - **Accent color** taken from the wallpaper
-- Wallpaper picker with slideshow, hot corners, Settings app
+- **Notifications** in the notch, or as cards that grow out of a corner of the frame (expand, swipe away, reply)
+- **Settings app** with search, a deep Hyprland page, and Wi-Fi that also handles Eduroam-style logins
+- Screen recording (whole screen or an area), wallpaper picker with slideshow, hot corners
 
 ## Requirements
 - Arch Linux based distribution
