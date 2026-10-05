@@ -134,9 +134,9 @@ PanelWindow {
         radius: 13
         color: on ? Tokens.accent
              : sbMouse.containsMouse ? Tokens.fillHover : Qt.rgba(1, 1, 1, 0.08)
-        scale: sbMouse.pressed ? 0.94 : 1
+        scale: sbMouse.pressed ? Tokens.pressScale : 1
         Behavior on color { ColorAnimation { duration: Tokens.durFast } }
-        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeGrow } }
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
         Text {
             id: sbText
             anchors.centerIn: parent
@@ -147,6 +147,7 @@ PanelWindow {
         }
         MouseArea {
             id: sbMouse
+            cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             hoverEnabled: true
             onClicked: sb.clicked()
@@ -216,8 +217,8 @@ PanelWindow {
         signal clicked()
 
         implicitHeight: 44
-        scale: trMouse.pressed ? 0.96 : 1
-        Behavior on scale { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
+        scale: trMouse.pressed ? Tokens.pressScale : 1
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
         Rectangle {
             anchors.fill: parent
@@ -266,6 +267,7 @@ PanelWindow {
 
         MouseArea {
             id: trMouse
+            cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             hoverEnabled: true
             onClicked: tr.clicked()
@@ -309,11 +311,13 @@ PanelWindow {
             height: 18
             sourceSize: Qt.size(36, 36)
             source: Quickshell.iconPath(sc.icon)
-            scale: iconMouse.pressed ? 0.85 : 1
-            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeGrow } }
+            scale: iconMouse.pressed ? Tokens.pressScaleIcon : 1
+            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
             MouseArea {
                 id: iconMouse
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
                 anchors.fill: parent
                 anchors.margins: -6
                 onClicked: sc.iconClicked()
@@ -365,7 +369,7 @@ PanelWindow {
                 opacity: sc.active ? 1 : 0
                 scale: scMouse.pressed ? 1.15 : sc.active ? 1 : 0.4
                 Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
-                Behavior on scale { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
+                Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
             }
 
             MouseArea {
@@ -399,6 +403,8 @@ PanelWindow {
     // Strømknapp: gir etter ved trykk, pulserer mens den venter på bekreftelse
     component PowerButton: Item {
         id: pb
+        scale: pbMouse.pressed ? Tokens.pressScale : 1
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
         property string powerId: ""
         property string icon: ""
         property string label: ""
@@ -421,7 +427,7 @@ PanelWindow {
                  : Tokens.fillHover
             scale: pbMouse.pressed ? 0.88 : 1
             Behavior on color { ColorAnimation { duration: Tokens.durFast } }
-            Behavior on scale { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
+            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
             SequentialAnimation {
                 running: pb.isArmed
@@ -453,6 +459,7 @@ PanelWindow {
 
         MouseArea {
             id: pbMouse
+            cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             hoverEnabled: true
             onClicked: cc.power(pb.powerId, pb.command, pb.confirm)
@@ -683,8 +690,8 @@ PanelWindow {
 
                             width: modesCol.width
                             height: 48
-                            scale: mrowMouse.pressed ? 0.97 : 1
-                            Behavior on scale { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
+                            scale: mrowMouse.pressed ? Tokens.pressScale : 1
+                            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
                             Rectangle {
                                 anchors.fill: parent
@@ -746,6 +753,7 @@ PanelWindow {
 
                             MouseArea {
                                 id: mrowMouse
+                                cursorShape: Qt.PointingHandCursor
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 onClicked: ModeService.toggle(mrow.modelData.id)
@@ -978,9 +986,9 @@ PanelWindow {
                             opacity: usable ? 1 : 0.4
                             color: selected ? Tokens.accent
                                  : profMouse.containsMouse ? Tokens.fillHover : Qt.rgba(1, 1, 1, 0.06)
-                            scale: profMouse.pressed ? 0.95 : 1
+                            scale: profMouse.pressed ? Tokens.pressScale : 1
                             Behavior on color { ColorAnimation { duration: Tokens.durFast } }
-                            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeGrow } }
+                            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
                             Text {
                                 anchors.centerIn: parent
@@ -993,6 +1001,7 @@ PanelWindow {
 
                             MouseArea {
                                 id: profMouse
+                                cursorShape: Qt.PointingHandCursor
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 enabled: prof.usable

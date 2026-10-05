@@ -272,6 +272,8 @@ PanelWindow {
 
                     Rectangle {
                         id: resultRow
+                        scale: resultRowMouse.pressed ? Tokens.pressScale : 1
+                        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                         required property var modelData
                         required property int index
                         readonly property bool isSelected: index === launcher.selected
@@ -279,7 +281,7 @@ PanelWindow {
                         width: parent.width - 12
                         height: 44
                         radius: Tokens.radiusMd
-                        color: isSelected ? Tokens.accent : "transparent"
+                        color: isSelected ? Tokens.accent : (resultRowMouse.containsMouse ? Tokens.fillHover : "transparent")
 
                         Image {
                             id: appIcon
@@ -321,6 +323,8 @@ PanelWindow {
                         }
 
                         MouseArea {
+                            id: resultRowMouse
+                            cursorShape: Qt.PointingHandCursor
                             anchors.fill: parent
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -344,6 +348,8 @@ PanelWindow {
     // ---------- Right-click menu ----------
     component MenuRow: Rectangle {
         id: row
+        scale: rowMouse.pressed ? Tokens.pressScale : 1
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
         property string label: ""
         signal triggered()
         width: parent.width
@@ -361,6 +367,7 @@ PanelWindow {
         }
         MouseArea {
             id: rowMouse
+            cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {

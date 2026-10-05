@@ -129,9 +129,9 @@ PanelWindow {
             width: vr.small ? 26 : 30
             height: width
             radius: width / 2
-            color: vr.muted ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.14)
-            scale: muteMouse.pressed ? 0.9 : 1
-            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeGrow } }
+            color: vr.muted ? Qt.rgba(1, 1, 1, 0.08) : Tokens.fillHover
+            scale: muteMouse.pressed ? Tokens.pressScale : 1
+            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
             Image {
                 anchors.centerIn: parent
@@ -145,6 +145,8 @@ PanelWindow {
 
             MouseArea {
                 id: muteMouse
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
                 anchors.fill: parent
                 onClicked: if (vr.audio) vr.audio.muted = !vr.audio.muted
             }
@@ -187,7 +189,7 @@ PanelWindow {
                 opacity: dragArea.containsMouse || dragArea.pressed ? 1 : 0
                 scale: dragArea.pressed ? 1.15 : 1
                 Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
-                Behavior on scale { NumberAnimation { duration: Tokens.durFast } }
+                Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
             }
 
             MouseArea {
@@ -284,6 +286,8 @@ PanelWindow {
 
                     // Output device (click to switch when there are several)
                     Rectangle {
+                        scale: devMouse.pressed ? Tokens.pressScale : 1
+                        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                         width: parent.width
                         height: 30
                         radius: Tokens.radiusMd
@@ -327,6 +331,7 @@ PanelWindow {
 
                         MouseArea {
                             id: devMouse
+                            cursorShape: Qt.PointingHandCursor
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: snd.nextOutput()

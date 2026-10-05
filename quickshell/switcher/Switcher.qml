@@ -137,6 +137,8 @@ PanelWindow {
 
                 Item {
                     id: tile
+                    scale: tileMouse.pressed ? Tokens.pressScale : 1
+                    Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                     required property var modelData
                     required property int index
                     readonly property bool isSelected: index === sw.selected
@@ -164,6 +166,8 @@ PanelWindow {
                     }
 
                     MouseArea {
+                        id: tileMouse
+                        cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         hoverEnabled: true
                         onEntered: sw.selected = tile.index

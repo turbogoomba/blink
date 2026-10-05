@@ -50,6 +50,8 @@ FloatingWindow {
 
                 delegate: Rectangle {
                     id: item
+                    scale: itemMouse.pressed ? Theme.Tokens.pressScale : 1
+                    Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                     required property var modelData
                     readonly property bool selected: modelData.id === settingsWindow.activePanel
 
@@ -84,6 +86,7 @@ FloatingWindow {
 
                     MouseArea {
                         id: itemMouse
+                        cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         hoverEnabled: true
                         onClicked: settingsWindow.activePanel = item.modelData.id

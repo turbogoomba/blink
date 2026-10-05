@@ -113,6 +113,8 @@ Flickable {
     // Mac-style switch
     component Toggle: Rectangle {
         id: sw
+        scale: swMouse.pressed ? Theme.Tokens.pressScale : 1
+        Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
         property bool checked: false
         property var apply: function(v) {}
 
@@ -133,6 +135,8 @@ Flickable {
         }
 
         MouseArea {
+            id: swMouse
+            hoverEnabled: true
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             onClicked: sw.apply(!sw.checked)
@@ -163,6 +167,8 @@ Flickable {
 
                 delegate: Rectangle {
                     id: opt
+                    scale: optMouse.pressed ? Theme.Tokens.pressScale : 1
+                    Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                     required property var modelData
                     readonly property bool selected: modelData.value === seg.current
 
@@ -234,7 +240,7 @@ Flickable {
                 anchors.verticalCenter: parent.verticalCenter
                 color: "white"
                 scale: drag.pressed ? 1.15 : 1
-                Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast } }
+                Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
             }
 
             MouseArea {
@@ -275,8 +281,8 @@ Flickable {
         height: 26
         radius: Theme.Tokens.radiusSm
         color: btnMouse.pressed ? Qt.darker(Theme.Tokens.accent, 1.2) : Theme.Tokens.accent
-        scale: btnMouse.pressed ? 0.96 : 1
-        Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast } }
+        scale: btnMouse.pressed ? Theme.Tokens.pressScale : 1
+        Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
 
         Text {
             id: btnText
@@ -290,6 +296,7 @@ Flickable {
 
         MouseArea {
             id: btnMouse
+            hoverEnabled: true
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             onClicked: btn.apply()

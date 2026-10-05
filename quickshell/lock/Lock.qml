@@ -238,8 +238,8 @@ Scope {
                                 height: 34
                                 radius: 17
                                 color: playMouse.containsMouse ? Tokens.fillStrong : Tokens.fillHover
-                                scale: playMouse.pressed ? 0.92 : 1
-                                Behavior on scale { NumberAnimation { duration: Tokens.durFast } }
+                                scale: playMouse.pressed ? Tokens.pressScale : 1
+                                Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
                                 Image {
                                     anchors.centerIn: parent
@@ -252,6 +252,7 @@ Scope {
 
                                 MouseArea {
                                     id: playMouse
+                                    cursorShape: Qt.PointingHandCursor
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     onClicked: root.player?.togglePlaying()
@@ -334,6 +335,8 @@ Scope {
 
                                 Rectangle {
                                     id: go
+                                    scale: goMouse.pressed ? Tokens.pressScaleIcon : 1
+                                    Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                                     anchors.right: parent.right
                                     anchors.rightMargin: 5
                                     anchors.verticalCenter: parent.verticalCenter
@@ -354,6 +357,8 @@ Scope {
 
                                     MouseArea {
                                         id: goMouse
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
                                         anchors.fill: parent
                                         onClicked: root.submit(input.text)
                                     }

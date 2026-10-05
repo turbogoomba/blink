@@ -208,6 +208,8 @@ Rectangle {
     // ---------- Små byggeklosser ----------
     component CtrlButton: Item {
         id: btn
+        scale: btnMouse.pressed ? Tokens.pressScaleIcon : 1
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
         property string icon: ""
         property int size: 20
         signal clicked()
@@ -225,6 +227,8 @@ Rectangle {
 
         MouseArea {
             id: btnMouse
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             onClicked: btn.clicked()
         }
@@ -232,6 +236,8 @@ Rectangle {
 
     component TabButton: Rectangle {
         id: tb
+        scale: tbMouse.pressed ? Tokens.pressScale : 1
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
         property string tabId: ""
         property string label: ""
         property int badge: 0
@@ -280,6 +286,7 @@ Rectangle {
 
         MouseArea {
             id: tbMouse
+            cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             hoverEnabled: true
             onClicked: notch.tab = tb.tabId
@@ -288,6 +295,8 @@ Rectangle {
 
     component FileTile: Item {
         id: tile
+        scale: tileMouse.pressed ? Tokens.pressScale : 1
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
         required property string modelData
         width: 64
         height: 76
@@ -343,6 +352,8 @@ Rectangle {
 
         MouseArea {
             id: tileMouse
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             drag.target: dragProxy
@@ -1362,6 +1373,8 @@ Rectangle {
                 }
 
                 Text {
+                    scale: clearMouse.pressed ? Tokens.pressScale : 1
+                    Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                     anchors.right: parent.right
                     anchors.rightMargin: 10
                     anchors.top: parent.top
@@ -1374,6 +1387,7 @@ Rectangle {
 
                     MouseArea {
                         id: clearMouse
+                        cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         anchors.margins: -4
                         hoverEnabled: true
@@ -1399,6 +1413,8 @@ Rectangle {
             }
 
             Text {
+                scale: clearAllMouse.pressed ? Tokens.pressScale : 1
+                Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                 visible: NotificationService.history.length > 0
                 anchors.right: parent.right
                 anchors.top: parent.top
@@ -1409,6 +1425,7 @@ Rectangle {
 
                 MouseArea {
                     id: clearAllMouse
+                    cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
                     anchors.margins: -4
                     hoverEnabled: true
@@ -1426,6 +1443,8 @@ Rectangle {
 
                 delegate: Rectangle {
                     id: entry
+                    scale: entryMouse.pressed ? Tokens.pressScale : 1
+                    Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                     required property var modelData
                     required property int index
 
@@ -1487,6 +1506,7 @@ Rectangle {
 
                     MouseArea {
                         id: entryMouse
+                        cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         hoverEnabled: true
                         onClicked: NotificationService.removeAt(entry.index)

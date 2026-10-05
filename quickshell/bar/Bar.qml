@@ -39,6 +39,8 @@ PanelWindow {
     // Lite element: ikon + tekst, klikkbart
     component BarItem: Item {
         id: bi
+        scale: biMouse.pressed ? Tokens.pressScale : 1
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
         property url iconSource: ""
         property string text: ""
         property color textColor: Tokens.textPrimary
@@ -72,6 +74,7 @@ PanelWindow {
 
         MouseArea {
             id: biMouse
+            cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             anchors.margins: -6
             hoverEnabled: true
@@ -82,6 +85,8 @@ PanelWindow {
     // Hollow ring that fills up with the usage. Orange over 70 %, red over 85 %.
     component RingStat: Item {
         id: rs
+        scale: rsMouse.pressed ? Tokens.pressScale : 1
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
         property string label: ""
         property real value: 0
         property color baseColor: Tokens.accent
@@ -158,6 +163,7 @@ PanelWindow {
 
         MouseArea {
             id: rsMouse
+            cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             anchors.margins: -6
             hoverEnabled: true
@@ -278,6 +284,8 @@ PanelWindow {
 
                         delegate: Rectangle {
                             id: ws
+                            scale: wsMouse.pressed ? Tokens.pressScale : 1
+                            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                             required property var modelData
 
                             anchors.verticalCenter: parent.verticalCenter
@@ -289,6 +297,7 @@ PanelWindow {
 
                             MouseArea {
                                 id: wsMouse
+                                cursorShape: Qt.PointingHandCursor
                                 anchors.fill: parent
                                 anchors.margins: -5
                                 hoverEnabled: true
@@ -379,6 +388,8 @@ PanelWindow {
             // Lyd: ikonet viser volumet, klikk åpner lydmenyen
             Item {
                 id: soundItem
+                scale: soundMouse.pressed ? Tokens.pressScale : 1
+                Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                 anchors.verticalCenter: parent.verticalCenter
                 implicitWidth: 16
                 implicitHeight: 16
@@ -404,6 +415,7 @@ PanelWindow {
 
                 MouseArea {
                     id: soundMouse
+                    cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
                     anchors.margins: -6
                     hoverEnabled: true

@@ -137,6 +137,8 @@ Column {
 
     component Tile: Item {
         id: tile
+        scale: tileMouse.pressed ? Tokens.pressScale : 1
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
         property string icon: ""
         property string label: ""
         property bool dashed: false
@@ -156,7 +158,7 @@ Column {
             border.width: tile.dashed ? 1.5 : 0
             border.color: Tokens.border
             scale: tileMouse.pressed ? 0.92 : 1
-            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeGrow } }
+            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
             Image {
                 anchors.centerIn: parent
@@ -189,6 +191,7 @@ Column {
 
         MouseArea {
             id: tileMouse
+            cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             hoverEnabled: true
             acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -343,11 +346,13 @@ Column {
 
             Rectangle {
                 id: folderRow
+                scale: folderMouse.pressed ? Tokens.pressScale : 1
+                Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                 required property string modelData
                 width: (content.width - 6) / 2
                 height: 34
                 radius: Tokens.radiusMd
-                color: folderMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : Tokens.fillIdle
+                color: folderMouse.containsMouse ? Tokens.fillHover : Tokens.fillIdle
 
                 Image {
                     id: folderIcon
@@ -373,6 +378,7 @@ Column {
                 }
                 MouseArea {
                     id: folderMouse
+                    cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
                     hoverEnabled: true
                     acceptedButtons: Qt.LeftButton | Qt.RightButton

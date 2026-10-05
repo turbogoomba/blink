@@ -50,6 +50,8 @@ Flickable {
 
                 delegate: Item {
                     id: dev
+                    scale: devMouse.pressed ? Theme.Tokens.pressScale : 1
+                    Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                     required property var modelData
                     required property int index
 
@@ -67,6 +69,7 @@ Flickable {
                     // Klikk: koble til/fra (paret) eller pare (ny)
                     MouseArea {
                         id: devMouse
+                        cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         hoverEnabled: true
                         enabled: !dev.modelData.pairing
@@ -122,6 +125,8 @@ Flickable {
                     // Høyre side: "Forget" for parede, "Connect" for nye
                     Text {
                         id: action
+                        scale: forgetMouse.pressed ? Theme.Tokens.pressScale : 1
+                        Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                         anchors.right: parent.right
                         anchors.rightMargin: 14
                         anchors.verticalCenter: parent.verticalCenter
@@ -134,6 +139,7 @@ Flickable {
 
                         MouseArea {
                             id: forgetMouse
+                            cursorShape: Qt.PointingHandCursor
                             anchors.fill: parent
                             anchors.margins: -4
                             hoverEnabled: true
@@ -193,6 +199,8 @@ Flickable {
 
             Rectangle {
                 id: toggle
+                scale: toggleMouse.pressed ? Theme.Tokens.pressScale : 1
+                Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                 readonly property bool on: panel.adapter?.enabled ?? false
                 anchors.right: parent.right
                 anchors.rightMargin: 14
@@ -214,6 +222,9 @@ Flickable {
                 }
 
                 MouseArea {
+                    id: toggleMouse
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
                     onClicked: {
                         if (!panel.adapter) return

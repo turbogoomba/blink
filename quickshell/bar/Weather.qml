@@ -348,6 +348,8 @@ PanelWindow {
                 }
 
                 Text {
+                    scale: yrMouse.pressed ? Tokens.pressScale : 1
+                    Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
                     text: "Open Yr ›"
@@ -357,6 +359,7 @@ PanelWindow {
 
                     MouseArea {
                         id: yrMouse
+                        cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         anchors.margins: -4
                         hoverEnabled: true

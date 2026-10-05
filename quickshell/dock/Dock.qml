@@ -326,6 +326,8 @@ PanelWindow {
 
     component MenuRow: Rectangle {
         id: mr
+        scale: mrMouse.pressed ? Tokens.pressScale : 1
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
         property string text: ""
         property bool danger: false
         signal activated()
@@ -346,6 +348,7 @@ PanelWindow {
 
         MouseArea {
             id: mrMouse
+            cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             hoverEnabled: true
             onClicked: mr.activated()

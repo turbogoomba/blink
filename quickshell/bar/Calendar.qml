@@ -142,6 +142,8 @@ PanelWindow {
 
     component NavButton: Rectangle {
         id: nb
+        scale: nbMouse.pressed ? Tokens.pressScaleIcon : 1
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
         property string glyph: ""
         signal clicked()
         width: 26
@@ -157,6 +159,7 @@ PanelWindow {
         }
         MouseArea {
             id: nbMouse
+            cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             hoverEnabled: true
             onClicked: nb.clicked()
@@ -219,6 +222,8 @@ PanelWindow {
 
                     NavButton { glyph: "‹"; onClicked: cal.shiftMonth(-1) }
                     Rectangle {
+                        scale: todayMouse.pressed ? Tokens.pressScale : 1
+                        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                         anchors.verticalCenter: parent.verticalCenter
                         width: todayText.implicitWidth + 16
                         height: 22
@@ -234,6 +239,7 @@ PanelWindow {
                         }
                         MouseArea {
                             id: todayMouse
+                            cursorShape: Qt.PointingHandCursor
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: {
@@ -315,6 +321,8 @@ PanelWindow {
 
                             Item {
                                 id: dayCell
+                                scale: dayMouse.pressed ? Tokens.pressScale : 1
+                                Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                                 required property var modelData
                                 width: 34
                                 height: 34
@@ -357,6 +365,7 @@ PanelWindow {
 
                                 MouseArea {
                                     id: dayMouse
+                                    cursorShape: Qt.PointingHandCursor
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     onClicked: dayCell.modelData.pick()

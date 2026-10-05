@@ -69,6 +69,8 @@ Flickable {
             // Bryter
             Rectangle {
                 id: toggle
+                scale: toggleMouse.pressed ? Theme.Tokens.pressScale : 1
+                Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                 anchors.right: parent.right
                 anchors.rightMargin: 14
                 anchors.verticalCenter: parent.verticalCenter
@@ -89,6 +91,9 @@ Flickable {
                 }
 
                 MouseArea {
+                    id: toggleMouse
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
                     onClicked: NetworkService.toggleWifi()
                 }
@@ -112,6 +117,8 @@ Flickable {
             }
 
             Text {
+                scale: refreshMouse.pressed ? Theme.Tokens.pressScale : 1
+                Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                 anchors.right: parent.right
                 anchors.rightMargin: 4
                 text: NetworkService.scanning ? "Scanning..." : "Refresh"
@@ -121,6 +128,7 @@ Flickable {
 
                 MouseArea {
                     id: refreshMouse
+                    cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
                     anchors.margins: -4
                     hoverEnabled: true
@@ -166,6 +174,8 @@ Flickable {
 
                         // Raden
                         Item {
+                            scale: rowMouse.pressed ? Theme.Tokens.pressScale : 1
+                            Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                             width: parent.width
                             height: 44
 
@@ -179,6 +189,7 @@ Flickable {
 
                             MouseArea {
                                 id: rowMouse
+                                cursorShape: Qt.PointingHandCursor
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 enabled: !net.isCurrent
@@ -282,6 +293,8 @@ Flickable {
 
                             Rectangle {
                                 id: joinBtn
+                                scale: joinBtnMouse.pressed ? Theme.Tokens.pressScale : 1
+                                Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                                 anchors.right: parent.right
                                 anchors.rightMargin: 14
                                 anchors.verticalCenter: parent.verticalCenter
@@ -300,6 +313,9 @@ Flickable {
                                 }
 
                                 MouseArea {
+                                    id: joinBtnMouse
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
                                     anchors.fill: parent
                                     onClicked: net.join()
                                 }

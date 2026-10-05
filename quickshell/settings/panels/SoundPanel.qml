@@ -38,6 +38,8 @@ Flickable {
 
         Image {
             id: muteIcon
+            scale: muteIconMouse.pressed ? Theme.Tokens.pressScaleIcon : 1
+            Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
             anchors.left: parent.left
             anchors.leftMargin: 14
             anchors.verticalCenter: parent.verticalCenter
@@ -47,6 +49,9 @@ Flickable {
             source: Quickshell.iconPath(vr.audio?.muted ? vr.mutedIcon : vr.icon)
 
             MouseArea {
+                id: muteIconMouse
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
                 anchors.fill: parent
                 anchors.margins: -6
                 onClicked: if (vr.audio) vr.audio.muted = !vr.audio.muted
@@ -137,6 +142,8 @@ Flickable {
 
                 delegate: Item {
                     id: dev
+                    scale: devMouse.pressed ? Theme.Tokens.pressScale : 1
+                    Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                     required property var modelData
                     required property int index
                     readonly property bool selected: modelData.id === dl.current?.id
@@ -154,6 +161,7 @@ Flickable {
 
                     MouseArea {
                         id: devMouse
+                        cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         hoverEnabled: true
                         onClicked: dl.picked(dev.modelData)

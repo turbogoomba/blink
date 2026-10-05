@@ -234,11 +234,13 @@ Flickable {
                         ]
 
                         delegate: Rectangle {
+                            scale: press252.pressed ? Theme.Tokens.pressScale : 1
+                            Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                             required property var modelData
                             width: (200 - 6) / 2
                             height: 24
                             radius: Theme.Tokens.radiusSm
-                            color: StyleService.mode === modelData.id ? Theme.Tokens.accent : "transparent"
+                            color: StyleService.mode === modelData.id ? Theme.Tokens.accent : (press252.containsMouse ? Theme.Tokens.fillHover : "transparent")
 
                             Text {
                                 anchors.centerIn: parent
@@ -250,6 +252,9 @@ Flickable {
                             }
 
                             MouseArea {
+                                id: press252
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
                                 anchors.fill: parent
                                 onClicked: if (StyleService.mode !== modelData.id) StyleService.toggle()
                             }
@@ -317,6 +322,8 @@ Flickable {
 
         // Tilbakestill
         Rectangle {
+            scale: resetMouse.pressed ? Theme.Tokens.pressScale : 1
+            Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
             width: resetText.implicitWidth + 28
             height: 30
             radius: Theme.Tokens.radiusSm
@@ -335,6 +342,7 @@ Flickable {
 
             MouseArea {
                 id: resetMouse
+                cursorShape: Qt.PointingHandCursor
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: panel.resetDefaults()

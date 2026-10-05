@@ -200,6 +200,8 @@ Scope {
 
                         delegate: Item {
                             id: thumb
+                            scale: thumbMouse.pressed ? Tokens.pressScale : 1
+                            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                             required property string modelData
                             required property int index
                             readonly property bool selected: index === root.index
@@ -250,6 +252,9 @@ Scope {
                             }
 
                             MouseArea {
+                                id: thumbMouse
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
                                 anchors.fill: parent
                                 onClicked: root.index = thumb.index
                                 onDoubleClicked: {
@@ -299,13 +304,15 @@ Scope {
                                         ]
 
                                         delegate: Rectangle {
+                                            scale: press320.pressed ? Tokens.pressScale : 1
+                                            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                                             required property var modelData
                                             readonly property bool on: WallpaperService.slideshowMinutes === modelData.minutes
 
                                             width: segText.implicitWidth + 18
                                             height: 22
                                             radius: Tokens.radiusSm
-                                            color: on ? Tokens.accent : "transparent"
+                                            color: on ? Tokens.accent : (press320.containsMouse ? Tokens.fillHover : "transparent")
 
                                             Text {
                                                 id: segText
@@ -318,6 +325,9 @@ Scope {
                                             }
 
                                             MouseArea {
+                                                id: press320
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
                                                 anchors.fill: parent
                                                 onClicked: WallpaperService.setSlideshow(modelData.minutes)
                                             }
@@ -328,6 +338,8 @@ Scope {
                         }
 
                         Rectangle {
+                            scale: setMouse.pressed ? Tokens.pressScale : 1
+                            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
                             width: setText.implicitWidth + 28
@@ -347,6 +359,7 @@ Scope {
 
                             MouseArea {
                                 id: setMouse
+                                cursorShape: Qt.PointingHandCursor
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 onClicked: root.choose()

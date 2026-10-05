@@ -128,6 +128,8 @@ Scope {
 
                     delegate: Rectangle {
                         id: pill
+                        scale: pillMouse.pressed ? Tokens.pressScale : 1
+                        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                         required property var modelData
                         readonly property bool active: modelData.id === win.activeWs?.id
                         readonly property bool dropHover: win.dragWindow !== null
@@ -174,6 +176,7 @@ Scope {
 
                         MouseArea {
                             id: pillMouse
+                            cursorShape: Qt.PointingHandCursor
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: Hyprland.dispatch(`hl.dsp.focus({ workspace = "${pill.modelData.id}" })`)
@@ -183,6 +186,8 @@ Scope {
 
                 // Ny arbeidsflate
                 Rectangle {
+                    scale: plusMouse.pressed ? Tokens.pressScale : 1
+                    Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                     width: 84
                     height: 84
                     radius: Tokens.radiusMd
@@ -201,6 +206,7 @@ Scope {
 
                     MouseArea {
                         id: plusMouse
+                        cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         hoverEnabled: true
                         onClicked: {
