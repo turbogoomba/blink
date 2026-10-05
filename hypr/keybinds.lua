@@ -14,6 +14,7 @@ hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("qs -c blink ipc call launcher toggle"))
 hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("loginctl lock-session"))
 hl.bind("Print", hl.dsp.exec_cmd(qs .. "screenshot region"))
+hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd(qs .. "record toggle"))  -- start/stop recording, also cancels area select
 hl.bind("F6", hl.dsp.exec_cmd(qs .. "screenshot region"))
 hl.bind("SHIFT + Print", hl.dsp.exec_cmd(qs .. "screenshot screen"))
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("hyprpicker -a"))

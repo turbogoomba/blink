@@ -24,27 +24,37 @@ Singleton {
         return m + ":" + (s < 10 ? "0" : "") + s
     }
 
+    // True while slurp waits for you to drag out an area. Not a recording yet.
+    readonly property bool selecting: picker.running
+
     // mode: "screen" (focused monitor) or "area" (drag to select)
     function start(mode) {
-        if (recording) return
+        if (recording || selecting) return
+        if (mode === "area") {
+            picker.running = true   // records once slurp gives back an area
+            return
+        }
+        launch('-o "$(hyprctl monitors -j | jq -r \'.[] | select(.focused) | .name\')"')
+    }
+
+    function launch(target) {
         file = dir + "/Recording_" + Qt.formatDateTime(new Date(), "yyyy-MM-dd_HH-mm-ss") + ".mp4"
         // Records what you hear (the speakers), not the microphone
         const audio = withAudio ? ' --audio="$(pactl get-default-sink).monitor"' : ""
         const out = ` -f "${file}"`
-        const target = mode === "area"
-            ? 'g=$(slurp) || exit 1; exec wf-recorder -g "$g"'
-            : 'exec wf-recorder -o "$(hyprctl monitors -j | jq -r \'.[] | select(.focused) | .name\')"'
-        proc.command = ["sh", "-c", `mkdir -p "${dir}"; ${target}${audio}${out}`]
+        proc.command = ["sh", "-c", `mkdir -p "${dir}"; exec wf-recorder ${target}${audio}${out}`]
         seconds = 0
         proc.running = true
     }
 
+    // Stop cancels the area selection too, so it can never get stuck
     function stop() {
-        if (recording) proc.signal(2)   // SIGINT
+        if (selecting) picker.signal(15)
+        else if (recording) proc.signal(2)   // SIGINT, so wf-recorder finishes the file
     }
 
     function toggle() {
-        if (recording) stop()
+        if (recording || selecting) stop()
         else start("screen")
     }
 
@@ -53,6 +63,23 @@ Singleton {
         ShelfService.add(["file://" + path])
         Quickshell.execDetached(["notify-send", "-a", "Screen Recording", "-i", "media-record",
             title, path.split("/").pop() + "  ·  in the notch tray"])
+    }
+
+    // Area picker. Esc in slurp cancels and nothing is recorded.
+    Process {
+        id: picker
+        // slurp reads preset boxes from stdin when it is not a terminal, and Quickshell keeps
+        // stdin open, so it would wait forever. An empty stdin makes it go straight to selecting.
+        command: ["sh", "-c", "exec slurp < /dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const g = text.trim()
+                if (/^\d+,\d+ \d+x\d+$/.test(g)) root.launch(`-g "${g}"`)
+            }
+        }
+        stderr: StdioCollector {
+            onStreamFinished: if (text.trim() !== "") console.warn("RecordService: slurp:", text.trim())
+        }
     }
 
     Process {
