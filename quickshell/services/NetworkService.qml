@@ -15,6 +15,10 @@ Singleton {
     property string ethernetName: ""
     property var networks: []
     property bool scanning: false
+    property var savedNames: []        // Wi-Fi profiles NetworkManager already knows
+    property string connectingSsid: "" // set while a connection attempt runs
+    property string errorSsid: ""      // last attempt that failed, and why
+    property string errorText: ""
 
     Component.onCompleted: refreshStatus()
 
@@ -27,9 +31,36 @@ Singleton {
         scanProc.running = true
     }
 
+    function isSaved(name) { return savedNames.indexOf(name) >= 0 }
+
+    // Open or password (WPA-PSK) networks. A saved network with no new password reuses its profile.
     function connectToNetwork(targetSsid, password) {
-        connectProc.ssidArg = targetSsid
-        connectProc.passwordArg = password
+        if (password.length === 0 && isSaved(targetSsid))
+            run(targetSsid, ["nmcli", "connection", "up", "id", targetSsid])
+        else if (password.length > 0)
+            run(targetSsid, ["nmcli", "device", "wifi", "connect", targetSsid, "password", password])
+        else
+            run(targetSsid, ["nmcli", "device", "wifi", "connect", targetSsid])
+    }
+
+    // Networks that ask for a username and password (WPA2-Enterprise, like Eduroam).
+    // PEAP with MSCHAPv2 is what Eduroam and most schools and offices use.
+    // An old profile with the same name is replaced, so new details always win.
+    function connectEnterprise(targetSsid, user, password) {
+        run(targetSsid, ["sh", "-c",
+            'nmcli connection delete id "$1" >/dev/null 2>&1; '
+            + 'nmcli connection add type wifi con-name "$1" ssid "$1" '
+            + 'wifi-sec.key-mgmt wpa-eap 802-1x.eap peap 802-1x.phase2-auth mschapv2 '
+            + '802-1x.identity "$2" 802-1x.password "$3" >/dev/null && nmcli connection up id "$1"',
+            "sh", targetSsid, user, password])
+    }
+
+    function run(targetSsid, cmd) {
+        if (connectProc.running) return
+        errorSsid = ""
+        errorText = ""
+        connectingSsid = targetSsid
+        connectProc.command = cmd
         connectProc.running = true
     }
 
@@ -95,19 +126,30 @@ Singleton {
     Process {
         id: scanProc
         command: ["sh", "-c",
-            "export LC_ALL=C; nmcli -t -f SSID,SIGNAL,SECURITY device wifi list --rescan yes"]
+            "export LC_ALL=C; nmcli -t -f NAME,TYPE connection show | sed 's/^/SAVED:/'; "
+            + "nmcli -t -f SSID,SIGNAL,SECURITY device wifi list --rescan yes"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const results = []
+                const saved = []
                 for (const line of text.split("\n")) {
+                    if (line.startsWith("SAVED:")) {
+                        const m = line.slice(6).match(/^(.*):(802-11-wireless|wifi)$/)
+                        if (m) saved.push(m[1].replace(/\\:/g, ":"))
+                        continue
+                    }
                     const parts = line.split(":")
                     if (parts.length < 3 || parts[0] === "") continue
+                    const security = parts.slice(2).join(":")
                     results.push({
                         ssid: parts[0],
                         signal: parseInt(parts[1]) || 0,
-                        secured: parts[2] !== "" && parts[2] !== "--"
+                        secured: security !== "" && security !== "--",
+                        // "WPA2 802.1X" and friends: needs a username, not just a password
+                        enterprise: /802\.1X|EAP/i.test(security)
                     })
                 }
+                root.savedNames = saved
                 root.networks = results
                 root.scanning = false
             }
@@ -116,12 +158,22 @@ Singleton {
 
     Process {
         id: connectProc
-        property string ssidArg: ""
-        property string passwordArg: ""
-        command: passwordArg.length > 0
-            ? ["nmcli", "device", "wifi", "connect", ssidArg, "password", passwordArg]
-            : ["nmcli", "device", "wifi", "connect", ssidArg]
-        onExited: root.refreshStatus()
+        environment: ({ LC_ALL: "C" })
+        stderr: StdioCollector { id: connectErr }
+        // Wait a tick so the error text has arrived before reading it
+        onExited: code => Qt.callLater(() => root.finishConnect(code))
+    }
+
+    function finishConnect(code) {
+        if (code !== 0) {
+            // nmcli says "Error: <why>". Keep the first line, without "Error:".
+            const msg = (connectErr.text || "").split("\n").find(l => l.trim() !== "") ?? ""
+            root.errorText = msg.replace(/^Error:\s*/, "").trim() || "Could not connect"
+            root.errorSsid = root.connectingSsid
+        }
+        root.connectingSsid = ""
+        root.refreshStatus()
+        if (!root.scanning) root.scan()
     }
 
     Process {

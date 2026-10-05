@@ -31,7 +31,7 @@ FloatingWindow {
     // Search entries for the pages that are not built from HyprSettingsService.
     // Keep these in step with the titles on those pages.
     readonly property var shellIndex: [
-        { panel: "wifi", label: "Wi-Fi", desc: "Turn Wi-Fi on or off and join a network", keys: "wireless internet network password" },
+        { panel: "wifi", label: "Wi-Fi", desc: "Turn Wi-Fi on or off and join a network", keys: "wireless internet network password eduroam username login school work" },
         { panel: "bluetooth", label: "Bluetooth", desc: "Turn Bluetooth on or off and pair devices", keys: "headphones devices pair" },
         { panel: "sound", label: "Output", desc: "Choose speakers or headphones and set the volume", keys: "volume audio speakers headphones" },
         { panel: "sound", label: "Input", desc: "Choose the microphone and its volume", keys: "microphone mic audio" },

@@ -166,8 +166,16 @@ Flickable {
 
                         width: list.width
 
+                        readonly property bool connecting: NetworkService.connectingSsid === modelData.ssid
+                        readonly property bool failed: NetworkService.errorSsid === modelData.ssid
+
                         function join() {
-                            NetworkService.connectToNetwork(net.modelData.ssid, pw.text)
+                            if (net.modelData.enterprise) {
+                                if (user.text.trim() === "" || pw.text === "") return
+                                NetworkService.connectEnterprise(net.modelData.ssid, user.text.trim(), pw.text)
+                            } else {
+                                NetworkService.connectToNetwork(net.modelData.ssid, pw.text)
+                            }
                             pw.text = ""
                             panel.expanded = ""
                         }
@@ -194,7 +202,8 @@ Flickable {
                                 hoverEnabled: true
                                 enabled: !net.isCurrent
                                 onClicked: {
-                                    if (net.modelData.secured)
+                                    // Known networks connect straight away; after a failure, ask for details again
+                                    if (net.modelData.secured && (!NetworkService.isSaved(net.modelData.ssid) || net.failed))
                                         panel.expanded = net.open ? "" : net.modelData.ssid
                                     else
                                         NetworkService.connectToNetwork(net.modelData.ssid, "")
@@ -207,7 +216,7 @@ Flickable {
                                 anchors.right: icons.left
                                 anchors.rightMargin: Theme.Tokens.spaceMd
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: net.modelData.ssid + (net.isCurrent ? "  ·  Connected" : "")
+                                text: net.modelData.ssid + (net.isCurrent ? "  ·  Connected" : net.connecting ? "  ·  Connecting..." : "")
                                 color: Theme.Tokens.textPrimary
                                 font.family: Theme.Tokens.fontFamily
                                 font.pixelSize: Theme.Tokens.fontBody
@@ -250,74 +259,142 @@ Flickable {
                             }
                         }
 
-                        // Passordfelt
-                        Item {
+                        // Why the last attempt failed
+                        Text {
+                            visible: net.failed && !net.connecting
+                            width: parent.width
+                            leftPadding: Theme.Tokens.spaceLg
+                            rightPadding: Theme.Tokens.spaceLg
+                            bottomPadding: Theme.Tokens.spaceSm
+                            wrapMode: Text.WordWrap
+                            text: "Could not connect: " + NetworkService.errorText
+                            color: Theme.Tokens.red
+                            font.family: Theme.Tokens.fontFamily
+                            font.pixelSize: Theme.Tokens.fontSmall
+                        }
+
+                        // Login: username (school and work networks) and password
+                        Column {
                             visible: net.open
                             width: parent.width
-                            height: 52
+                            spacing: Theme.Tokens.spaceSm
+                            topPadding: Theme.Tokens.spaceSm
+                            bottomPadding: Theme.Tokens.spaceMd
+
+                            Text {
+                                visible: net.modelData.enterprise
+                                leftPadding: Theme.Tokens.spaceLg
+                                text: "This network asks for a username and password, like Eduroam."
+                                color: Theme.Tokens.textSecondary
+                                font.family: Theme.Tokens.fontFamily
+                                font.pixelSize: Theme.Tokens.fontSmall
+                            }
 
                             Rectangle {
-                                anchors.left: parent.left
-                                anchors.leftMargin: Theme.Tokens.spaceLg
-                                anchors.right: joinBtn.left
-                                anchors.rightMargin: Theme.Tokens.spaceSm
-                                anchors.verticalCenter: parent.verticalCenter
+                                visible: net.modelData.enterprise
+                                x: Theme.Tokens.spaceLg
+                                width: parent.width - 2 * Theme.Tokens.spaceLg - 64 - Theme.Tokens.spaceSm
                                 height: 30
                                 radius: Theme.Tokens.radiusSm
                                 color: Theme.Tokens.fillIdle
-                                border.color: "transparent"
+                                border.color: user.activeFocus ? Theme.Tokens.accent : "transparent"
                                 border.width: 1
 
                                 TextInput {
-                                    id: pw
+                                    id: user
                                     anchors.fill: parent
                                     anchors.leftMargin: Theme.Tokens.spaceMd
                                     anchors.rightMargin: Theme.Tokens.spaceMd
                                     verticalAlignment: TextInput.AlignVCenter
-                                    echoMode: TextInput.Password
                                     color: Theme.Tokens.textPrimary
+                                    selectionColor: Theme.Tokens.accent
                                     font.family: Theme.Tokens.fontFamily
                                     font.pixelSize: Theme.Tokens.fontBody
-                                    focus: net.open
-                                    onAccepted: net.join()
+                                    clip: true
+                                    focus: net.open && net.modelData.enterprise
+                                    KeyNavigation.tab: pw
+                                    onAccepted: pw.forceActiveFocus()
 
                                     Text {
                                         anchors.verticalCenter: parent.verticalCenter
-                                        text: "Password (blank if saved)"
+                                        text: net.modelData.ssid.toLowerCase() === "eduroam" ? "Username (name@school.no)" : "Username"
                                         color: Theme.Tokens.textSecondary
-                                        font: pw.font
-                                        visible: pw.text === ""
+                                        font: user.font
+                                        visible: user.text === ""
                                     }
                                 }
                             }
 
-                            Rectangle {
-                                id: joinBtn
-                                scale: joinBtnMouse.pressed ? Theme.Tokens.pressScale : 1
-                                Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
-                                anchors.right: parent.right
-                                anchors.rightMargin: Theme.Tokens.spaceLg
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: 64
+                            Item {
+                                width: parent.width
                                 height: 30
-                                radius: Theme.Tokens.radiusSm
-                                color: Theme.Tokens.accent
 
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "Join"
-                                    color: Theme.Tokens.onAccent
-                                    font.family: Theme.Tokens.fontFamily
-                                    font.pixelSize: Theme.Tokens.fontBody
-                                    font.weight: Font.Medium
+                                Rectangle {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: Theme.Tokens.spaceLg
+                                    anchors.right: joinBtn.left
+                                    anchors.rightMargin: Theme.Tokens.spaceSm
+                                    height: 30
+                                    radius: Theme.Tokens.radiusSm
+                                    color: Theme.Tokens.fillIdle
+                                    border.color: pw.activeFocus ? Theme.Tokens.accent : "transparent"
+                                    border.width: 1
+
+                                    TextInput {
+                                        id: pw
+                                        anchors.fill: parent
+                                        anchors.leftMargin: Theme.Tokens.spaceMd
+                                        anchors.rightMargin: Theme.Tokens.spaceMd
+                                        verticalAlignment: TextInput.AlignVCenter
+                                        echoMode: TextInput.Password
+                                        color: Theme.Tokens.textPrimary
+                                        selectionColor: Theme.Tokens.accent
+                                        font.family: Theme.Tokens.fontFamily
+                                        font.pixelSize: Theme.Tokens.fontBody
+                                        clip: true
+                                        focus: net.open && !net.modelData.enterprise
+                                        onAccepted: net.join()
+
+                                        Text {
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            text: "Password"
+                                            color: Theme.Tokens.textSecondary
+                                            font: pw.font
+                                            visible: pw.text === ""
+                                        }
+                                    }
                                 }
 
-                                MouseArea {
-                                    id: joinBtnMouse
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    anchors.fill: parent
-                                    onClicked: net.join()
+                                Rectangle {
+                                    id: joinBtn
+                                    readonly property bool ready: pw.text !== "" && (!net.modelData.enterprise || user.text.trim() !== "")
+                                    scale: joinBtnMouse.pressed ? Theme.Tokens.pressScale : 1
+                                    Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: Theme.Tokens.spaceLg
+                                    width: 64
+                                    height: 30
+                                    radius: Theme.Tokens.radiusSm
+                                    color: Theme.Tokens.accent
+                                    opacity: ready ? 1 : 0.5
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "Join"
+                                        color: Theme.Tokens.onAccent
+                                        font.family: Theme.Tokens.fontFamily
+                                        font.pixelSize: Theme.Tokens.fontBody
+                                        font.weight: Font.Medium
+                                    }
+
+                                    MouseArea {
+                                        id: joinBtnMouse
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        anchors.fill: parent
+                                        enabled: joinBtn.ready
+                                        onClicked: net.join()
+                                    }
                                 }
                             }
                         }
