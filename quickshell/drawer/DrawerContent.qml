@@ -7,7 +7,7 @@ import "../services"
 // What is inside the drawer: system graphs, favorite apps and folders.
 Column {
     id: content
-    spacing: 14
+    spacing: Tokens.spaceLg
 
     // Set by the drawer while a folder is dragged over it
     property bool dropActive: false
@@ -84,7 +84,7 @@ Column {
 
         Column {
             anchors.fill: parent
-            anchors.margins: 10
+            anchors.margins: Tokens.spaceMd
             spacing: 2
 
             Item {
@@ -107,7 +107,7 @@ Column {
             }
 
             Row {
-                spacing: 4
+                spacing: Tokens.spaceXs
                 Text {
                     id: valueText
                     text: card.value
@@ -179,7 +179,7 @@ Column {
 
         Text {
             anchors.top: tileBox.bottom
-            anchors.topMargin: 5
+            anchors.topMargin: Tokens.spaceXs
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             text: tile.label
@@ -221,7 +221,7 @@ Column {
 
     Grid {
         columns: 2
-        spacing: 8
+        spacing: Tokens.spaceSm
 
         StatCard {
             title: "CPU"
@@ -258,7 +258,7 @@ Column {
     // Disk
     Column {
         width: parent.width
-        spacing: 6
+        spacing: Tokens.spaceSm
 
         Item {
             width: parent.width
@@ -311,7 +311,7 @@ Column {
 
     Flow {
         width: parent.width
-        spacing: 8
+        spacing: Tokens.spaceSm
 
         Repeater {
             model: SettingsService.favApps
@@ -339,7 +339,7 @@ Column {
 
     Grid {
         columns: 2
-        spacing: 6
+        spacing: Tokens.spaceSm
 
         Repeater {
             model: SettingsService.favFolders
@@ -357,7 +357,7 @@ Column {
                 Image {
                     id: folderIcon
                     anchors.left: parent.left
-                    anchors.leftMargin: 10
+                    anchors.leftMargin: Tokens.spaceMd
                     anchors.verticalCenter: parent.verticalCenter
                     width: 16
                     height: 16
@@ -366,9 +366,9 @@ Column {
                 }
                 Text {
                     anchors.left: folderIcon.right
-                    anchors.leftMargin: 8
+                    anchors.leftMargin: Tokens.spaceSm
                     anchors.right: parent.right
-                    anchors.rightMargin: 8
+                    anchors.rightMargin: Tokens.spaceSm
                     anchors.verticalCenter: parent.verticalCenter
                     text: folderRow.modelData.split("/").pop()
                     color: Tokens.textPrimary

@@ -171,7 +171,7 @@ PanelWindow {
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.topMargin: Tokens.barHeight
-        anchors.rightMargin: 6
+        anchors.rightMargin: Tokens.spaceSm
         width: 300
         readonly property real fullHeight: body.implicitHeight + 28
         height: fullHeight * Math.max(0, cal.reveal)
@@ -197,7 +197,7 @@ PanelWindow {
             x: 16
             y: 12
             width: parent.width - 32
-            spacing: 10
+            spacing: Tokens.spaceMd
             opacity: Math.max(0, Math.min(1, (cal.reveal - 0.3) / 0.5))
 
             // ---------- Month header ----------
@@ -255,7 +255,7 @@ PanelWindow {
 
             // ---------- Grid with week numbers ----------
             Row {
-                spacing: 4
+                spacing: Tokens.spaceXs
 
                 // Week numbers
                 Column {
@@ -356,7 +356,7 @@ PanelWindow {
                                     visible: dayCell.modelData.hasEvent && !dayCell.modelData.isToday
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     anchors.bottom: parent.bottom
-                                    anchors.bottomMargin: 3
+                                    anchors.bottomMargin: Tokens.spaceXs
                                     width: 4
                                     height: 4
                                     radius: 2
@@ -387,7 +387,7 @@ PanelWindow {
             Column {
                 visible: TimetableService.enabled
                 width: parent.width
-                spacing: 6
+                spacing: Tokens.spaceSm
 
                 Text {
                     text: cal.sameDay(cal.selected, cal.today) ? "Today"
@@ -436,9 +436,9 @@ PanelWindow {
 
                         Text {
                             anchors.left: evBadge.right
-                            anchors.leftMargin: 8
+                            anchors.leftMargin: Tokens.spaceSm
                             anchors.right: evTime.left
-                            anchors.rightMargin: 8
+                            anchors.rightMargin: Tokens.spaceSm
                             anchors.verticalCenter: parent.verticalCenter
                             text: ev.modelData.location || ev.modelData.title || ""
                             color: Tokens.textPrimary

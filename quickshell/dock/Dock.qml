@@ -408,8 +408,8 @@ PanelWindow {
 
             Text {
                 leftPadding: 10
-                topPadding: 4
-                bottomPadding: 4
+                topPadding: Tokens.spaceXs
+                bottomPadding: Tokens.spaceXs
                 text: contextMenu.item?.entry?.name ?? contextMenu.item?.id ?? ""
                 color: Tokens.textSecondary
                 font.family: Tokens.fontFamily
@@ -562,7 +562,7 @@ PanelWindow {
             anchors.horizontalCenterOffset: dock.side === "left" ? 2 : dock.side === "right" ? -2 : 0
             anchors.verticalCenterOffset: dock.horizontal ? -2 : 0
             columns: dock.horizontal ? 100 : 1
-            spacing: 8
+            spacing: Tokens.spaceSm
 
             HoverHandler { id: rowHover }
 

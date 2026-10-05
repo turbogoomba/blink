@@ -354,7 +354,7 @@ PanelWindow {
             anchors.right: parent.right
             anchors.rightMargin: Tokens.spacing
             anchors.verticalCenter: parent.verticalCenter
-            spacing: 16
+            spacing: Tokens.spaceLg
             opacity: BootService.bar
             transform: Translate { x: -(1 - BootService.bar) * 60 }
 

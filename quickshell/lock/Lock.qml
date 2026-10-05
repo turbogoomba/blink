@@ -187,7 +187,7 @@ Scope {
                             ClippingRectangle {
                                 id: art
                                 anchors.left: parent.left
-                                anchors.leftMargin: 12
+                                anchors.leftMargin: Tokens.spaceMd
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: 46
                                 height: 46
@@ -204,7 +204,7 @@ Scope {
 
                             Column {
                                 anchors.left: art.right
-                                anchors.leftMargin: 12
+                                anchors.leftMargin: Tokens.spaceMd
                                 anchors.right: playBtn.left
                                 anchors.rightMargin: 10
                                 anchors.verticalCenter: parent.verticalCenter
@@ -232,7 +232,7 @@ Scope {
                             Rectangle {
                                 id: playBtn
                                 anchors.right: parent.right
-                                anchors.rightMargin: 12
+                                anchors.rightMargin: Tokens.spaceMd
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: 34
                                 height: 34
@@ -266,7 +266,7 @@ Scope {
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.bottom: parent.bottom
                         anchors.bottomMargin: 64
-                        spacing: 12
+                        spacing: Tokens.spaceMd
 
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -310,7 +310,7 @@ Scope {
                                     anchors.left: lockIcon.right
                                     anchors.leftMargin: 10
                                     anchors.right: go.left
-                                    anchors.rightMargin: 8
+                                    anchors.rightMargin: Tokens.spaceSm
                                     anchors.verticalCenter: parent.verticalCenter
                                     echoMode: TextInput.Password
                                     passwordCharacter: "•"
@@ -386,9 +386,9 @@ Scope {
 
                     Row {
                         anchors.left: parent.left
-                        anchors.leftMargin: 16
+                        anchors.leftMargin: Tokens.spaceLg
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 8
+                        spacing: Tokens.spaceSm
 
                         Image {
                             anchors.verticalCenter: parent.verticalCenter
@@ -409,7 +409,7 @@ Scope {
 
                     Row {
                         anchors.right: parent.right
-                        anchors.rightMargin: 16
+                        anchors.rightMargin: Tokens.spaceLg
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: 14
 

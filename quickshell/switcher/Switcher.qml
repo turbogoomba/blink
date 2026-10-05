@@ -130,7 +130,7 @@ PanelWindow {
             id: row
             anchors.horizontalCenter: parent.horizontalCenter
             y: 18
-            spacing: 10
+            spacing: Tokens.spaceMd
 
             Repeater {
                 model: sw.windows

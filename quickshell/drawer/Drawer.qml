@@ -218,7 +218,7 @@ PanelWindow {
 
         Flickable {
             anchors.fill: parent
-            anchors.margins: 16
+            anchors.margins: Tokens.spaceLg
             contentHeight: body.implicitHeight
             clip: true
             boundsBehavior: Flickable.StopAtBounds

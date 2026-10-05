@@ -329,7 +329,7 @@ Rectangle {
 
         Text {
             anchors.top: thumb.bottom
-            anchors.topMargin: 4
+            anchors.topMargin: Tokens.spaceXs
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             text: ShelfService.nameOf(tile.modelData)
@@ -436,7 +436,7 @@ Rectangle {
             // Follow the mouse along the bar, otherwise glance around now and then
             anchors.horizontalCenterOffset: (isNaN(notch.lookTarget) ? face.look : notch.lookTarget) * 3
             y: face.smiling ? 0 : 4
-            spacing: 8
+            spacing: Tokens.spaceSm
             // Startup: the eyes open
             transform: Scale { origin.y: eyes.height / 2; yScale: 0.1 + 0.9 * BootService.eyes }
 
@@ -695,9 +695,9 @@ Rectangle {
             id: osdTrack
             visible: !parent.isWs
             anchors.left: osdIcon.right
-            anchors.leftMargin: 12
+            anchors.leftMargin: Tokens.spaceMd
             anchors.right: osdPct.left
-            anchors.rightMargin: 12
+            anchors.rightMargin: Tokens.spaceMd
             anchors.verticalCenter: parent.verticalCenter
             height: 6
             radius: 3
@@ -850,7 +850,7 @@ Rectangle {
     // ============================================================
     Item {
         anchors.fill: parent
-        anchors.margins: 16
+        anchors.margins: Tokens.spaceLg
         opacity: notch.peek ? 1 : 0
         enabled: notch.peek
         Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
@@ -876,7 +876,7 @@ Rectangle {
             anchors.left: peekArt.right
             anchors.leftMargin: 14
             anchors.right: peekControls.left
-            anchors.rightMargin: 12
+            anchors.rightMargin: Tokens.spaceMd
             anchors.verticalCenter: parent.verticalCenter
             spacing: 2
 
@@ -947,8 +947,8 @@ Rectangle {
         anchors.fill: parent
         anchors.leftMargin: 18
         anchors.rightMargin: 18
-        anchors.topMargin: 8
-        anchors.bottomMargin: 8
+        anchors.topMargin: Tokens.spaceSm
+        anchors.bottomMargin: Tokens.spaceSm
         opacity: notch.showBt ? 1 : 0
         visible: opacity > 0
         Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
@@ -969,9 +969,9 @@ Rectangle {
 
         Column {
             anchors.left: btIcon.right
-            anchors.leftMargin: 12
+            anchors.leftMargin: Tokens.spaceMd
             anchors.right: batteryRing.left
-            anchors.rightMargin: 12
+            anchors.rightMargin: Tokens.spaceMd
             anchors.verticalCenter: parent.verticalCenter
             spacing: 1
 
@@ -1041,9 +1041,9 @@ Rectangle {
     Column {
         id: openContent
         anchors { top: parent.top; left: parent.left; right: parent.right }
-        anchors.topMargin: 12
-        anchors.leftMargin: 20
-        anchors.rightMargin: 20
+        anchors.topMargin: Tokens.spaceMd
+        anchors.leftMargin: Tokens.spaceXl
+        anchors.rightMargin: Tokens.spaceXl
         spacing: 14
         opacity: notch.open ? 1 : 0
         enabled: notch.open
@@ -1055,7 +1055,7 @@ Rectangle {
             height: 26
 
             Row {
-                spacing: 4
+                spacing: Tokens.spaceXs
 
                 TabButton { tabId: "nook"; label: "Nook" }
                 TabButton { tabId: "tray"; label: "Tray"; badge: ShelfService.files.length }
@@ -1108,7 +1108,7 @@ Rectangle {
                     anchors.leftMargin: 14
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: 4
+                    spacing: Tokens.spaceXs
 
                     Text {
                         width: parent.width
@@ -1176,7 +1176,7 @@ Rectangle {
 
             Rectangle {
                 anchors.left: mediaArea.right
-                anchors.leftMargin: 20
+                anchors.leftMargin: Tokens.spaceXl
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 width: 1
@@ -1234,9 +1234,9 @@ Rectangle {
 
                         Text {
                             anchors.left: codeBadge.right
-                            anchors.leftMargin: 8
+                            anchors.leftMargin: Tokens.spaceSm
                             anchors.right: whenText.left
-                            anchors.rightMargin: 8
+                            anchors.rightMargin: Tokens.spaceSm
                             anchors.verticalCenter: parent.verticalCenter
                             text: cls.modelData.location || cls.modelData.title || ""
                             color: Tokens.textPrimary
@@ -1308,9 +1308,9 @@ Rectangle {
 
                         Text {
                             anchors.left: lineBadge.right
-                            anchors.leftMargin: 8
+                            anchors.leftMargin: Tokens.spaceSm
                             anchors.right: minsText.left
-                            anchors.rightMargin: 8
+                            anchors.rightMargin: Tokens.spaceSm
                             anchors.verticalCenter: parent.verticalCenter
                             text: dep.modelData.dest
                             color: Tokens.textPrimary
@@ -1344,7 +1344,7 @@ Rectangle {
                 id: shelfRow
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 8
+                spacing: Tokens.spaceSm
                 visible: notch.hasShelf && !notch.dragging
 
                 Repeater {
@@ -1436,9 +1436,9 @@ Rectangle {
             ListView {
                 id: list
                 anchors.fill: parent
-                anchors.topMargin: 20
+                anchors.topMargin: Tokens.spaceXl
                 clip: true
-                spacing: 4
+                spacing: Tokens.spaceXs
                 model: NotificationService.history
 
                 delegate: Rectangle {

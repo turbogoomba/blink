@@ -145,7 +145,7 @@ Scope {
                     anchors.horizontalCenter: parent.horizontalCenter
                     y: 22
                     width: 720
-                    spacing: 14
+                    spacing: Tokens.spaceLg
                     opacity: win.progress
                     readonly property string selected: WallpaperService.files[root.index] ?? ""
 
@@ -189,7 +189,7 @@ Scope {
                         width: parent.width
                         height: 100
                         orientation: ListView.Horizontal
-                        spacing: 12
+                        spacing: Tokens.spaceMd
                         clip: true
                         model: WallpaperService.files
                         currentIndex: root.index
@@ -243,7 +243,7 @@ Scope {
                             Rectangle {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.top: thumbImg.bottom
-                                anchors.topMargin: 6
+                                anchors.topMargin: Tokens.spaceSm
                                 width: 5
                                 height: 5
                                 radius: 2.5
@@ -273,7 +273,7 @@ Scope {
                         Row {
                             anchors.left: parent.left
                             anchors.verticalCenter: parent.verticalCenter
-                            spacing: 10
+                            spacing: Tokens.spaceMd
 
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter

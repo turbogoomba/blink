@@ -124,7 +124,7 @@ PanelWindow {
             x: 16
             y: 14
             width: parent.width - 32
-            spacing: 14
+            spacing: Tokens.spaceLg
             opacity: Math.max(0, Math.min(1, (wx.reveal - 0.3) / 0.5))
 
             // ---------- Now ----------
@@ -145,7 +145,7 @@ PanelWindow {
                 Text {
                     id: bigTemp
                     anchors.left: bigIcon.right
-                    anchors.leftMargin: 12
+                    anchors.leftMargin: Tokens.spaceMd
                     anchors.verticalCenter: parent.verticalCenter
                     text: wx.round(WeatherService.temperature)
                     color: Tokens.textPrimary
@@ -246,7 +246,7 @@ PanelWindow {
             // ---------- Next days ----------
             Column {
                 width: parent.width
-                spacing: 4
+                spacing: Tokens.spaceXs
 
                 Repeater {
                     model: WeatherService.days
@@ -285,7 +285,7 @@ PanelWindow {
                         Text {
                             id: minText
                             anchors.left: dayIcon.right
-                            anchors.leftMargin: 14
+                            anchors.leftMargin: Tokens.spaceLg
                             anchors.verticalCenter: parent.verticalCenter
                             width: 30
                             horizontalAlignment: Text.AlignRight
@@ -299,9 +299,9 @@ PanelWindow {
                         Rectangle {
                             id: rangeTrack
                             anchors.left: minText.right
-                            anchors.leftMargin: 10
+                            anchors.leftMargin: Tokens.spaceMd
                             anchors.right: maxText.left
-                            anchors.rightMargin: 10
+                            anchors.rightMargin: Tokens.spaceMd
                             anchors.verticalCenter: parent.verticalCenter
                             height: 4
                             radius: 2

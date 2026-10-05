@@ -191,10 +191,10 @@ PanelWindow {
 
                 Rectangle {
                     anchors.fill: parent
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-                    anchors.topMargin: 4
-                    anchors.bottomMargin: 4
+                    anchors.leftMargin: Tokens.spaceMd
+                    anchors.rightMargin: Tokens.spaceMd
+                    anchors.topMargin: Tokens.spaceXs
+                    anchors.bottomMargin: Tokens.spaceXs
                     radius: Tokens.radiusLg
                     color: Tokens.fillIdle
                     border.color: Qt.rgba(1, 1, 1, 0.06)
@@ -216,7 +216,7 @@ PanelWindow {
                 TextInput {
                     id: search
                     anchors.left: searchIcon.right
-                    anchors.leftMargin: 12
+                    anchors.leftMargin: Tokens.spaceMd
                     anchors.right: parent.right
                     anchors.rightMargin: 18
                     anchors.verticalCenter: parent.verticalCenter
@@ -263,7 +263,7 @@ PanelWindow {
             // ---------- Resultater ----------
             Column {
                 width: parent.width
-                padding: 6
+                padding: Tokens.spaceSm
                 spacing: 2
                 visible: launcher.results.length > 0
 
@@ -278,7 +278,7 @@ PanelWindow {
                         required property int index
                         readonly property bool isSelected: index === launcher.selected
 
-                        width: parent.width - 12
+                        width: parent.width - 2 * Tokens.spaceSm
                         height: 44
                         radius: Tokens.radiusMd
                         color: isSelected ? Tokens.accent : (resultRowMouse.containsMouse ? Tokens.fillHover : "transparent")
@@ -286,7 +286,7 @@ PanelWindow {
                         Image {
                             id: appIcon
                             anchors.left: parent.left
-                            anchors.leftMargin: 10
+                            anchors.leftMargin: Tokens.spaceMd
                             anchors.verticalCenter: parent.verticalCenter
                             width: 28
                             height: 28
@@ -296,9 +296,9 @@ PanelWindow {
 
                         Column {
                             anchors.left: appIcon.right
-                            anchors.leftMargin: 12
+                            anchors.leftMargin: Tokens.spaceMd
                             anchors.right: parent.right
-                            anchors.rightMargin: 12
+                            anchors.rightMargin: Tokens.spaceMd
                             anchors.verticalCenter: parent.verticalCenter
 
                             Text {
@@ -358,7 +358,7 @@ PanelWindow {
         color: rowMouse.containsMouse ? Tokens.accent : "transparent"
         Text {
             anchors.left: parent.left
-            anchors.leftMargin: 10
+            anchors.leftMargin: Tokens.spaceMd
             anchors.verticalCenter: parent.verticalCenter
             text: row.label
             color: Tokens.textPrimary

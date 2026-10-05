@@ -120,7 +120,7 @@ Scope {
                 anchors.horizontalCenter: parent.horizontalCenter
                 y: 24 - 30 * (1 - win.progress)
                 opacity: win.progress
-                spacing: 14
+                spacing: Tokens.spaceLg
 
                 Repeater {
                     id: wsRepeater
@@ -149,7 +149,7 @@ Scope {
                         Row {
                             anchors.centerIn: parent
                             anchors.verticalCenterOffset: -8
-                            spacing: 4
+                            spacing: Tokens.spaceXs
 
                             Repeater {
                                 model: pill.wsWindows.slice(0, 4)
@@ -166,7 +166,7 @@ Scope {
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.bottom: parent.bottom
-                            anchors.bottomMargin: 8
+                            anchors.bottomMargin: Tokens.spaceSm
                             text: "Desktop " + pill.modelData.id
                             color: pill.active ? Tokens.textPrimary : Tokens.textSecondary
                             font.family: Tokens.fontFamily
@@ -280,7 +280,7 @@ Scope {
                         Rectangle {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.top: parent.bottom
-                            anchors.topMargin: 8
+                            anchors.topMargin: Tokens.spaceSm
                             width: Math.min(titleText.implicitWidth + 20, tile.width)
                             height: 26
                             radius: Tokens.radiusMd
@@ -290,8 +290,8 @@ Scope {
                             Text {
                                 id: titleText
                                 anchors.fill: parent
-                                anchors.leftMargin: 10
-                                anchors.rightMargin: 10
+                                anchors.leftMargin: Tokens.spaceMd
+                                anchors.rightMargin: Tokens.spaceMd
                                 verticalAlignment: Text.AlignVCenter
                                 horizontalAlignment: Text.AlignHCenter
                                 text: tile.modelData.title

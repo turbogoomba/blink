@@ -155,7 +155,7 @@ PanelWindow {
         Item {
             id: track
             anchors.left: muteBtn.right
-            anchors.leftMargin: 12
+            anchors.leftMargin: Tokens.spaceMd
             anchors.right: pct.left
             anchors.rightMargin: 10
             anchors.verticalCenter: parent.verticalCenter
@@ -280,7 +280,7 @@ PanelWindow {
                     x: 10
                     y: 10
                     width: parent.width - 20
-                    spacing: 8
+                    spacing: Tokens.spaceSm
 
                     VolumeRow { node: snd.sink }
 
@@ -296,7 +296,7 @@ PanelWindow {
                         Image {
                             id: devIcon
                             anchors.left: parent.left
-                            anchors.leftMargin: 8
+                            anchors.leftMargin: Tokens.spaceSm
                             anchors.verticalCenter: parent.verticalCenter
                             width: 14
                             height: 14
@@ -307,9 +307,9 @@ PanelWindow {
 
                         Text {
                             anchors.left: devIcon.right
-                            anchors.leftMargin: 8
+                            anchors.leftMargin: Tokens.spaceSm
                             anchors.right: devArrow.left
-                            anchors.rightMargin: 8
+                            anchors.rightMargin: Tokens.spaceSm
                             anchors.verticalCenter: parent.verticalCenter
                             text: snd.nameOf(snd.sink)
                             color: Tokens.textSecondary
@@ -321,7 +321,7 @@ PanelWindow {
                         Text {
                             id: devArrow
                             anchors.right: parent.right
-                            anchors.rightMargin: 8
+                            anchors.rightMargin: Tokens.spaceSm
                             anchors.verticalCenter: parent.verticalCenter
                             visible: snd.outputs.length > 1
                             text: "⇄"

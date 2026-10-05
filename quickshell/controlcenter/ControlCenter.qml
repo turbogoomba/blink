@@ -231,7 +231,7 @@ PanelWindow {
         IconCircle {
             id: trIcon
             anchors.left: parent.left
-            anchors.leftMargin: 8
+            anchors.leftMargin: Tokens.spaceSm
             anchors.verticalCenter: parent.verticalCenter
             icon: tr.icon
             fallback: tr.fallback
@@ -241,9 +241,9 @@ PanelWindow {
 
         Column {
             anchors.left: trIcon.right
-            anchors.leftMargin: 10
+            anchors.leftMargin: Tokens.spaceMd
             anchors.right: parent.right
-            anchors.rightMargin: 8
+            anchors.rightMargin: Tokens.spaceSm
             anchors.verticalCenter: parent.verticalCenter
 
             Text {
@@ -291,9 +291,9 @@ PanelWindow {
 
         Text {
             anchors.left: parent.left
-            anchors.leftMargin: 14
+            anchors.leftMargin: Tokens.spaceLg
             anchors.top: parent.top
-            anchors.topMargin: 12
+            anchors.topMargin: Tokens.spaceMd
             text: sc.title
             color: Tokens.textPrimary
             font.family: Tokens.fontFamily
@@ -304,9 +304,9 @@ PanelWindow {
         Image {
             id: scIcon
             anchors.left: parent.left
-            anchors.leftMargin: 14
+            anchors.leftMargin: Tokens.spaceLg
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 14
+            anchors.bottomMargin: Tokens.spaceLg
             width: 18
             height: 18
             sourceSize: Qt.size(36, 36)
@@ -327,9 +327,9 @@ PanelWindow {
         Item {
             id: scSlider
             anchors.left: scIcon.right
-            anchors.leftMargin: 10
+            anchors.leftMargin: Tokens.spaceMd
             anchors.right: scPct.left
-            anchors.rightMargin: 10
+            anchors.rightMargin: Tokens.spaceMd
             anchors.verticalCenter: scIcon.verticalCenter
             height: 20
 
@@ -388,7 +388,7 @@ PanelWindow {
         Text {
             id: scPct
             anchors.right: parent.right
-            anchors.rightMargin: 14
+            anchors.rightMargin: Tokens.spaceLg
             anchors.verticalCenter: scIcon.verticalCenter
             width: 32
             horizontalAlignment: Text.AlignRight
@@ -449,7 +449,7 @@ PanelWindow {
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: pbCircle.bottom
-            anchors.topMargin: 6
+            anchors.topMargin: Tokens.spaceSm
             text: pb.isArmed ? "Confirm?" : pb.label
             color: pb.isArmed ? Tokens.textPrimary : Tokens.textSecondary
             font.family: Tokens.fontFamily
@@ -511,7 +511,7 @@ PanelWindow {
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.topMargin: Tokens.barHeight
-        anchors.rightMargin: 6
+        anchors.rightMargin: Tokens.spaceSm
         width: 340
         readonly property real fullHeight: content.implicitHeight + 24
         height: fullHeight * Math.max(0, cc.reveal)
@@ -536,12 +536,12 @@ PanelWindow {
         ColumnLayout {
             id: content
             anchors { left: parent.left; right: parent.right; top: parent.top; margins: 12 }
-            spacing: 10
+            spacing: Tokens.spaceMd
 
             // ---------- Tilkobling + fliser ----------
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 10
+                spacing: Tokens.spaceMd
 
                 Card {
                     order: 0
@@ -553,8 +553,8 @@ PanelWindow {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        anchors.margins: 6
-                        spacing: 4
+                        anchors.margins: Tokens.spaceSm
+                        spacing: Tokens.spaceXs
 
                         ToggleRow {
                             Layout.fillWidth: true
@@ -605,7 +605,7 @@ PanelWindow {
                 ColumnLayout {
                     Layout.fillWidth: true
                     Layout.preferredWidth: 1
-                    spacing: 10
+                    spacing: Tokens.spaceMd
 
                     Card {
                         order: 1
@@ -704,7 +704,7 @@ PanelWindow {
                             IconCircle {
                                 id: mIcon
                                 anchors.left: parent.left
-                                anchors.leftMargin: 8
+                                anchors.leftMargin: Tokens.spaceSm
                                 anchors.verticalCenter: parent.verticalCenter
                                 icon: mrow.modelData.icon
                                 active: mrow.on
@@ -712,9 +712,9 @@ PanelWindow {
 
                             Column {
                                 anchors.left: mIcon.right
-                                anchors.leftMargin: 10
+                                anchors.leftMargin: Tokens.spaceMd
                                 anchors.right: mCheck.left
-                                anchors.rightMargin: 8
+                                anchors.rightMargin: Tokens.spaceSm
                                 anchors.verticalCenter: parent.verticalCenter
 
                                 Text {
@@ -739,7 +739,7 @@ PanelWindow {
                             Text {
                                 id: mCheck
                                 anchors.right: parent.right
-                                anchors.rightMargin: 12
+                                anchors.rightMargin: Tokens.spaceMd
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: "✓"
                                 color: Tokens.accent
@@ -773,7 +773,7 @@ PanelWindow {
                     anchors.left: parent.left
                     anchors.right: recButtons.left
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.margins: 4
+                    anchors.margins: Tokens.spaceXs
                     icon: "media-record-symbolic"
                     fallback: "media-record"
                     title: "Screen Recording"
@@ -804,9 +804,9 @@ PanelWindow {
                 Row {
                     id: recButtons
                     anchors.right: parent.right
-                    anchors.rightMargin: 10
+                    anchors.rightMargin: Tokens.spaceMd
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: 6
+                    spacing: Tokens.spaceSm
                     visible: !RecordService.recording
 
                     SmallButton {
@@ -873,7 +873,7 @@ PanelWindow {
                 Item {
                     id: bigBattery
                     anchors.left: parent.left
-                    anchors.leftMargin: 16
+                    anchors.leftMargin: Tokens.spaceLg
                     anchors.verticalCenter: batTop.verticalCenter
                     width: 36
                     height: 17
@@ -918,9 +918,9 @@ PanelWindow {
 
                 Column {
                     anchors.left: bigBattery.right
-                    anchors.leftMargin: 14
+                    anchors.leftMargin: Tokens.spaceLg
                     anchors.right: bigPct.left
-                    anchors.rightMargin: 10
+                    anchors.rightMargin: Tokens.spaceMd
                     anchors.verticalCenter: batTop.verticalCenter
                     spacing: 1
 
@@ -944,7 +944,7 @@ PanelWindow {
                 Text {
                     id: bigPct
                     anchors.right: parent.right
-                    anchors.rightMargin: 16
+                    anchors.rightMargin: Tokens.spaceLg
                     anchors.verticalCenter: batTop.verticalCenter
                     text: Math.round(cc.batteryLevel * 100) + "%"
                     color: Tokens.textPrimary
@@ -960,9 +960,9 @@ PanelWindow {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    anchors.margins: 10
+                    anchors.margins: Tokens.spaceMd
                     height: 28
-                    spacing: 6
+                    spacing: Tokens.spaceSm
 
                     readonly property var options: [
                         { label: "Saver", value: PowerProfile.PowerSaver },
@@ -1020,9 +1020,9 @@ PanelWindow {
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.topMargin: 12
-                    anchors.leftMargin: 8
-                    anchors.rightMargin: 8
+                    anchors.topMargin: Tokens.spaceMd
+                    anchors.leftMargin: Tokens.spaceSm
+                    anchors.rightMargin: Tokens.spaceSm
                     spacing: 0
 
                     PowerButton {
