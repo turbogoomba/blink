@@ -22,10 +22,11 @@ PanelWindow {
     readonly property bool open: ShellState.weatherOpen
     property real reveal: open ? 1 : 0
     Behavior on reveal {
+        id: openBehavior   // targetValue = where it is going, read before the animation starts
         NumberAnimation {
-            duration: wx.open ? 440 : 240
-            easing.type: wx.open ? Tokens.easeGrow : Tokens.easeShrink
-            easing.overshoot: 0.9
+            duration: openBehavior.targetValue > 0.5 ? 440 : 240
+            easing.type: openBehavior.targetValue > 0.5 ? Tokens.easeGrow : Tokens.easeShrink
+            easing.overshoot: Tokens.bounce
         }
     }
     visible: open || reveal > 0.01

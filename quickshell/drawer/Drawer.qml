@@ -34,10 +34,11 @@ PanelWindow {
     Behavior on handleReveal { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
     property real reveal: open ? 1 : 0
     Behavior on reveal {
+        id: openBehavior   // targetValue = where it is going, read before the animation starts
         NumberAnimation {
-            duration: drawer.open ? 420 : 240
-            easing.type: drawer.open ? Tokens.easeGrow : Tokens.easeShrink
-            easing.overshoot: 0.8
+            duration: openBehavior.targetValue > 0.5 ? 420 : 240
+            easing.type: openBehavior.targetValue > 0.5 ? Tokens.easeGrow : Tokens.easeShrink
+            easing.overshoot: Tokens.bounce
         }
     }
 

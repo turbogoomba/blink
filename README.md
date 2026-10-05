@@ -8,8 +8,6 @@ and everything grows out of the bar.
 ## Showcase
 [![Blink showcase: click to watch](screenshots/showcase.jpg)](screenshots/showcase.mp4)
 
-*Click the picture to watch the video (1:12).*
-
 ![Control Center](screenshots/control-center.png)
 
 ![Desktop](screenshots/desktop.png)

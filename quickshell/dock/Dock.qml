@@ -7,6 +7,8 @@ import "../services"
 
 // The dock: black, part of the frame, at the bottom, left or right (Settings > Display & Dock).
 // Hidden inside the frame until the mouse touches the edge. Right-click an icon for options.
+// Click the app you are using to minimize it; click again to bring it back where you are.
+// Minimized windows also sit as small tiles at the end. Drag pinned icons to reorder them.
 PanelWindow {
     id: dock
 
@@ -32,10 +34,11 @@ PanelWindow {
     // Grows out of the frame with a small bounce, tucks back quickly
     property real reveal: revealed ? 1 : 0
     Behavior on reveal {
+        id: openBehavior   // targetValue = where it is going, read before the animation starts
         NumberAnimation {
-            duration: dock.revealed ? 380 : 220
-            easing.type: dock.revealed ? Tokens.easeGrow : Tokens.easeShrink
-            easing.overshoot: 0.8
+            duration: openBehavior.targetValue > 0.5 ? 380 : 220
+            easing.type: openBehavior.targetValue > 0.5 ? Tokens.easeGrow : Tokens.easeShrink
+            easing.overshoot: Tokens.bounce
         }
     }
 
@@ -100,11 +103,21 @@ PanelWindow {
     function isMinimized(t) {
         return t.workspace?.name === "special:minimized"
     }
+    function isActive(t) {
+        return !!Hyprland.activeToplevel && Hyprland.activeToplevel.address === t.address
+    }
+    function minimize(w) {
+        Hyprland.dispatch(`hl.dsp.window.move({ workspace = "special:minimized", follow = false, window = "address:${addr(w)}" })`)
+    }
 
+    readonly property var minimizedWins: Hyprland.toplevels.values.filter(t => isMinimized(t))
+
+    // Minimized: back to the workspace you are on now, focused. Otherwise just focus it.
     function showWindow(w) {
         if (isMinimized(w)) {
             const ws = Hyprland.focusedWorkspace?.id ?? 1
             Hyprland.dispatch(`hl.dsp.window.move({ workspace = "${ws}", window = "address:${addr(w)}" })`)
+            Hyprland.dispatch(`hl.dsp.focus({ window = "address:${addr(w)}" })`)
         } else {
             Hyprland.dispatch(`hl.dsp.focus({ window = "address:${addr(w)}" })`)
         }
@@ -137,7 +150,32 @@ PanelWindow {
             }
             return
         }
-        showWindow(wins[0])
+        // The window you are using: tuck it away. Otherwise bring it here.
+        const w = wins[0]
+        if (!isMinimized(w) && isActive(w)) minimize(w)
+        else showWindow(w)
+    }
+
+    // ---------- Drag to reorder ----------
+    // While the list changes after a drop, icons skip their pop-in animation
+    property bool reordering: false
+    function dropPinned(id, iconItem, delta) {
+        const list = SettingsService.dockApps
+        const from = list.indexOf(id)
+        if (from < 0) return
+        const center = (horizontal ? iconItem.x + iconItem.width / 2 : iconItem.y + iconItem.height / 2) + delta
+        let to = 0
+        for (let i = 0; i < pinnedRepeater.count; i++) {
+            if (i === from) continue
+            const it = pinnedRepeater.itemAt(i)
+            if (!it) continue
+            const c = horizontal ? it.x + it.width / 2 : it.y + it.height / 2
+            if (center > c) to++
+        }
+        if (to === from) return
+        reordering = true
+        SettingsService.moveTo(id, to)
+        Qt.callLater(() => dock.reordering = false)
     }
 
     function openContext(id, entry, iconItem) {
@@ -177,8 +215,15 @@ PanelWindow {
         property string label: ""
         property bool running: false
         property bool dimmed: false
+        property real imageSize: dock.size - 8
+        property bool tile: false          // minimized window: icon on a small tile
+        property bool draggable: false
+        property real dragDelta: 0
+        readonly property bool dragging: iconMouse.dragging
         signal clicked()
         signal rightClicked()
+        signal dropped(real delta)
+        z: dragging ? 10 : 0
 
         // Magnification: the closer the mouse, the bigger (max 1.35)
         readonly property real mag: {
@@ -210,17 +255,31 @@ PanelWindow {
         readonly property real outY: dock.horizontal ? -1 : 0
         property real hop: 0
 
+        Rectangle {
+            visible: icon.tile
+            anchors.centerIn: parent
+            width: icon.imageSize + 10
+            height: icon.imageSize + 10
+            radius: Tokens.radiusMd
+            color: iconMouse.containsMouse ? Tokens.fillStrong : Tokens.fillHover
+            scale: iconImage.scale
+            transform: Translate { x: icon.hop * icon.outX; y: icon.hop * icon.outY }
+        }
+
         Image {
             id: iconImage
             anchors.centerIn: parent
-            width: dock.size - 8
-            height: dock.size - 8
+            width: icon.imageSize
+            height: icon.imageSize
             sourceSize: Qt.size(96, 96)
             source: icon.source
             transformOrigin: dock.side === "left" ? Item.Left : dock.side === "right" ? Item.Right : Item.Bottom
             scale: icon.mag
             Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
-            transform: Translate { x: icon.hop * icon.outX; y: icon.hop * icon.outY }
+            transform: Translate {
+                x: icon.hop * icon.outX + (dock.horizontal ? icon.dragDelta : 0)
+                y: icon.hop * icon.outY + (dock.horizontal ? 0 : icon.dragDelta)
+            }
         }
 
         SequentialAnimation {
@@ -238,10 +297,13 @@ PanelWindow {
             NumberAnimation { target: icon; property: "hop"; to: 0; duration: Tokens.durFast; easing.type: Tokens.easeShrink }
         }
 
-        // New icons pop in
+        // New icons pop in (not when the list was just reordered)
         scale: 0.4
         opacity: 0
-        Component.onCompleted: popIn.start()
+        Component.onCompleted: {
+            if (dock.reordering) { scale = 1; opacity = 1 }
+            else popIn.start()
+        }
         ParallelAnimation {
             id: popIn
             NumberAnimation { target: icon; property: "scale"; to: 1; duration: Tokens.durSlow; easing.type: Tokens.easeGrow }
@@ -260,7 +322,7 @@ PanelWindow {
             color: Tokens.surface
             border.color: Tokens.border
             border.width: 1
-            visible: iconMouse.containsMouse && icon.label !== "" && !dock.contextItem
+            visible: iconMouse.containsMouse && icon.label !== "" && !dock.contextItem && !icon.dragging
 
             Text {
                 id: labelText
@@ -288,8 +350,32 @@ PanelWindow {
             id: iconMouse
             anchors.fill: parent
             hoverEnabled: true
+            preventStealing: true
             acceptedButtons: Qt.LeftButton | Qt.RightButton
+            property real pressPos: 0
+            property bool dragging: false
+            property bool wasDrag: false
+            onPressed: mouse => {
+                pressPos = dock.horizontal ? mouse.x : mouse.y
+                wasDrag = false
+            }
+            onPositionChanged: mouse => {
+                if (!pressed || !icon.draggable || !(pressedButtons & Qt.LeftButton)) return
+                const d = (dock.horizontal ? mouse.x : mouse.y) - pressPos
+                if (!dragging && Math.abs(d) > 8) dragging = true
+                if (dragging) icon.dragDelta = d
+            }
+            onReleased: {
+                if (dragging) {
+                    wasDrag = true
+                    const d = icon.dragDelta
+                    dragging = false
+                    icon.dragDelta = 0
+                    icon.dropped(d)
+                }
+            }
             onClicked: mouse => {
+                if (wasDrag) return
                 if (mouse.button === Qt.RightButton) icon.rightClicked()
                 else icon.clicked()
             }
@@ -309,6 +395,25 @@ PanelWindow {
         dimmed: running && wins.every(w => dock.isMinimized(w))
         onClicked: dock.appClicked(modelData, entry, appIcon)
         onRightClicked: dock.openContext(modelData, entry, appIcon)
+    }
+
+    // A pinned app: can be dragged to a new place
+    component PinnedIcon: AppIcon {
+        id: pinnedIcon
+        draggable: true
+        onDropped: delta => dock.dropPinned(modelData, pinnedIcon, delta)
+    }
+
+    // A minimized window: a small tile; click brings it to the workspace you are on
+    component MinimizedIcon: DockIcon {
+        id: minIcon
+        required property var modelData
+        readonly property var entry: dock.findEntry(modelData.wayland?.appId ?? "")
+        tile: true
+        imageSize: Math.round(dock.size * 0.55)
+        source: Quickshell.iconPath(entry?.icon ?? (modelData.wayland?.appId ?? "").toLowerCase(), "application-x-executable")
+        label: modelData.title || entry?.name || "Window"
+        onClicked: dock.showWindow(modelData)
     }
 
     // ---------- Popups (window list, right-click menu) ----------
@@ -509,29 +614,34 @@ PanelWindow {
     Fillet {
         cx: dock.horizontal ? 0 : dock.side === "left" ? 14 : 0
         cy: dock.horizontal ? 0 : 0
-        x: dock.horizontal ? body.x - 14 : dock.side === "left" ? body.x : body.x + dock.across - 14
-        y: dock.horizontal ? body.y + dock.across - 14 : body.y - 14
+        x: dock.horizontal ? body.x - 14 : dock.side === "left" ? body.x : body.x + body.width - 14
+        y: dock.horizontal ? body.y + body.height - 14 : body.y - 14
         opacity: Math.min(1, dock.reveal * 3)
     }
     // After the dock (right of it, or below it)
     Fillet {
         cx: dock.horizontal ? 14 : dock.side === "left" ? 14 : 0
         cy: dock.horizontal ? 0 : 14
-        x: dock.horizontal ? body.x + dock.along : dock.side === "left" ? body.x : body.x + dock.across - 14
-        y: dock.horizontal ? body.y + dock.across - 14 : body.y + dock.along
+        x: dock.horizontal ? body.x + dock.along : dock.side === "left" ? body.x : body.x + body.width - 14
+        y: dock.horizontal ? body.y + body.height - 14 : body.y + dock.along
         opacity: Math.min(1, dock.reveal * 3)
     }
 
     Item {
         id: body
-        // Hidden = pushed out past the frame; revealed = resting on the frame's inner edge
-        readonly property real hiddenShift: (1 - dock.reveal) * (dock.across + dock.frameT + 4)
-        width: dock.horizontal ? dock.along : dock.across
-        height: dock.horizontal ? dock.across : dock.along
+        // Hidden = pushed out past the frame; revealed = resting on the frame's inner edge.
+        // The bounce past "revealed" stretches the dock instead of lifting it,
+        // so its edge never leaves the frame.
+        readonly property real rawShift: (1 - dock.reveal) * (dock.across + dock.frameT + 4)
+        readonly property real hiddenShift: Math.max(0, rawShift)
+        readonly property real stretch: Math.max(0, -rawShift)
+        readonly property real thick: dock.across + stretch
+        width: dock.horizontal ? dock.along : thick
+        height: dock.horizontal ? thick : dock.along
         x: dock.horizontal ? (dock.width - dock.along) / 2
          : dock.side === "left" ? dock.frameT - hiddenShift
-         : dock.width - dock.frameT - dock.across + hiddenShift
-        y: dock.horizontal ? dock.height - dock.frameT - dock.across + hiddenShift
+         : dock.width - dock.frameT - thick + hiddenShift
+        y: dock.horizontal ? dock.height - dock.frameT - thick + hiddenShift
          : (dock.height - dock.along) / 2
 
         // Icons sit on top of hoverZone, so the body tracks hover itself too
@@ -567,8 +677,9 @@ PanelWindow {
             HoverHandler { id: rowHover }
 
             Repeater {
+                id: pinnedRepeater
                 model: SettingsService.dockApps
-                AppIcon {}
+                PinnedIcon {}
             }
 
             Repeater {
@@ -588,6 +699,19 @@ PanelWindow {
                 label: "Settings"
                 running: ShellState.settingsOpen
                 onClicked: ShellState.settingsOpen = !ShellState.settingsOpen
+            }
+
+            // Minimized windows, after a second divider
+            Rectangle {
+                visible: dock.minimizedWins.length > 0
+                width: dock.horizontal ? 1 : dock.size * 0.7
+                height: dock.horizontal ? dock.size * 0.7 : 1
+                color: Tokens.border
+            }
+
+            Repeater {
+                model: dock.minimizedWins
+                MinimizedIcon {}
             }
         }
     }

@@ -27,7 +27,7 @@ PanelWindow {
     property var windows: []
 
     property real reveal: open ? 1 : 0
-    Behavior on reveal { NumberAnimation { duration: sw.open ? 220 : 120; easing.type: Tokens.easeMove } }
+    Behavior on reveal { id: openBehavior; NumberAnimation { duration: openBehavior.targetValue > 0.5 ? 320 : 120; easing.type: openBehavior.targetValue > 0.5 ? Tokens.easeGrow : Tokens.easeMove; easing.overshoot: Tokens.bounce } }
     visible: open || reveal > 0.01
 
     function addr(t) {

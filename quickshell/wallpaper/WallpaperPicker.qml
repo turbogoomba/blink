@@ -56,7 +56,7 @@ Scope {
         WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
         property real progress: root.open ? 1 : 0
-        Behavior on progress { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeMove } }
+        Behavior on progress { id: openBehavior; NumberAnimation { duration: openBehavior.targetValue > 0.5 ? 440 : 240; easing.type: openBehavior.targetValue > 0.5 ? Tokens.easeGrow : Tokens.easeShrink; easing.overshoot: Tokens.bounce } }
         visible: root.open || progress > 0
 
         onVisibleChanged: if (visible) keys.forceActiveFocus()

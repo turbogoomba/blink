@@ -29,10 +29,11 @@ PanelWindow {
     // Height of the sheet: grows out of the bar with a little bounce
     property real reveal: open ? 1 : 0
     Behavior on reveal {
+        id: openBehavior   // targetValue = where it is going, read before the animation starts
         NumberAnimation {
-            duration: cc.open ? 460 : 260
-            easing.type: cc.open ? Tokens.easeGrow : Tokens.easeShrink
-            easing.overshoot: 0.9
+            duration: openBehavior.targetValue > 0.5 ? 460 : 260
+            easing.type: openBehavior.targetValue > 0.5 ? Tokens.easeGrow : Tokens.easeShrink
+            easing.overshoot: Tokens.bounce
         }
     }
     visible: open || progress > 0 || reveal > 0
@@ -511,7 +512,7 @@ PanelWindow {
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.topMargin: Tokens.barHeight
-        anchors.rightMargin: Tokens.spaceSm
+        anchors.rightMargin: 6   // the frame: the sheet must sit flush against it
         width: 340
         readonly property real fullHeight: content.implicitHeight + 24
         height: fullHeight * Math.max(0, cc.reveal)

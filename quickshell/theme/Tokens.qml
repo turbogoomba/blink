@@ -66,4 +66,6 @@ Singleton {
 	readonly property int easeMove: Easing.OutCubic   // fades and movement
 	readonly property int easeGrow: Easing.OutBack    // things growing out of the frame/notch, press bounce
 	readonly property int easeShrink: Easing.InCubic  // things closing
+	// How far things overshoot when they open (with easeGrow). 0 = none, 1.7 = Qt's default
+	readonly property real bounce: 1.3
 }

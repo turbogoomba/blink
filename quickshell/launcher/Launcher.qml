@@ -21,10 +21,11 @@ PanelWindow {
     // 0 = tucked into the notch, 1 = fully open. Grows with a little bounce.
     property real reveal: ShellState.launcherOpen ? 1 : 0
     Behavior on reveal {
+        id: openBehavior   // targetValue = where it is going, read before the animation starts
         NumberAnimation {
-            duration: ShellState.launcherOpen ? 420 : 220
-            easing.type: ShellState.launcherOpen ? Tokens.easeGrow : Tokens.easeShrink
-            easing.overshoot: 0.8
+            duration: openBehavior.targetValue > 0.5 ? 420 : 220
+            easing.type: openBehavior.targetValue > 0.5 ? Tokens.easeGrow : Tokens.easeShrink
+            easing.overshoot: Tokens.bounce
         }
     }
     visible: ShellState.launcherOpen || reveal > 0.01

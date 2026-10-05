@@ -136,8 +136,8 @@ Rectangle {
     clip: true
 
     // Springy morph, like the Dynamic Island
-    Behavior on width  { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow; easing.overshoot: 0.7 } }
-    Behavior on height { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow; easing.overshoot: 0.7 } }
+    Behavior on width  { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow; easing.overshoot: Tokens.bounce } }
+    Behavior on height { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow; easing.overshoot: Tokens.bounce } }
     Behavior on radius { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
 
     // ---------- Bluetooth: lytt etter til/frakobling ----------

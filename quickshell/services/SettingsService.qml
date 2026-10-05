@@ -51,6 +51,14 @@ Singleton {
         dockApps = list
     }
 
+    // Put a pinned app at a new place in the list (drag and drop in the dock)
+    function moveTo(id, to) {
+        const list = dockApps.filter(a => a !== id)
+        if (list.length === dockApps.length) return
+        list.splice(Math.max(0, Math.min(list.length, to)), 0, id)
+        dockApps = list
+    }
+
     function isFavorite(id) { return favApps.indexOf(id) !== -1 }
     function addFavorite(id) { if (id && !isFavorite(id)) favApps = [...favApps, id] }
     function removeFavorite(id) { favApps = favApps.filter(a => a !== id) }
