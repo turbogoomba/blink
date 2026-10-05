@@ -34,7 +34,7 @@ Flickable {
         x: 28
         y: 28
         width: panel.width - 56
-        spacing: 14
+        spacing: Theme.Tokens.spaceLg
 
         // ---------- Overskrift ----------
         Text {
@@ -56,7 +56,7 @@ Flickable {
 
             Text {
                 anchors.left: parent.left
-                anchors.leftMargin: 14
+                anchors.leftMargin: Theme.Tokens.spaceLg
                 anchors.verticalCenter: parent.verticalCenter
                 text: NetworkService.ethernetConnected
                     ? "Wi-Fi  ·  Ethernet connected"
@@ -72,7 +72,7 @@ Flickable {
                 scale: toggleMouse.pressed ? Theme.Tokens.pressScale : 1
                 Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                 anchors.right: parent.right
-                anchors.rightMargin: 14
+                anchors.rightMargin: Theme.Tokens.spaceLg
                 anchors.verticalCenter: parent.verticalCenter
                 width: 38
                 height: 22
@@ -108,7 +108,7 @@ Flickable {
 
             Text {
                 anchors.left: parent.left
-                anchors.leftMargin: 4
+                anchors.leftMargin: Theme.Tokens.spaceXs
                 text: "Networks"
                 color: Theme.Tokens.textSecondary
                 font.family: Theme.Tokens.fontFamily
@@ -120,7 +120,7 @@ Flickable {
                 scale: refreshMouse.pressed ? Theme.Tokens.pressScale : 1
                 Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                 anchors.right: parent.right
-                anchors.rightMargin: 4
+                anchors.rightMargin: Theme.Tokens.spaceXs
                 text: NetworkService.scanning ? "Scanning..." : "Refresh"
                 color: refreshMouse.containsMouse ? Theme.Tokens.textPrimary : Theme.Tokens.accent
                 font.family: Theme.Tokens.fontFamily
@@ -181,7 +181,7 @@ Flickable {
 
                             Rectangle {
                                 anchors.fill: parent
-                                anchors.margins: 4
+                                anchors.margins: Theme.Tokens.spaceXs
                                 radius: Theme.Tokens.radiusSm
                                 color: Theme.Tokens.surfaceAlt
                                 visible: rowMouse.containsMouse && !net.isCurrent
@@ -203,9 +203,9 @@ Flickable {
 
                             Text {
                                 anchors.left: parent.left
-                                anchors.leftMargin: 14
+                                anchors.leftMargin: Theme.Tokens.spaceLg
                                 anchors.right: icons.left
-                                anchors.rightMargin: 12
+                                anchors.rightMargin: Theme.Tokens.spaceMd
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: net.modelData.ssid + (net.isCurrent ? "  ·  Connected" : "")
                                 color: Theme.Tokens.textPrimary
@@ -218,9 +218,9 @@ Flickable {
                             Row {
                                 id: icons
                                 anchors.right: parent.right
-                                anchors.rightMargin: 14
+                                anchors.rightMargin: Theme.Tokens.spaceLg
                                 anchors.verticalCenter: parent.verticalCenter
-                                spacing: 8
+                                spacing: Theme.Tokens.spaceSm
 
                                 Image {
                                     visible: net.modelData.secured
@@ -242,7 +242,7 @@ Flickable {
                             Rectangle {
                                 anchors.bottom: parent.bottom
                                 anchors.left: parent.left
-                                anchors.leftMargin: 14
+                                anchors.leftMargin: Theme.Tokens.spaceLg
                                 anchors.right: parent.right
                                 height: 1
                                 color: Theme.Tokens.border
@@ -258,9 +258,9 @@ Flickable {
 
                             Rectangle {
                                 anchors.left: parent.left
-                                anchors.leftMargin: 14
+                                anchors.leftMargin: Theme.Tokens.spaceLg
                                 anchors.right: joinBtn.left
-                                anchors.rightMargin: 8
+                                anchors.rightMargin: Theme.Tokens.spaceSm
                                 anchors.verticalCenter: parent.verticalCenter
                                 height: 30
                                 radius: Theme.Tokens.radiusSm
@@ -271,8 +271,8 @@ Flickable {
                                 TextInput {
                                     id: pw
                                     anchors.fill: parent
-                                    anchors.leftMargin: 10
-                                    anchors.rightMargin: 10
+                                    anchors.leftMargin: Theme.Tokens.spaceMd
+                                    anchors.rightMargin: Theme.Tokens.spaceMd
                                     verticalAlignment: TextInput.AlignVCenter
                                     echoMode: TextInput.Password
                                     color: Theme.Tokens.textPrimary
@@ -296,7 +296,7 @@ Flickable {
                                 scale: joinBtnMouse.pressed ? Theme.Tokens.pressScale : 1
                                 Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                                 anchors.right: parent.right
-                                anchors.rightMargin: 14
+                                anchors.rightMargin: Theme.Tokens.spaceLg
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: 64
                                 height: 30

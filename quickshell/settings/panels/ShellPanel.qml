@@ -27,7 +27,7 @@ Flickable {
 
     component SectionTitle: Text {
         width: col.width
-        topPadding: 8
+        topPadding: Theme.Tokens.spaceSm
         color: Theme.Tokens.textSecondary
         font.family: Theme.Tokens.fontFamily
         font.pixelSize: Theme.Tokens.fontBody
@@ -65,9 +65,9 @@ Flickable {
 
         Column {
             anchors.left: parent.left
-            anchors.leftMargin: 16
+            anchors.leftMargin: Theme.Tokens.spaceLg
             anchors.right: slot.left
-            anchors.rightMargin: 12
+            anchors.rightMargin: Theme.Tokens.spaceMd
             anchors.verticalCenter: parent.verticalCenter
             spacing: 2
 
@@ -93,7 +93,7 @@ Flickable {
         Item {
             id: slot
             anchors.right: parent.right
-            anchors.rightMargin: 16
+            anchors.rightMargin: Theme.Tokens.spaceLg
             anchors.verticalCenter: parent.verticalCenter
             width: childrenRect.width
             height: childrenRect.height
@@ -103,7 +103,7 @@ Flickable {
             visible: row.divider
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-            anchors.leftMargin: 16
+            anchors.leftMargin: Theme.Tokens.spaceLg
             anchors.right: parent.right
             height: 1
             color: Theme.Tokens.border
@@ -219,7 +219,7 @@ Flickable {
             id: track
             anchors.left: parent.left
             anchors.right: valText.left
-            anchors.rightMargin: 12
+            anchors.rightMargin: Theme.Tokens.spaceMd
             anchors.verticalCenter: parent.verticalCenter
             height: 4
             radius: 2
@@ -320,8 +320,8 @@ Flickable {
         TextInput {
             id: input
             anchors.fill: parent
-            anchors.leftMargin: 10
-            anchors.rightMargin: 10
+            anchors.leftMargin: Theme.Tokens.spaceMd
+            anchors.rightMargin: Theme.Tokens.spaceMd
             verticalAlignment: TextInput.AlignVCenter
             text: fld.value
             clip: true
@@ -349,7 +349,7 @@ Flickable {
         x: 28
         y: 28
         width: panel.width - 56
-        spacing: 10
+        spacing: Theme.Tokens.spaceMd
 
         Text {
             text: panel.page === "desktop" ? "Display & Dock"
@@ -360,14 +360,14 @@ Flickable {
             font.family: Theme.Tokens.fontFamily
             font.pixelSize: Theme.Tokens.fontLarge
             font.weight: Font.DemiBold
-            bottomPadding: 6
+            bottomPadding: Theme.Tokens.spaceSm
         }
 
         // ---------- Desktop & Dock ----------
         Column {
             visible: panel.page === "desktop"
             width: col.width
-            spacing: 10
+            spacing: Theme.Tokens.spaceMd
 
             SectionTitle { text: "Wallpaper" }
             Group {
@@ -405,7 +405,7 @@ Flickable {
                     subtitle: "Plays once after you log in"
                     divider: false
                     Row {
-                        spacing: 10
+                        spacing: Theme.Tokens.spaceMd
                         PushButton {
                             anchors.verticalCenter: parent.verticalCenter
                             text: "Play"
@@ -503,7 +503,7 @@ Flickable {
         Column {
             visible: panel.page === "corners"
             width: col.width
-            spacing: 10
+            spacing: Theme.Tokens.spaceMd
 
             Group {
                 SettingRow {
@@ -568,7 +568,7 @@ Flickable {
         Column {
             visible: panel.page === "notch"
             width: col.width
-            spacing: 10
+            spacing: Theme.Tokens.spaceMd
 
             SectionTitle { text: "Right side of the open notch" }
             Group {
@@ -597,7 +597,7 @@ Flickable {
                     Column {
                         x: 16
                         y: 12
-                        spacing: 8
+                        spacing: Theme.Tokens.spaceSm
 
                         Text {
                             text: "Calendar link (.ics from Mine studier). Press Enter to save."
@@ -632,7 +632,7 @@ Flickable {
         Column {
             visible: panel.page === "notifications"
             width: col.width
-            spacing: 10
+            spacing: Theme.Tokens.spaceMd
 
             Group {
                 SettingRow {

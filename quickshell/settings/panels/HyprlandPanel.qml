@@ -85,9 +85,9 @@ Flickable {
 
         Text {
             anchors.left: parent.left
-            anchors.leftMargin: 14
+            anchors.leftMargin: Theme.Tokens.spaceLg
             anchors.top: parent.top
-            anchors.topMargin: 12
+            anchors.topMargin: Theme.Tokens.spaceMd
             text: sr.label
             color: Theme.Tokens.textPrimary
             font.family: Theme.Tokens.fontFamily
@@ -96,9 +96,9 @@ Flickable {
 
         Text {
             anchors.right: parent.right
-            anchors.rightMargin: 14
+            anchors.rightMargin: Theme.Tokens.spaceLg
             anchors.top: parent.top
-            anchors.topMargin: 12
+            anchors.topMargin: Theme.Tokens.spaceMd
             text: sr.value.toFixed(sr.decimals)
             color: Theme.Tokens.textSecondary
             font.family: Theme.Tokens.fontFamily
@@ -109,11 +109,11 @@ Flickable {
         Item {
             id: track
             anchors.left: parent.left
-            anchors.leftMargin: 14
+            anchors.leftMargin: Theme.Tokens.spaceLg
             anchors.right: parent.right
-            anchors.rightMargin: 14
+            anchors.rightMargin: Theme.Tokens.spaceLg
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 10
+            anchors.bottomMargin: Theme.Tokens.spaceMd
             height: 20
 
             Rectangle {
@@ -156,7 +156,7 @@ Flickable {
         Rectangle {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-            anchors.leftMargin: 14
+            anchors.leftMargin: Theme.Tokens.spaceLg
             anchors.right: parent.right
             height: 1
             color: Theme.Tokens.border
@@ -175,7 +175,7 @@ Flickable {
 
     // ---------- Seksjonsoverskrift ----------
     component SectionTitle: Text {
-        leftPadding: 4
+        leftPadding: Theme.Tokens.spaceXs
         color: Theme.Tokens.textSecondary
         font.family: Theme.Tokens.fontFamily
         font.pixelSize: Theme.Tokens.fontBody
@@ -188,7 +188,7 @@ Flickable {
         x: 28
         y: 28
         width: panel.width - 56
-        spacing: 14
+        spacing: Theme.Tokens.spaceLg
 
         Text {
             text: "Hyprland"
@@ -204,7 +204,7 @@ Flickable {
 
             Text {
                 anchors.left: parent.left
-                anchors.leftMargin: 14
+                anchors.leftMargin: Theme.Tokens.spaceLg
                 anchors.verticalCenter: parent.verticalCenter
                 text: "Window mode"
                 color: Theme.Tokens.textPrimary
@@ -214,7 +214,7 @@ Flickable {
 
             Rectangle {
                 anchors.right: parent.right
-                anchors.rightMargin: 14
+                anchors.rightMargin: Theme.Tokens.spaceLg
                 anchors.verticalCenter: parent.verticalCenter
                 width: 200
                 height: 30
@@ -225,7 +225,7 @@ Flickable {
 
                 Row {
                     anchors.fill: parent
-                    anchors.margins: 3
+                    anchors.margins: Theme.Tokens.spaceXs
 
                     Repeater {
                         model: [

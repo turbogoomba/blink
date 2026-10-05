@@ -20,7 +20,7 @@ Flickable {
 
     // ---------- Seksjonsoverskrift ----------
     component SectionTitle: Text {
-        leftPadding: 4
+        leftPadding: Theme.Tokens.spaceXs
         color: Theme.Tokens.textSecondary
         font.family: Theme.Tokens.fontFamily
         font.pixelSize: Theme.Tokens.fontBody
@@ -60,7 +60,7 @@ Flickable {
 
                     Rectangle {
                         anchors.fill: parent
-                        anchors.margins: 4
+                        anchors.margins: Theme.Tokens.spaceXs
                         radius: Theme.Tokens.radiusSm
                         color: Theme.Tokens.surfaceAlt
                         visible: devMouse.containsMouse
@@ -83,7 +83,7 @@ Flickable {
                     Image {
                         id: devIcon
                         anchors.left: parent.left
-                        anchors.leftMargin: 14
+                        anchors.leftMargin: Theme.Tokens.spaceLg
                         anchors.verticalCenter: parent.verticalCenter
                         width: 20
                         height: 20
@@ -93,9 +93,9 @@ Flickable {
 
                     Column {
                         anchors.left: devIcon.right
-                        anchors.leftMargin: 12
+                        anchors.leftMargin: Theme.Tokens.spaceMd
                         anchors.right: action.left
-                        anchors.rightMargin: 12
+                        anchors.rightMargin: Theme.Tokens.spaceMd
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: 1
 
@@ -128,7 +128,7 @@ Flickable {
                         scale: forgetMouse.pressed ? Theme.Tokens.pressScale : 1
                         Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                         anchors.right: parent.right
-                        anchors.rightMargin: 14
+                        anchors.rightMargin: Theme.Tokens.spaceLg
                         anchors.verticalCenter: parent.verticalCenter
                         text: dl.paired ? "Forget" : "Connect"
                         color: dl.paired
@@ -151,7 +151,7 @@ Flickable {
                     Rectangle {
                         anchors.bottom: parent.bottom
                         anchors.left: parent.left
-                        anchors.leftMargin: 14
+                        anchors.leftMargin: Theme.Tokens.spaceLg
                         anchors.right: parent.right
                         height: 1
                         color: Theme.Tokens.border
@@ -168,7 +168,7 @@ Flickable {
         x: 28
         y: 28
         width: panel.width - 56
-        spacing: 14
+        spacing: Theme.Tokens.spaceLg
 
         Text {
             text: "Bluetooth"
@@ -189,7 +189,7 @@ Flickable {
 
             Text {
                 anchors.left: parent.left
-                anchors.leftMargin: 14
+                anchors.leftMargin: Theme.Tokens.spaceLg
                 anchors.verticalCenter: parent.verticalCenter
                 text: panel.adapter ? "Bluetooth" : "Bluetooth  ·  No adapter found"
                 color: Theme.Tokens.textPrimary
@@ -203,7 +203,7 @@ Flickable {
                 Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                 readonly property bool on: panel.adapter?.enabled ?? false
                 anchors.right: parent.right
-                anchors.rightMargin: 14
+                anchors.rightMargin: Theme.Tokens.spaceLg
                 anchors.verticalCenter: parent.verticalCenter
                 width: 38
                 height: 22

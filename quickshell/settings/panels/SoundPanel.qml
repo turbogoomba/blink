@@ -41,7 +41,7 @@ Flickable {
             scale: muteIconMouse.pressed ? Theme.Tokens.pressScaleIcon : 1
             Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
             anchors.left: parent.left
-            anchors.leftMargin: 14
+            anchors.leftMargin: Theme.Tokens.spaceLg
             anchors.verticalCenter: parent.verticalCenter
             width: 20
             height: 20
@@ -62,9 +62,9 @@ Flickable {
         Item {
             id: slider
             anchors.left: muteIcon.right
-            anchors.leftMargin: 12
+            anchors.leftMargin: Theme.Tokens.spaceMd
             anchors.right: pct.left
-            anchors.rightMargin: 12
+            anchors.rightMargin: Theme.Tokens.spaceMd
             anchors.verticalCenter: parent.verticalCenter
             height: 20
 
@@ -107,7 +107,7 @@ Flickable {
         Text {
             id: pct
             anchors.right: parent.right
-            anchors.rightMargin: 14
+            anchors.rightMargin: Theme.Tokens.spaceLg
             anchors.verticalCenter: parent.verticalCenter
             width: 34
             horizontalAlignment: Text.AlignRight
@@ -153,7 +153,7 @@ Flickable {
 
                     Rectangle {
                         anchors.fill: parent
-                        anchors.margins: 4
+                        anchors.margins: Theme.Tokens.spaceXs
                         radius: Theme.Tokens.radiusSm
                         color: Theme.Tokens.surfaceAlt
                         visible: devMouse.containsMouse
@@ -169,9 +169,9 @@ Flickable {
 
                     Text {
                         anchors.left: parent.left
-                        anchors.leftMargin: 14
+                        anchors.leftMargin: Theme.Tokens.spaceLg
                         anchors.right: check.left
-                        anchors.rightMargin: 12
+                        anchors.rightMargin: Theme.Tokens.spaceMd
                         anchors.verticalCenter: parent.verticalCenter
                         text: panel.nameOf(dev.modelData)
                         color: Theme.Tokens.textPrimary
@@ -184,7 +184,7 @@ Flickable {
                     Image {
                         id: check
                         anchors.right: parent.right
-                        anchors.rightMargin: 14
+                        anchors.rightMargin: Theme.Tokens.spaceLg
                         anchors.verticalCenter: parent.verticalCenter
                         visible: dev.selected
                         width: 16
@@ -196,7 +196,7 @@ Flickable {
                     Rectangle {
                         anchors.bottom: parent.bottom
                         anchors.left: parent.left
-                        anchors.leftMargin: 14
+                        anchors.leftMargin: Theme.Tokens.spaceLg
                         anchors.right: parent.right
                         height: 1
                         color: Theme.Tokens.border
@@ -213,7 +213,7 @@ Flickable {
         x: 28
         y: 28
         width: panel.width - 56
-        spacing: 14
+        spacing: Theme.Tokens.spaceLg
 
         Text {
             text: "Sound"
@@ -224,7 +224,7 @@ Flickable {
         }
 
         Text {
-            leftPadding: 4
+            leftPadding: Theme.Tokens.spaceXs
             text: "Output"
             color: Theme.Tokens.textSecondary
             font.family: Theme.Tokens.fontFamily
@@ -245,7 +245,7 @@ Flickable {
         }
 
         Text {
-            leftPadding: 4
+            leftPadding: Theme.Tokens.spaceXs
             text: "Input"
             color: Theme.Tokens.textSecondary
             font.family: Theme.Tokens.fontFamily

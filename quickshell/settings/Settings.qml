@@ -40,9 +40,9 @@ FloatingWindow {
 
         Column {
             anchors { top: parent.top; left: parent.left; right: parent.right }
-            anchors.topMargin: 20
-            anchors.leftMargin: 10
-            anchors.rightMargin: 11
+            anchors.topMargin: Theme.Tokens.spaceXl
+            anchors.leftMargin: Theme.Tokens.spaceMd
+            anchors.rightMargin: Theme.Tokens.spaceMd
             spacing: 2
 
             Repeater {
@@ -65,7 +65,7 @@ FloatingWindow {
                     Image {
                         id: itemIcon
                         anchors.left: parent.left
-                        anchors.leftMargin: 10
+                        anchors.leftMargin: Theme.Tokens.spaceMd
                         anchors.verticalCenter: parent.verticalCenter
                         width: 16
                         height: 16
@@ -75,7 +75,7 @@ FloatingWindow {
 
                     Text {
                         anchors.left: itemIcon.right
-                        anchors.leftMargin: 10
+                        anchors.leftMargin: Theme.Tokens.spaceMd
                         anchors.verticalCenter: parent.verticalCenter
                         text: item.modelData.label
                         color: Theme.Tokens.textPrimary
