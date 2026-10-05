@@ -32,8 +32,8 @@ Flickable {
         width: col.width
         height: 52
         radius: Theme.Tokens.radiusMd
-        color: Theme.Tokens.surface
-        border.color: Theme.Tokens.border
+        color: Theme.Tokens.fillIdle
+        border.color: "transparent"
         border.width: 1
 
         Image {
@@ -73,7 +73,7 @@ Flickable {
                 width: parent.width
                 height: 4
                 radius: 2
-                color: Theme.Tokens.border
+                color: Theme.Tokens.fillStrong
 
                 Rectangle {
                     width: knob.x + knob.width / 2
@@ -128,8 +128,8 @@ Flickable {
         width: col.width
         height: dlCol.implicitHeight
         radius: Theme.Tokens.radiusMd
-        color: Theme.Tokens.surface
-        border.color: Theme.Tokens.border
+        color: Theme.Tokens.fillIdle
+        border.color: "transparent"
         border.width: 1
         visible: devices.length > 0
 
@@ -155,7 +155,7 @@ Flickable {
                         anchors.fill: parent
                         anchors.margins: Theme.Tokens.spaceXs
                         radius: Theme.Tokens.radiusSm
-                        color: Theme.Tokens.surfaceAlt
+                        color: Theme.Tokens.fillIdle
                         visible: devMouse.containsMouse
                     }
 
@@ -199,7 +199,7 @@ Flickable {
                         anchors.leftMargin: Theme.Tokens.spaceLg
                         anchors.right: parent.right
                         height: 1
-                        color: Theme.Tokens.border
+                        color: Theme.Tokens.divider
                         visible: dev.index < dl.devices.length - 1
                     }
                 }

@@ -50,8 +50,8 @@ Flickable {
             width: parent.width
             height: 48
             radius: Theme.Tokens.radiusMd
-            color: Theme.Tokens.surface
-            border.color: Theme.Tokens.border
+            color: Theme.Tokens.fillIdle
+            border.color: "transparent"
             border.width: 1
 
             Text {
@@ -77,7 +77,7 @@ Flickable {
                 width: 38
                 height: 22
                 radius: 11
-                color: NetworkService.wifiEnabled ? Theme.Tokens.accent : Theme.Tokens.border
+                color: NetworkService.wifiEnabled ? Theme.Tokens.accent : Theme.Tokens.fillStrong
                 Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
 
                 Rectangle {
@@ -143,8 +143,8 @@ Flickable {
             width: parent.width
             height: list.implicitHeight
             radius: Theme.Tokens.radiusMd
-            color: Theme.Tokens.surface
-            border.color: Theme.Tokens.border
+            color: Theme.Tokens.fillIdle
+            border.color: "transparent"
             border.width: 1
             visible: NetworkService.wifiEnabled && panel.networks.length > 0
 
@@ -183,7 +183,7 @@ Flickable {
                                 anchors.fill: parent
                                 anchors.margins: Theme.Tokens.spaceXs
                                 radius: Theme.Tokens.radiusSm
-                                color: Theme.Tokens.surfaceAlt
+                                color: Theme.Tokens.fillIdle
                                 visible: rowMouse.containsMouse && !net.isCurrent
                             }
 
@@ -245,7 +245,7 @@ Flickable {
                                 anchors.leftMargin: Theme.Tokens.spaceLg
                                 anchors.right: parent.right
                                 height: 1
-                                color: Theme.Tokens.border
+                                color: Theme.Tokens.divider
                                 visible: !net.last || net.open
                             }
                         }
@@ -264,8 +264,8 @@ Flickable {
                                 anchors.verticalCenter: parent.verticalCenter
                                 height: 30
                                 radius: Theme.Tokens.radiusSm
-                                color: Theme.Tokens.bg
-                                border.color: Theme.Tokens.border
+                                color: Theme.Tokens.fillIdle
+                                border.color: "transparent"
                                 border.width: 1
 
                                 TextInput {
@@ -306,7 +306,7 @@ Flickable {
                                 Text {
                                     anchors.centerIn: parent
                                     text: "Join"
-                                    color: "white"
+                                    color: Theme.Tokens.onAccent
                                     font.family: Theme.Tokens.fontFamily
                                     font.pixelSize: Theme.Tokens.fontBody
                                     font.weight: Font.Medium

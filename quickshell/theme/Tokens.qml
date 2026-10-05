@@ -31,6 +31,9 @@ Singleton {
 	readonly property color fillHover: Qt.rgba(1, 1, 1, 0.12)
 	readonly property color fillStrong: Qt.rgba(1, 1, 1, 0.20)
 	// Scale while pressed: normal controls, small icon targets
+	// Thin lines between rows, and text that sits on the accent color
+	readonly property color divider: Qt.rgba(1, 1, 1, 0.08)
+	readonly property color onAccent: Qt.rgba(0, 0, 0, 0.85)
 	readonly property real pressScale: 0.96
 	readonly property real pressScaleIcon: 0.88
 

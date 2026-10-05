@@ -41,8 +41,8 @@ Flickable {
         width: col.width
         height: inner.implicitHeight
         radius: Theme.Tokens.radiusMd
-        color: Theme.Tokens.surface
-        border.color: Theme.Tokens.border
+        color: Theme.Tokens.fillIdle
+        border.color: "transparent"
         border.width: 1
         clip: true
 
@@ -106,7 +106,7 @@ Flickable {
             anchors.leftMargin: Theme.Tokens.spaceLg
             anchors.right: parent.right
             height: 1
-            color: Theme.Tokens.border
+            color: Theme.Tokens.divider
         }
     }
 
@@ -121,7 +121,7 @@ Flickable {
         width: 38
         height: 22
         radius: 11
-        color: checked ? Theme.Tokens.accent : Theme.Tokens.border
+        color: checked ? Theme.Tokens.accent : Theme.Tokens.fillStrong
         Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
 
         Rectangle {
@@ -153,8 +153,8 @@ Flickable {
         width: segRow.implicitWidth + 4
         height: 26
         radius: Theme.Tokens.radiusSm
-        color: Theme.Tokens.surfaceAlt
-        border.color: Theme.Tokens.border
+        color: Theme.Tokens.fillIdle
+        border.color: "transparent"
         border.width: 1
 
         Row {
@@ -176,14 +176,14 @@ Flickable {
                     height: 22
                     radius: Theme.Tokens.radiusSm
                     color: selected ? Theme.Tokens.accent
-                         : optMouse.containsMouse ? Theme.Tokens.surface : "transparent"
+                         : optMouse.containsMouse ? Theme.Tokens.fillHover : "transparent"
                     Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
 
                     Text {
                         id: optText
                         anchors.centerIn: parent
                         text: opt.modelData.label
-                        color: opt.selected ? "white" : Theme.Tokens.textPrimary
+                        color: opt.selected ? Theme.Tokens.onAccent : Theme.Tokens.textPrimary
                         font.family: Theme.Tokens.fontFamily
                         font.pixelSize: Theme.Tokens.fontBody
                     }
@@ -223,7 +223,7 @@ Flickable {
             anchors.verticalCenter: parent.verticalCenter
             height: 4
             radius: 2
-            color: Theme.Tokens.border
+            color: Theme.Tokens.fillStrong
 
             Rectangle {
                 width: parent.width * sl.frac
@@ -288,7 +288,7 @@ Flickable {
             id: btnText
             anchors.centerIn: parent
             text: btn.text
-            color: "white"
+            color: Theme.Tokens.onAccent
             font.family: Theme.Tokens.fontFamily
             font.pixelSize: Theme.Tokens.fontBody
             font.weight: Font.Medium
@@ -313,8 +313,8 @@ Flickable {
         width: col.width - 32
         height: 30
         radius: Theme.Tokens.radiusSm
-        color: Theme.Tokens.surfaceAlt
-        border.color: input.activeFocus ? Theme.Tokens.accent : Theme.Tokens.border
+        color: Theme.Tokens.fillIdle
+        border.color: input.activeFocus ? Theme.Tokens.accent : "transparent"
         border.width: 1
 
         TextInput {
