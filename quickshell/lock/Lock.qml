@@ -10,8 +10,8 @@ import Quickshell.Services.UPower
 import "../services"
 import "../theme"
 
-// Mac Rice lock screen (v2): same black frame, bar and notch as the desktop.
-// Lock with:  qs -p <shell> ipc call lock lock   (hypridle does this)
+// Blink lock screen (v2): same black frame, bar and notch as the desktop.
+// Lock with:  qs -c blink ipc call lock lock   (hypridle does this)
 Scope {
     id: root
 

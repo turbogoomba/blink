@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Kobler Mac Rice-temaene for Firefox, Vesktop og Spotify til riktige steder.
+# Kobler Blink-temaene for Firefox, Vesktop og Spotify til riktige steder.
 # Filene blir liggende i repoet; programmene får bare snarveier til dem.
 # Trygt å kjøre flere ganger.
 
@@ -42,7 +42,7 @@ echo
 # ---------- Vesktop ----------
 echo "Vesktop"
 link "$APPS/vesktop/MacRice.theme.css" "$HOME/.config/vesktop/themes/MacRice.theme.css"
-echo "  -> Slå på i Vesktop: Settings > Vencord > Themes > Mac Rice"
+echo "  -> Slå på i Vesktop: Settings > Vencord > Themes > Blink"
 echo
 
 # ---------- Spotify (Spicetify) ----------

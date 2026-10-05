@@ -1,11 +1,11 @@
-/* Mac Rice — mørk bakgrunn på nye faner */
+/* Blink — mørk bakgrunn på nye faner */
 @-moz-document url("about:newtab"), url("about:home"), url("about:blank") {
   body {
     background-color: #1c1c1e !important;
   }
 }
 
-/* Mac Rice — minimal new tab */
+/* Blink — minimal new tab */
 @-moz-document url("about:newtab"), url("about:home") {
   body { background: #1c1c1e !important; }
 

@@ -6,7 +6,7 @@ import Quickshell.Io
 
 // Reads the OsloMet timetable (ICS link) and exposes the next classes.
 // Settings > Notch decides: auto (timetable if a link exists), timetable or buses.
-// The link comes from Settings, or ~/.config/mac-hypr-rice/timetable-url as fallback.
+// The link comes from Settings, or ~/.config/blink/timetable-url as fallback.
 Singleton {
     id: root
 
@@ -27,7 +27,7 @@ Singleton {
     // Old link file (fallback)
     Process {
         id: readCfg
-        command: ["sh", "-c", "cat \"$HOME/.config/mac-hypr-rice/timetable-url\" 2>/dev/null"]
+        command: ["sh", "-c", "cat \"$HOME/.config/blink/timetable-url\" 2>/dev/null"]
         stdout: StdioCollector {
             onStreamFinished: root.fileUrl = text.trim()
         }

@@ -1,4 +1,4 @@
-# mac-hypr-rice
+# Blink
 
 A macOS-inspired desktop for Hyprland, built with Quickshell. Black frame, a notch with a face,
 and everything grows out of the bar.
@@ -30,8 +30,8 @@ and everything grows out of the bar.
 
 ## Install
 ```
-git clone https://github.com/turbogoomba/mac-hypr-rice ~/Documents/GitHub/mac-hypr-rice
-cd ~/Documents/GitHub/mac-hypr-rice
+git clone https://github.com/turbogoomba/blink ~/Documents/GitHub/blink
+cd ~/Documents/GitHub/blink
 ./install.sh
 ```
 Log out and back in when it is done.
@@ -54,5 +54,5 @@ hypr/        Hyprland config (Lua)
 quickshell/  The shell: bar, notch, dock, control center, services
 sddm/        Login screen theme
 apps/        Firefox, Spotify and Vesktop themes
-systemd/     Quickshell service
+systemd/     Blink shell service
 ```

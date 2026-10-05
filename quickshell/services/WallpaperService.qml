@@ -53,7 +53,7 @@ Singleton {
     // ---------- Slideshow ----------
     FileView {
         id: settings
-        path: Quickshell.env("HOME") + "/.config/mac-hypr-rice/slideshow"
+        path: Quickshell.env("HOME") + "/.config/blink/slideshow"
         printErrors: false
         onLoaded: root.slideshowMinutes = parseInt(text()) || 0
     }

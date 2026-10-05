@@ -4,7 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// All shell settings, saved to ~/.config/mac-hypr-rice/settings.json
+// All shell settings, saved to ~/.config/blink/settings.json
 // (per machine, outside the repo). Change a value here -> it is saved automatically.
 Singleton {
     id: root
@@ -68,7 +68,7 @@ Singleton {
     property alias nightLight: adapter.nightLight
     property alias nightTemp: adapter.nightTemp
 
-    readonly property string dir: Quickshell.env("HOME") + "/.config/mac-hypr-rice"
+    readonly property string dir: Quickshell.env("HOME") + "/.config/blink"
 
     Process {
         id: mkdir

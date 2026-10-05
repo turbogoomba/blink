@@ -1,10 +1,10 @@
 [SddmGreeterTheme]
-Name=Mac Rice
-Description=Login screen matching the Mac Rice shell
+Name=Blink
+Description=Login screen matching the Blink shell
 Author=turbogoomba
 Type=sddm-theme
 Version=1.0
-Website=https://github.com/turbogoomba/mac-hypr-rice
+Website=https://github.com/turbogoomba/blink
 MainScript=Main.qml
 ConfigFile=theme.conf
 QtVersion=6

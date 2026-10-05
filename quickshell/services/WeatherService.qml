@@ -26,7 +26,7 @@ Singleton {
 
     Process {
         id: proc
-        command: ["curl", "-s", "-A", "mac-hypr-rice github.com/turbogoomba",
+        command: ["curl", "-s", "-A", "blink github.com/turbogoomba/blink",
             `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${root.lat}&lon=${root.lon}`]
         stdout: StdioCollector {
             onStreamFinished: {

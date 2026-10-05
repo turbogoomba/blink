@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Mac Rice installer: sets up the whole desktop on a new machine (Arch Linux).
+# Blink installer: sets up the whole desktop on a new machine (Arch Linux).
 # Safe to run again: it skips what is already done and backs up what it replaces.
 #
 #   ./install.sh            ask before each step
@@ -48,7 +48,7 @@ link() {
     ok "$dst -> $src"
 }
 
-echo "Mac Rice installer"
+echo "Blink installer"
 echo "  repo:    $REPO"
 echo "  machine: $HOST"
 
@@ -129,14 +129,15 @@ else
 fi
 
 # ---------- 3. Quickshell service ----------
-bold "3. Quickshell"
-if ask "Set up Quickshell as a service (starts with Hyprland, restarts if it crashes)?"; then
-    link "$REPO/systemd/quickshell.service" "$HOME/.config/systemd/user/quickshell.service"
+bold "3. Blink shell"
+if ask "Set up the Blink shell as a service (starts with Hyprland, restarts if it crashes)?"; then
+    link "$REPO/systemd/blink.service" "$HOME/.config/systemd/user/blink.service"
+    link "$REPO/quickshell" "$HOME/.config/quickshell/blink"
     systemctl --user daemon-reload && ok "systemd reloaded"
-    mkdir -p "$HOME/.config/mac-hypr-rice" "$HOME/Pictures/Wallpapers" "$HOME/Videos/Recordings"
-    ok "created ~/.config/mac-hypr-rice, ~/Pictures/Wallpapers, ~/Videos/Recordings"
+    mkdir -p "$HOME/.config/blink" "$HOME/Pictures/Wallpapers" "$HOME/Videos/Recordings"
+    ok "created ~/.config/blink, ~/Pictures/Wallpapers, ~/Videos/Recordings"
 else
-    skip "Quickshell"
+    skip "Blink shell"
 fi
 
 # ---------- 4. System services ----------
@@ -149,19 +150,19 @@ fi
 
 # ---------- 5. Login screen ----------
 bold "5. Login screen (SDDM)"
-if [ -d "$REPO/sddm/mac-rice" ] && ask "Install the Mac Rice login screen?"; then
+if [ -d "$REPO/sddm/blink" ] && ask "Install the Blink login screen?"; then
     sudo mkdir -p /usr/share/sddm/themes /etc/sddm.conf.d
-    sudo cp -r "$REPO/sddm/mac-rice" /usr/share/sddm/themes/ && ok "theme copied"
+    sudo cp -r "$REPO/sddm/blink" /usr/share/sddm/themes/ && ok "theme copied"
 
     wall="$(find "$HOME/Pictures/Wallpapers" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.png' -o -iname '*.jpeg' \) | head -1)"
     if [ -n "$wall" ]; then
-        sudo cp "$wall" /usr/share/sddm/themes/mac-rice/background.jpg && ok "background: $(basename "$wall")"
+        sudo cp "$wall" /usr/share/sddm/themes/blink/background.jpg && ok "background: $(basename "$wall")"
     else
         warn "no wallpaper found in ~/Pictures/Wallpapers, the login screen will be dark"
     fi
 
-    printf '[Theme]\nCurrent=mac-rice\nCursorTheme=macOS\nCursorSize=24\n' | sudo tee /etc/sddm.conf.d/theme.conf >/dev/null
-    ok "SDDM uses mac-rice"
+    printf '[Theme]\nCurrent=blink\nCursorTheme=macOS\nCursorSize=24\n' | sudo tee /etc/sddm.conf.d/theme.conf >/dev/null
+    ok "SDDM uses blink"
 
     current="$(systemctl show -p Id --value display-manager 2>/dev/null)"
     if [ -z "$current" ]; then
@@ -193,5 +194,5 @@ cat <<EOF
   - Check monitors in hypr/machines/$HOST.lua (names from: hyprctl monitors).
   - Put wallpapers in ~/Pictures/Wallpapers, then pick one with Super+W.
   - Timetable in the notch: Settings > Notch > paste your calendar link.
-  - Restart the shell any time with: systemctl --user restart quickshell
+  - Restart the shell any time with: systemctl --user restart blink
 EOF

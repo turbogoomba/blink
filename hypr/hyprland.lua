@@ -11,7 +11,7 @@ hl.env("QS_ICON_THEME", "Papirus-Dark")
 
 ---- AUTOSTART ----
 hl.on("hyprland.start", function()
-    hl.exec_cmd("sh -c 'dbus-update-activation-environment --systemd --all; systemctl --user start quickshell.service hypridle.service'")
+    hl.exec_cmd("sh -c 'dbus-update-activation-environment --systemd --all; systemctl --user start blink.service hypridle.service'")
     hl.exec_cmd("awww-daemon")
 end)
 

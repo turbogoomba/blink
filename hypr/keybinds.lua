@@ -1,7 +1,7 @@
 -- ~/.config/hypr/keybinds.lua
 -- Converted from keybinds.conf (hyprlang -> Lua, Hyprland 0.55+)
 
-local qs = "qs -p /home/tallman/Documents/GitHub/mac-hypr-rice/quickshell ipc call "
+local qs = "qs -c blink ipc call "
 local terminal    = "kitty"
 local fileManager = "thunar"
 local mainMod      = "SUPER"
@@ -11,7 +11,7 @@ local mainMod      = "SUPER"
 ----------------------
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
-hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("qs -p /home/tallman/Documents/GitHub/mac-hypr-rice/quickshell ipc call launcher toggle"))
+hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("qs -c blink ipc call launcher toggle"))
 hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("loginctl lock-session"))
 hl.bind("Print", hl.dsp.exec_cmd(qs .. "screenshot region"))
 hl.bind("F6", hl.dsp.exec_cmd(qs .. "screenshot region"))
@@ -25,8 +25,8 @@ hl.bind(mainMod .. " + C", hl.dsp.window.close())
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + M", hl.dsp.window.move({ workspace = "special:minimized", follow = false }))
 hl.bind(mainMod .. " + SHIFT + M", hl.dsp.workspace.toggle_special("minimized"))
-hl.bind(mainMod .. " + ESCAPE", hl.dsp.exec_cmd("qs -p /home/tallman/Documents/GitHub/mac-hypr-rice/quickshell ipc call lock lock"))
-hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd("qs -p /home/tallman/Documents/GitHub/mac-hypr-rice/quickshell ipc call mission toggle"))
+hl.bind(mainMod .. " + ESCAPE", hl.dsp.exec_cmd("qs -c blink ipc call lock lock"))
+hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd("qs -c blink ipc call mission toggle"))
 ------------------
 ---- WORKSPACES ----
 ------------------
@@ -86,7 +86,7 @@ hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), { locked = true, repeating = true })
 hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true, repeating = true })
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true, repeating = true })
-local osd = "qs -p /home/tallman/Documents/GitHub/mac-hypr-rice/quickshell ipc call osd "
+local osd = "qs -c blink ipc call osd "
 hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd(osd .. "brightnessUp"), { locked = true, repeating = true })
 hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd(osd .. "brightnessDown"), { locked = true, repeating = true })
 
@@ -103,9 +103,9 @@ hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("hyprctl dispatch dpms off &&
 hl.layer_rule({ match = { namespace = "missioncontrol" }, blur = true, ignore_alpha = 0.1 })
 
 -- Bakgrunnsvelger
-hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("qs -p /home/tallman/Documents/GitHub/mac-hypr-rice/quickshell ipc call wallpaper toggle"))
+hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("qs -c blink ipc call wallpaper toggle"))
 
 ---- ALT+TAB ----
-local sw = "qs -p /home/tallman/Documents/GitHub/mac-hypr-rice/quickshell ipc call switcher "
+local sw = "qs -c blink ipc call switcher "
 hl.bind("ALT + TAB", hl.dsp.exec_cmd(sw .. "next"))
 hl.bind("ALT + SHIFT + TAB", hl.dsp.exec_cmd(sw .. "prev"))

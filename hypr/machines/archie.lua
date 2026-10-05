@@ -15,7 +15,7 @@ hl.config({
     },
 })
 
-local qs = "qs -p " .. os.getenv("HOME") .. "/Documents/GitHub/mac-hypr-rice/quickshell ipc call "
+local qs = "qs -c blink ipc call "
 
 -- Tre fingre sidelengs: bytt arbeidsflate
 hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })

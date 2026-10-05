@@ -19,7 +19,7 @@ Singleton {
         const xhr = new XMLHttpRequest()
         xhr.open("POST", "https://api.entur.io/journey-planner/v3/graphql")
         xhr.setRequestHeader("Content-Type", "application/json")
-        xhr.setRequestHeader("ET-Client-Name", "herman-mac-hypr-rice")
+        xhr.setRequestHeader("ET-Client-Name", "herman-blink")
         xhr.onreadystatechange = () => {
             if (xhr.readyState !== XMLHttpRequest.DONE) return
             root.loading = false

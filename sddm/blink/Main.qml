@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Effects
 
-// Mac Rice login screen for SDDM (Qt 6)
+// Blink login screen for SDDM (Qt 6)
 Rectangle {
     id: root
     width: 1920
