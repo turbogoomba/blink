@@ -64,6 +64,13 @@ Singleton {
     // Accent color from the wallpaper
     property alias accentFromWallpaper: adapter.accentFromWallpaper
 
+    // Notifications: "notch" (one at a time in the notch) or "corner" (cards out of the frame)
+    property alias notifStyle: adapter.notifStyle
+    property alias notifCorner: adapter.notifCorner      // "left" or "right"
+    property alias notifMax: adapter.notifMax            // cards on screen
+    property alias notifTimeout: adapter.notifTimeout    // seconds
+    property alias notifShowBody: adapter.notifShowBody
+
     // Night Shift
     property alias nightLight: adapter.nightLight
     property alias nightTemp: adapter.nightTemp
@@ -105,6 +112,11 @@ Singleton {
             property bool accentFromWallpaper: true
             property bool nightLight: false
             property int nightTemp: 4000
+            property string notifStyle: "notch"
+            property string notifCorner: "right"
+            property int notifMax: 3
+            property int notifTimeout: 5
+            property bool notifShowBody: true
         }
     }
 }

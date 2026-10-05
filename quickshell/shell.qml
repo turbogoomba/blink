@@ -40,6 +40,7 @@ ShellRoot {
     BarUI.HotCorners {}
     BarUI.Osd {}
     BarUI.Calendar {}
+    BarUI.NotifCards {}
     BarUI.Weather {}
     BarUI.SoundMenu {}
     SwitcherUI.Switcher {}

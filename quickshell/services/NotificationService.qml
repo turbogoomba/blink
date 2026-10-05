@@ -2,6 +2,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Services.Notifications
+import Quickshell.Hyprland
 
 Singleton {
     id: root
@@ -16,6 +17,8 @@ Singleton {
         keepOnReload: false
         bodySupported: true
         imageSupported: true
+        actionsSupported: true
+        inlineReplySupported: true
 
         onNotification: n => {
             n.tracked = true
@@ -29,6 +32,10 @@ Singleton {
             root.unread += 1
 
             if (ShellState.doNotDisturb) return
+            if (SettingsService.notifStyle === "corner") {
+                root.addPopup(n)
+                return
+            }
             root.current = n
             hideTimer.restart()
         }
@@ -36,8 +43,113 @@ Singleton {
 
     Timer {
         id: hideTimer
-        interval: 5000
+        interval: SettingsService.notifTimeout * 1000
         onTriggered: root.hide()
+    }
+
+    // ---------- Corner cards ----------
+    // Newest first. Each card: { uid, n, appName, summary, body, icon, time, actions, due }
+    property var popups: []
+    property bool popupsPaused: false
+    property int nextUid: 1
+
+    function addPopup(n) {
+        const card = {
+            uid: nextUid++,
+            n: n,
+            appName: n.appName ?? "",
+            desktopEntry: n.desktopEntry ?? "",
+            summary: n.summary ?? "",
+            body: n.body ?? "",
+            icon: iconFor(n),
+            time: new Date(),
+            // Some apps (Telegram, KDE Connect...) let you answer right in the notification
+            canReply: n.hasInlineReply ?? false,
+            replyHint: n.inlineReplyPlaceholder || "Reply",
+            // App buttons, like "Reply". Not the plain "default" click action.
+            actions: (n.actions ?? []).filter(a => a.identifier !== "default").map(a => ({ id: a.identifier, text: a.text })),
+            due: Date.now() + SettingsService.notifTimeout * 1000
+        }
+        popups = [card, ...popups].slice(0, 20)
+        // The app can take it back (for example when you read the message there)
+        n.closed.connect(() => removePopup(card.uid))
+    }
+
+    function removePopup(uid) {
+        popups = popups.filter(c => c.uid !== uid)
+    }
+
+    // You closed it: tell the app, keep it in the history
+    function dismissPopup(uid) {
+        const c = popups.find(c => c.uid === uid)
+        removePopup(uid)
+        try { c?.n?.dismiss() } catch (e) {}
+    }
+
+    // Clicked: do what the app asks for a click, and bring its window forward.
+    // Discord and many other apps send no click action, so focusing the window is what opens the chat.
+    function openPopup(uid) {
+        const c = popups.find(c => c.uid === uid)
+        if (!c) return
+        removePopup(uid)
+        try {
+            const d = (c.n?.actions ?? []).find(a => a.identifier === "default")
+            d?.invoke()
+        } catch (e) {}
+        const keys = [c.desktopEntry, c.appName].filter(k => k).map(k => k.toLowerCase())
+        for (const t of Hyprland.toplevels.values) {
+            const id = (t.wayland?.appId ?? "").toLowerCase()
+            if (id && keys.some(k => id === k || id.indexOf(k) >= 0 || k.indexOf(id) >= 0)) {
+                const a = t.address.startsWith("0x") ? t.address : "0x" + t.address
+                Hyprland.dispatch(`hl.dsp.focus({ window = "address:${a}" })`)
+                break
+            }
+        }
+    }
+
+    function reply(uid, text) {
+        const c = popups.find(c => c.uid === uid)
+        removePopup(uid)
+        try { c?.n?.sendInlineReply(text) } catch (e) {}
+    }
+
+    function invokeAction(uid, actionId) {
+        const c = popups.find(c => c.uid === uid)
+        removePopup(uid)
+        try {
+            const a = (c?.n?.actions ?? []).find(a => a.identifier === actionId)
+            a?.invoke()
+        } catch (e) {}
+    }
+
+    // Hovering the cards stops the clock; leaving gives every card its full time again
+    function pausePopups(paused) {
+        popupsPaused = paused
+        if (!paused) {
+            const due = Date.now() + SettingsService.notifTimeout * 1000
+            popups = popups.map(c => Object.assign({}, c, { due: due }))
+        }
+    }
+
+    Timer {
+        interval: 250
+        repeat: true
+        running: root.popups.length > 0 && !root.popupsPaused
+        onTriggered: {
+            const now = Date.now()
+            if (root.popups.some(c => c.due <= now))
+                root.popups = root.popups.filter(c => c.due > now)
+        }
+    }
+
+    // Switching to the notch, or turning on Do Not Disturb, clears the cards
+    Connections {
+        target: SettingsService
+        function onNotifStyleChanged() { root.popups = []; root.hide() }
+    }
+    Connections {
+        target: ShellState
+        function onDoNotDisturbChanged() { if (ShellState.doNotDisturb) root.popups = [] }
     }
 
     function hide() {

@@ -1,6 +1,6 @@
 # Blink
 
-Still work in progress hobby project!!!
+Still work in progress and a hobby project!!!
 
 A macOS-inspired desktop for Hyprland, built with Quickshell. Black frame, a notch with a face,
 and everything grows out of the bar.

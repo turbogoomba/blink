@@ -171,7 +171,7 @@ PanelWindow {
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.topMargin: Tokens.barHeight
-        anchors.rightMargin: Tokens.spaceSm
+        anchors.rightMargin: 6   // the frame: the sheet must sit flush against it
         width: 300
         readonly property real fullHeight: body.implicitHeight + 28
         height: fullHeight * Math.max(0, cal.reveal)

@@ -634,14 +634,76 @@ Flickable {
             width: col.width
             spacing: Theme.Tokens.spaceMd
 
+            SectionTitle { text: "Style" }
+            Group {
+                SettingRow {
+                    title: "Show in"
+                    subtitle: "The notch shows one at a time. Corner cards grow out of the frame and stack"
+                    Segments {
+                        options: [{ value: "notch", label: "Notch" }, { value: "corner", label: "Corner cards" }]
+                        current: SettingsService.notifStyle
+                        apply: function(v) { SettingsService.notifStyle = v }
+                    }
+                }
+                SettingRow {
+                    opacity: SettingsService.notifStyle === "corner" ? 1 : 0.4
+                    title: "Corner"
+                    subtitle: "Which top corner the cards grow out of"
+                    Segments {
+                        options: [{ value: "left", label: "Left" }, { value: "right", label: "Right" }]
+                        current: SettingsService.notifCorner
+                        apply: function(v) { SettingsService.notifCorner = v }
+                    }
+                }
+                SettingRow {
+                    opacity: SettingsService.notifStyle === "corner" ? 1 : 0.4
+                    title: "Cards on screen"
+                    subtitle: "Older ones stack behind the newest"
+                    ValueSlider {
+                        from: 1; to: 5; step: 1
+                        value: SettingsService.notifMax
+                        apply: function(v) { SettingsService.notifMax = v }
+                    }
+                }
+                SettingRow {
+                    title: "Show for"
+                    subtitle: "How long a notification stays before it goes to the history"
+                    divider: false
+                    ValueSlider {
+                        from: 3; to: 15; step: 1
+                        value: SettingsService.notifTimeout
+                        suffix: " s"
+                        apply: function(v) { SettingsService.notifTimeout = v }
+                    }
+                }
+            }
+
+            SectionTitle { text: "Behavior" }
             Group {
                 SettingRow {
                     title: "Do Not Disturb"
                     subtitle: "Hide notification popups. They still go to the history."
-                    divider: false
                     Toggle {
                         checked: ShellState.doNotDisturb
                         apply: function(v) { ShellState.mode = v ? "dnd" : "" }
+                    }
+                }
+                SettingRow {
+                    title: "Show message text"
+                    subtitle: "Off shows only the app and title, handy when sharing your screen"
+                    Toggle {
+                        checked: SettingsService.notifShowBody
+                        apply: function(v) { SettingsService.notifShowBody = v }
+                    }
+                }
+                SettingRow {
+                    title: "History"
+                    subtitle: NotificationService.history.length === 0 ? "Empty"
+                        : NotificationService.history.length + " notifications, shown in the notch"
+                    divider: false
+                    PushButton {
+                        text: "Clear"
+                        apply: function() { NotificationService.clearAll() }
                     }
                 }
             }
