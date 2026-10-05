@@ -41,7 +41,7 @@ Flickable {
             text: "Wi-Fi"
             color: Theme.Tokens.textPrimary
             font.family: Theme.Tokens.fontFamily
-            font.pixelSize: 22
+            font.pixelSize: Theme.Tokens.fontLarge
             font.weight: Font.DemiBold
         }
 
@@ -49,7 +49,7 @@ Flickable {
         Rectangle {
             width: parent.width
             height: 48
-            radius: 10
+            radius: Theme.Tokens.radiusMd
             color: Theme.Tokens.surface
             border.color: Theme.Tokens.border
             border.width: 1
@@ -63,7 +63,7 @@ Flickable {
                     : "Wi-Fi"
                 color: Theme.Tokens.textPrimary
                 font.family: Theme.Tokens.fontFamily
-                font.pixelSize: 13
+                font.pixelSize: Theme.Tokens.fontBody
             }
 
             // Bryter
@@ -76,7 +76,7 @@ Flickable {
                 height: 22
                 radius: 11
                 color: NetworkService.wifiEnabled ? Theme.Tokens.accent : Theme.Tokens.border
-                Behavior on color { ColorAnimation { duration: 150 } }
+                Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
 
                 Rectangle {
                     width: 18
@@ -85,7 +85,7 @@ Flickable {
                     y: 2
                     x: NetworkService.wifiEnabled ? toggle.width - width - 2 : 2
                     color: "white"
-                    Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                    Behavior on x { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                 }
 
                 MouseArea {
@@ -107,7 +107,7 @@ Flickable {
                 text: "Networks"
                 color: Theme.Tokens.textSecondary
                 font.family: Theme.Tokens.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: Theme.Tokens.fontBody
                 font.weight: Font.Medium
             }
 
@@ -117,7 +117,7 @@ Flickable {
                 text: NetworkService.scanning ? "Scanning..." : "Refresh"
                 color: refreshMouse.containsMouse ? Theme.Tokens.textPrimary : Theme.Tokens.accent
                 font.family: Theme.Tokens.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: Theme.Tokens.fontBody
 
                 MouseArea {
                     id: refreshMouse
@@ -134,7 +134,7 @@ Flickable {
         Rectangle {
             width: parent.width
             height: list.implicitHeight
-            radius: 10
+            radius: Theme.Tokens.radiusMd
             color: Theme.Tokens.surface
             border.color: Theme.Tokens.border
             border.width: 1
@@ -172,7 +172,7 @@ Flickable {
                             Rectangle {
                                 anchors.fill: parent
                                 anchors.margins: 4
-                                radius: 7
+                                radius: Theme.Tokens.radiusSm
                                 color: Theme.Tokens.surfaceAlt
                                 visible: rowMouse.containsMouse && !net.isCurrent
                             }
@@ -199,7 +199,7 @@ Flickable {
                                 text: net.modelData.ssid + (net.isCurrent ? "  ·  Connected" : "")
                                 color: Theme.Tokens.textPrimary
                                 font.family: Theme.Tokens.fontFamily
-                                font.pixelSize: 13
+                                font.pixelSize: Theme.Tokens.fontBody
                                 font.weight: net.isCurrent ? Font.DemiBold : Font.Normal
                                 elide: Text.ElideRight
                             }
@@ -252,7 +252,7 @@ Flickable {
                                 anchors.rightMargin: 8
                                 anchors.verticalCenter: parent.verticalCenter
                                 height: 30
-                                radius: 7
+                                radius: Theme.Tokens.radiusSm
                                 color: Theme.Tokens.bg
                                 border.color: Theme.Tokens.border
                                 border.width: 1
@@ -266,7 +266,7 @@ Flickable {
                                     echoMode: TextInput.Password
                                     color: Theme.Tokens.textPrimary
                                     font.family: Theme.Tokens.fontFamily
-                                    font.pixelSize: 13
+                                    font.pixelSize: Theme.Tokens.fontBody
                                     focus: net.open
                                     onAccepted: net.join()
 
@@ -287,7 +287,7 @@ Flickable {
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: 64
                                 height: 30
-                                radius: 7
+                                radius: Theme.Tokens.radiusSm
                                 color: Theme.Tokens.accent
 
                                 Text {
@@ -295,7 +295,7 @@ Flickable {
                                     text: "Join"
                                     color: "white"
                                     font.family: Theme.Tokens.fontFamily
-                                    font.pixelSize: 13
+                                    font.pixelSize: Theme.Tokens.fontBody
                                     font.weight: Font.Medium
                                 }
 

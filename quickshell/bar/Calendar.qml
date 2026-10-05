@@ -25,7 +25,7 @@ PanelWindow {
     Behavior on reveal {
         NumberAnimation {
             duration: cal.open ? 440 : 240
-            easing.type: cal.open ? Easing.OutBack : Easing.InCubic
+            easing.type: cal.open ? Tokens.easeGrow : Tokens.easeShrink
             easing.overshoot: 0.9
         }
     }
@@ -147,13 +147,13 @@ PanelWindow {
         width: 26
         height: 26
         radius: 13
-        color: nbMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+        color: nbMouse.containsMouse ? Tokens.fillHover : "transparent"
         Text {
             anchors.centerIn: parent
             text: nb.glyph
             color: Tokens.textPrimary
             font.family: Tokens.fontFamily
-            font.pixelSize: 14
+            font.pixelSize: Tokens.fontBody
         }
         MouseArea {
             id: nbMouse
@@ -183,7 +183,7 @@ PanelWindow {
             y: -20
             width: parent.width + 20
             height: parent.height + 20
-            radius: 20
+            radius: Tokens.radiusXl
             color: Tokens.barBg
         }
 
@@ -208,7 +208,7 @@ PanelWindow {
                     text: Qt.formatDate(new Date(cal.viewYear, cal.viewMonth, 1), "MMMM yyyy")
                     color: Tokens.textPrimary
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 15
+                    font.pixelSize: Tokens.fontTitle
                     font.weight: Font.DemiBold
                 }
 
@@ -223,14 +223,14 @@ PanelWindow {
                         width: todayText.implicitWidth + 16
                         height: 22
                         radius: 11
-                        color: todayMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.07)
+                        color: todayMouse.containsMouse ? Tokens.fillHover : Tokens.fillIdle
                         Text {
                             id: todayText
                             anchors.centerIn: parent
                             text: "Today"
                             color: Tokens.textPrimary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Tokens.fontSmall
                         }
                         MouseArea {
                             id: todayMouse
@@ -263,7 +263,7 @@ PanelWindow {
                         color: Tokens.textSecondary
                         opacity: 0.6
                         font.family: Tokens.fontFamily
-                        font.pixelSize: 10
+                        font.pixelSize: Tokens.fontSmall
                     }
                     Repeater {
                         model: cal.weekNumbers
@@ -277,7 +277,7 @@ PanelWindow {
                             color: Tokens.textSecondary
                             opacity: 0.6
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 10
+                            font.pixelSize: Tokens.fontSmall
                             font.features: { "tnum": 1 }
                         }
                     }
@@ -301,7 +301,7 @@ PanelWindow {
                                 color: index >= 5 ? Tokens.textSecondary : Tokens.textPrimary
                                 opacity: 0.8
                                 font.family: Tokens.fontFamily
-                                font.pixelSize: 11
+                                font.pixelSize: Tokens.fontSmall
                                 font.weight: Font.Medium
                             }
                         }
@@ -325,10 +325,10 @@ PanelWindow {
                                     height: 28
                                     radius: 14
                                     color: dayCell.modelData.isToday ? Tokens.accent
-                                         : dayCell.modelData.isSelected ? Qt.rgba(1, 1, 1, 0.16)
+                                         : dayCell.modelData.isSelected ? Tokens.fillHover
                                          : dayMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08)
                                          : "transparent"
-                                    Behavior on color { ColorAnimation { duration: 120 } }
+                                    Behavior on color { ColorAnimation { duration: Tokens.durFast } }
                                 }
 
                                 Text {
@@ -338,7 +338,7 @@ PanelWindow {
                                          : dayCell.modelData.inMonth ? Tokens.textPrimary
                                          : Qt.rgba(1, 1, 1, 0.25)
                                     font.family: Tokens.fontFamily
-                                    font.pixelSize: 12
+                                    font.pixelSize: Tokens.fontBody
                                     font.weight: dayCell.modelData.isToday ? Font.DemiBold : Font.Normal
                                     font.features: { "tnum": 1 }
                                 }
@@ -385,7 +385,7 @@ PanelWindow {
                         : Qt.formatDate(cal.selected, "dddd d MMMM")
                     color: Tokens.textSecondary
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 11
+                    font.pixelSize: Tokens.fontSmall
                     font.weight: Font.Medium
                 }
 
@@ -395,7 +395,7 @@ PanelWindow {
                     color: Tokens.textSecondary
                     opacity: 0.7
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 12
+                    font.pixelSize: Tokens.fontBody
                 }
 
                 Repeater {
@@ -412,7 +412,7 @@ PanelWindow {
                             anchors.verticalCenter: parent.verticalCenter
                             width: Math.max(28, evCode.implicitWidth + 10)
                             height: 18
-                            radius: 4
+                            radius: Tokens.radiusSm
                             color: Tokens.accent
                             Text {
                                 id: evCode
@@ -420,7 +420,7 @@ PanelWindow {
                                 text: TimetableService.shortTitle(ev.modelData)
                                 color: "white"
                                 font.family: Tokens.fontFamily
-                                font.pixelSize: 11
+                                font.pixelSize: Tokens.fontSmall
                                 font.weight: Font.Bold
                             }
                         }
@@ -434,7 +434,7 @@ PanelWindow {
                             text: ev.modelData.location || ev.modelData.title || ""
                             color: Tokens.textPrimary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 12
+                            font.pixelSize: Tokens.fontBody
                             elide: Text.ElideRight
                         }
 
@@ -446,7 +446,7 @@ PanelWindow {
                                 + (ev.modelData.end ? "–" + TimetableService.timeText(ev.modelData.end) : "")
                             color: Tokens.textSecondary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Tokens.fontSmall
                             font.features: { "tnum": 1 }
                         }
                     }

@@ -23,7 +23,7 @@ Flickable {
         leftPadding: 4
         color: Theme.Tokens.textSecondary
         font.family: Theme.Tokens.fontFamily
-        font.pixelSize: 12
+        font.pixelSize: Theme.Tokens.fontBody
         font.weight: Font.Medium
     }
 
@@ -35,7 +35,7 @@ Flickable {
 
         width: col.width
         height: dlCol.implicitHeight
-        radius: 10
+        radius: Theme.Tokens.radiusMd
         color: Theme.Tokens.surface
         border.color: Theme.Tokens.border
         border.width: 1
@@ -59,7 +59,7 @@ Flickable {
                     Rectangle {
                         anchors.fill: parent
                         anchors.margins: 4
-                        radius: 7
+                        radius: Theme.Tokens.radiusSm
                         color: Theme.Tokens.surfaceAlt
                         visible: devMouse.containsMouse
                     }
@@ -101,7 +101,7 @@ Flickable {
                             text: dev.modelData.name
                             color: Theme.Tokens.textPrimary
                             font.family: Theme.Tokens.fontFamily
-                            font.pixelSize: 13
+                            font.pixelSize: Theme.Tokens.fontBody
                             elide: Text.ElideRight
                         }
                         Text {
@@ -115,7 +115,7 @@ Flickable {
                             visible: text !== ""
                             color: Theme.Tokens.textSecondary
                             font.family: Theme.Tokens.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Theme.Tokens.fontSmall
                         }
                     }
 
@@ -130,7 +130,7 @@ Flickable {
                             ? (forgetMouse.containsMouse ? Theme.Tokens.textPrimary : Theme.Tokens.textSecondary)
                             : Theme.Tokens.accent
                         font.family: Theme.Tokens.fontFamily
-                        font.pixelSize: 12
+                        font.pixelSize: Theme.Tokens.fontBody
 
                         MouseArea {
                             id: forgetMouse
@@ -168,7 +168,7 @@ Flickable {
             text: "Bluetooth"
             color: Theme.Tokens.textPrimary
             font.family: Theme.Tokens.fontFamily
-            font.pixelSize: 22
+            font.pixelSize: Theme.Tokens.fontLarge
             font.weight: Font.DemiBold
         }
 
@@ -176,7 +176,7 @@ Flickable {
         Rectangle {
             width: parent.width
             height: 48
-            radius: 10
+            radius: Theme.Tokens.radiusMd
             color: Theme.Tokens.surface
             border.color: Theme.Tokens.border
             border.width: 1
@@ -188,7 +188,7 @@ Flickable {
                 text: panel.adapter ? "Bluetooth" : "Bluetooth  ·  No adapter found"
                 color: Theme.Tokens.textPrimary
                 font.family: Theme.Tokens.fontFamily
-                font.pixelSize: 13
+                font.pixelSize: Theme.Tokens.fontBody
             }
 
             Rectangle {
@@ -201,7 +201,7 @@ Flickable {
                 height: 22
                 radius: 11
                 color: on ? Theme.Tokens.accent : Theme.Tokens.border
-                Behavior on color { ColorAnimation { duration: 150 } }
+                Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
 
                 Rectangle {
                     width: 18
@@ -210,7 +210,7 @@ Flickable {
                     y: 2
                     x: toggle.on ? toggle.width - width - 2 : 2
                     color: "white"
-                    Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                    Behavior on x { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                 }
 
                 MouseArea {

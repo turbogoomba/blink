@@ -55,7 +55,7 @@ FloatingWindow {
 
                     width: parent.width
                     height: 32
-                    radius: 7
+                    radius: Theme.Tokens.radiusSm
                     color: selected ? Theme.Tokens.accent
                          : itemMouse.containsMouse ? Theme.Tokens.surface
                          : "transparent"
@@ -78,7 +78,7 @@ FloatingWindow {
                         text: item.modelData.label
                         color: Theme.Tokens.textPrimary
                         font.family: Theme.Tokens.fontFamily
-                        font.pixelSize: 13
+                        font.pixelSize: Theme.Tokens.fontBody
                         font.weight: item.selected ? Font.Medium : Font.Normal
                     }
 
@@ -118,7 +118,7 @@ FloatingWindow {
             horizontalAlignment: Text.AlignHCenter
             color: Theme.Tokens.textSecondary
             font.family: Theme.Tokens.fontFamily
-            font.pixelSize: 15
+            font.pixelSize: Theme.Tokens.fontTitle
         }
     }
 }

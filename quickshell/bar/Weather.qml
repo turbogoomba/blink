@@ -24,7 +24,7 @@ PanelWindow {
     Behavior on reveal {
         NumberAnimation {
             duration: wx.open ? 440 : 240
-            easing.type: wx.open ? Easing.OutBack : Easing.InCubic
+            easing.type: wx.open ? Tokens.easeGrow : Tokens.easeShrink
             easing.overshoot: 0.9
         }
     }
@@ -86,13 +86,13 @@ PanelWindow {
             text: parent.label
             color: Tokens.textSecondary
             font.family: Tokens.fontFamily
-            font.pixelSize: 10
+            font.pixelSize: Tokens.fontSmall
         }
         Text {
             text: parent.value
             color: Tokens.textPrimary
             font.family: Tokens.fontFamily
-            font.pixelSize: 13
+            font.pixelSize: Tokens.fontBody
             font.weight: Font.Medium
             font.features: { "tnum": 1 }
         }
@@ -113,7 +113,7 @@ PanelWindow {
             y: -20
             width: parent.width
             height: parent.height + 20
-            radius: 20
+            radius: Tokens.radiusXl
             color: Tokens.barBg
         }
 
@@ -164,7 +164,7 @@ PanelWindow {
                         text: "Oslo"
                         color: Tokens.textPrimary
                         font.family: Tokens.fontFamily
-                        font.pixelSize: 14
+                        font.pixelSize: Tokens.fontBody
                         font.weight: Font.DemiBold
                     }
                     Text {
@@ -172,7 +172,7 @@ PanelWindow {
                         text: WeatherService.description
                         color: Tokens.textSecondary
                         font.family: Tokens.fontFamily
-                        font.pixelSize: 12
+                        font.pixelSize: Tokens.fontBody
                     }
                     Text {
                         anchors.right: parent.right
@@ -181,7 +181,7 @@ PanelWindow {
                             + "  L " + wx.round(WeatherService.days[0]?.min ?? NaN)
                         color: Tokens.textSecondary
                         font.family: Tokens.fontFamily
-                        font.pixelSize: 11
+                        font.pixelSize: Tokens.fontSmall
                     }
                 }
             }
@@ -198,8 +198,8 @@ PanelWindow {
             Rectangle {
                 width: parent.width
                 height: 86
-                radius: 14
-                color: Qt.rgba(1, 1, 1, 0.07)
+                radius: Tokens.radiusLg
+                color: Tokens.fillIdle
                 border.color: Qt.rgba(1, 1, 1, 0.06)
                 border.width: 1
 
@@ -220,7 +220,7 @@ PanelWindow {
                                 text: parent.index === 0 ? "Now" : Qt.formatTime(parent.modelData.time, "HH")
                                 color: Tokens.textSecondary
                                 font.family: Tokens.fontFamily
-                                font.pixelSize: 11
+                                font.pixelSize: Tokens.fontSmall
                                 font.features: { "tnum": 1 }
                             }
                             Image {
@@ -235,7 +235,7 @@ PanelWindow {
                                 text: wx.round(parent.modelData.temp)
                                 color: Tokens.textPrimary
                                 font.family: Tokens.fontFamily
-                                font.pixelSize: 12
+                                font.pixelSize: Tokens.fontBody
                                 font.weight: Font.Medium
                             }
                         }
@@ -268,7 +268,7 @@ PanelWindow {
                             text: dayRow.index === 0 ? "Today" : Qt.formatDate(dayRow.modelData.date, "ddd")
                             color: Tokens.textPrimary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 12
+                            font.pixelSize: Tokens.fontBody
                             font.weight: dayRow.index === 0 ? Font.DemiBold : Font.Normal
                         }
 
@@ -292,7 +292,7 @@ PanelWindow {
                             text: wx.round(dayRow.modelData.min)
                             color: Tokens.textSecondary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 12
+                            font.pixelSize: Tokens.fontBody
                         }
 
                         // Temperature range bar
@@ -325,7 +325,7 @@ PanelWindow {
                             text: wx.round(dayRow.modelData.max)
                             color: Tokens.textPrimary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 12
+                            font.pixelSize: Tokens.fontBody
                             font.weight: Font.Medium
                         }
                     }
@@ -344,7 +344,7 @@ PanelWindow {
                     color: Tokens.textSecondary
                     opacity: 0.7
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 10
+                    font.pixelSize: Tokens.fontSmall
                 }
 
                 Text {
@@ -353,7 +353,7 @@ PanelWindow {
                     text: "Open Yr ›"
                     color: yrMouse.containsMouse ? Tokens.textPrimary : Tokens.accent
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 11
+                    font.pixelSize: Tokens.fontSmall
 
                     MouseArea {
                         id: yrMouse

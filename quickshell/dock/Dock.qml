@@ -34,7 +34,7 @@ PanelWindow {
     Behavior on reveal {
         NumberAnimation {
             duration: dock.revealed ? 380 : 220
-            easing.type: dock.revealed ? Easing.OutBack : Easing.InCubic
+            easing.type: dock.revealed ? Tokens.easeGrow : Tokens.easeShrink
             easing.overshoot: 0.8
         }
     }
@@ -219,14 +219,14 @@ PanelWindow {
             source: icon.source
             transformOrigin: dock.side === "left" ? Item.Left : dock.side === "right" ? Item.Right : Item.Bottom
             scale: icon.mag
-            Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutCubic } }
+            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
             transform: Translate { x: icon.hop * icon.outX; y: icon.hop * icon.outY }
         }
 
         SequentialAnimation {
             id: bounceAnim
-            NumberAnimation { target: icon; property: "hop"; to: 18; duration: 220; easing.type: Easing.OutQuad }
-            NumberAnimation { target: icon; property: "hop"; to: 0; duration: 220; easing.type: Easing.InQuad }
+            NumberAnimation { target: icon; property: "hop"; to: 18; duration: Tokens.durNormal; easing.type: Tokens.easeMove }
+            NumberAnimation { target: icon; property: "hop"; to: 0; duration: Tokens.durNormal; easing.type: Tokens.easeShrink }
             onFinished: {
                 if (icon.launching) bounceAnim.start()
                 else settleAnim.start()
@@ -234,8 +234,8 @@ PanelWindow {
         }
         SequentialAnimation {
             id: settleAnim
-            NumberAnimation { target: icon; property: "hop"; to: 6; duration: 120; easing.type: Easing.OutQuad }
-            NumberAnimation { target: icon; property: "hop"; to: 0; duration: 120; easing.type: Easing.InQuad }
+            NumberAnimation { target: icon; property: "hop"; to: 6; duration: Tokens.durFast; easing.type: Tokens.easeMove }
+            NumberAnimation { target: icon; property: "hop"; to: 0; duration: Tokens.durFast; easing.type: Tokens.easeShrink }
         }
 
         // New icons pop in
@@ -244,8 +244,8 @@ PanelWindow {
         Component.onCompleted: popIn.start()
         ParallelAnimation {
             id: popIn
-            NumberAnimation { target: icon; property: "scale"; to: 1; duration: 320; easing.type: Easing.OutBack }
-            NumberAnimation { target: icon; property: "opacity"; to: 1; duration: 160 }
+            NumberAnimation { target: icon; property: "scale"; to: 1; duration: Tokens.durSlow; easing.type: Tokens.easeGrow }
+            NumberAnimation { target: icon; property: "opacity"; to: 1; duration: Tokens.durNormal }
         }
 
         // Name label, away from the edge
@@ -256,7 +256,7 @@ PanelWindow {
             y: dock.horizontal ? -height - gap : (parent.height - height) / 2
             width: labelText.implicitWidth + 16
             height: 24
-            radius: 6
+            radius: Tokens.radiusSm
             color: Tokens.surface
             border.color: Tokens.border
             border.width: 1
@@ -268,7 +268,7 @@ PanelWindow {
                 text: icon.label
                 color: Tokens.textPrimary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: Tokens.fontBody
             }
         }
 
@@ -313,7 +313,7 @@ PanelWindow {
 
     // ---------- Popups (window list, right-click menu) ----------
     component PopupBox: Rectangle {
-        radius: 12
+        radius: Tokens.radiusMd
         color: Tokens.bg
         border.color: Tokens.border
         border.width: 1
@@ -331,7 +331,7 @@ PanelWindow {
         signal activated()
         width: parent ? parent.width : 0
         height: 30
-        radius: 7
+        radius: Tokens.radiusSm
         color: mrMouse.containsMouse ? Tokens.accent : "transparent"
 
         Text {
@@ -341,7 +341,7 @@ PanelWindow {
             text: mr.text
             color: mrMouse.containsMouse ? "white" : mr.danger ? "#ff8a83" : Tokens.textPrimary
             font.family: Tokens.fontFamily
-            font.pixelSize: 13
+            font.pixelSize: Tokens.fontBody
         }
 
         MouseArea {
@@ -410,7 +410,7 @@ PanelWindow {
                 text: contextMenu.item?.entry?.name ?? contextMenu.item?.id ?? ""
                 color: Tokens.textSecondary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 11
+                font.pixelSize: Tokens.fontSmall
             }
 
             MenuRow {
@@ -541,7 +541,7 @@ PanelWindow {
         // with the half against the frame filled in square
         Rectangle {
             anchors.fill: parent
-            radius: 20
+            radius: Tokens.radiusXl
             color: Tokens.barBg
         }
         Rectangle {

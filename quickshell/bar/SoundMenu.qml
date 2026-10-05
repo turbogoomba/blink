@@ -26,7 +26,7 @@ PanelWindow {
     Behavior on reveal {
         NumberAnimation {
             duration: snd.open ? 440 : 240
-            easing.type: snd.open ? Easing.OutBack : Easing.InCubic
+            easing.type: snd.open ? Tokens.easeGrow : Tokens.easeShrink
             easing.overshoot: 0.9
         }
     }
@@ -131,7 +131,7 @@ PanelWindow {
             radius: width / 2
             color: vr.muted ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.14)
             scale: muteMouse.pressed ? 0.9 : 1
-            Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
+            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeGrow } }
 
             Image {
                 anchors.centerIn: parent
@@ -166,8 +166,8 @@ PanelWindow {
                 width: parent.width
                 height: dragArea.containsMouse || dragArea.pressed ? 8 : 6
                 radius: height / 2
-                color: Qt.rgba(1, 1, 1, 0.12)
-                Behavior on height { NumberAnimation { duration: 120 } }
+                color: Tokens.fillHover
+                Behavior on height { NumberAnimation { duration: Tokens.durFast } }
 
                 Rectangle {
                     width: parent.width * track.shown
@@ -186,8 +186,8 @@ PanelWindow {
                 color: "white"
                 opacity: dragArea.containsMouse || dragArea.pressed ? 1 : 0
                 scale: dragArea.pressed ? 1.15 : 1
-                Behavior on opacity { NumberAnimation { duration: 120 } }
-                Behavior on scale { NumberAnimation { duration: 100 } }
+                Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
+                Behavior on scale { NumberAnimation { duration: Tokens.durFast } }
             }
 
             MouseArea {
@@ -221,7 +221,7 @@ PanelWindow {
             text: vr.muted ? "Mute" : Math.round(vr.volume * 100) + "%"
             color: Tokens.textSecondary
             font.family: Tokens.fontFamily
-            font.pixelSize: 11
+            font.pixelSize: Tokens.fontSmall
             font.features: { "tnum": 1 }
         }
     }
@@ -242,7 +242,7 @@ PanelWindow {
             y: -20
             width: parent.width
             height: parent.height + 20
-            radius: 20
+            radius: Tokens.radiusXl
             color: Tokens.barBg
         }
 
@@ -260,7 +260,7 @@ PanelWindow {
                 text: "Sound"
                 color: Tokens.textPrimary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 15
+                font.pixelSize: Tokens.fontTitle
                 font.weight: Font.DemiBold
             }
 
@@ -268,8 +268,8 @@ PanelWindow {
             Rectangle {
                 width: parent.width
                 height: mainCol.implicitHeight + 20
-                radius: 14
-                color: Qt.rgba(1, 1, 1, 0.07)
+                radius: Tokens.radiusLg
+                color: Tokens.fillIdle
                 border.color: Qt.rgba(1, 1, 1, 0.06)
                 border.width: 1
 
@@ -286,7 +286,7 @@ PanelWindow {
                     Rectangle {
                         width: parent.width
                         height: 30
-                        radius: 8
+                        radius: Tokens.radiusMd
                         color: devMouse.containsMouse && snd.outputs.length > 1 ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
 
                         Image {
@@ -310,7 +310,7 @@ PanelWindow {
                             text: snd.nameOf(snd.sink)
                             color: Tokens.textSecondary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 12
+                            font.pixelSize: Tokens.fontBody
                             elide: Text.ElideRight
                         }
 
@@ -322,7 +322,7 @@ PanelWindow {
                             visible: snd.outputs.length > 1
                             text: "⇄"
                             color: Tokens.textSecondary
-                            font.pixelSize: 13
+                            font.pixelSize: Tokens.fontBody
                         }
 
                         MouseArea {
@@ -340,7 +340,7 @@ PanelWindow {
                 text: "Apps"
                 color: Tokens.textSecondary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 11
+                font.pixelSize: Tokens.fontSmall
                 font.weight: Font.Medium
             }
 
@@ -350,7 +350,7 @@ PanelWindow {
                 color: Tokens.textSecondary
                 opacity: 0.7
                 font.family: Tokens.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: Tokens.fontBody
             }
 
             Repeater {
@@ -368,7 +368,7 @@ PanelWindow {
                         text: snd.appName(appCol.modelData)
                         color: Tokens.textPrimary
                         font.family: Tokens.fontFamily
-                        font.pixelSize: 12
+                        font.pixelSize: Tokens.fontBody
                         font.weight: Font.Medium
                         elide: Text.ElideRight
                     }

@@ -25,13 +25,13 @@ PanelWindow {
     // ---------- Åpne/lukke ----------
     readonly property bool open: ShellState.controlCenterOpen
     property real progress: open ? 1 : 0
-    Behavior on progress { NumberAnimation { duration: 380; easing.type: Easing.OutCubic } }
+    Behavior on progress { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeMove } }
     // Height of the sheet: grows out of the bar with a little bounce
     property real reveal: open ? 1 : 0
     Behavior on reveal {
         NumberAnimation {
             duration: cc.open ? 460 : 260
-            easing.type: cc.open ? Easing.OutBack : Easing.InCubic
+            easing.type: cc.open ? Tokens.easeGrow : Tokens.easeShrink
             easing.overshoot: 0.9
         }
     }
@@ -133,17 +133,17 @@ PanelWindow {
         height: 26
         radius: 13
         color: on ? Tokens.accent
-             : sbMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.08)
+             : sbMouse.containsMouse ? Tokens.fillHover : Qt.rgba(1, 1, 1, 0.08)
         scale: sbMouse.pressed ? 0.94 : 1
-        Behavior on color { ColorAnimation { duration: 120 } }
-        Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
+        Behavior on color { ColorAnimation { duration: Tokens.durFast } }
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeGrow } }
         Text {
             id: sbText
             anchors.centerIn: parent
             text: sb.label
             color: sb.on ? "white" : Tokens.textPrimary
             font.family: Tokens.fontFamily
-            font.pixelSize: 11
+            font.pixelSize: Tokens.fontSmall
         }
         MouseArea {
             id: sbMouse
@@ -159,14 +159,14 @@ PanelWindow {
         property int order: 0
         readonly property real appear: cc.stagger(order)
 
-        radius: 14
-        color: cardHover.hovered ? Qt.rgba(1, 1, 1, 0.10) : Qt.rgba(1, 1, 1, 0.07)
+        radius: Tokens.radiusLg
+        color: cardHover.hovered ? Qt.rgba(1, 1, 1, 0.10) : Tokens.fillIdle
         border.color: Qt.rgba(1, 1, 1, 0.06)
         border.width: 1
         opacity: appear
         transform: Translate { y: (1 - card.appear) * 14 }
 
-        Behavior on color { ColorAnimation { duration: 150 } }
+        Behavior on color { ColorAnimation { duration: Tokens.durFast } }
 
         HoverHandler { id: cardHover }
     }
@@ -184,15 +184,15 @@ PanelWindow {
         implicitWidth: size
         implicitHeight: size
         radius: size / 2
-        color: active ? activeColor : Qt.rgba(1, 1, 1, 0.12)
-        Behavior on color { ColorAnimation { duration: 200 } }
+        color: active ? activeColor : Tokens.fillHover
+        Behavior on color { ColorAnimation { duration: Tokens.durNormal } }
 
         onActiveChanged: pop.restart()
 
         SequentialAnimation {
             id: pop
-            NumberAnimation { target: ic; property: "scale"; to: 1.18; duration: 110; easing.type: Easing.OutQuad }
-            NumberAnimation { target: ic; property: "scale"; to: 1; duration: 240; easing.type: Easing.OutBack }
+            NumberAnimation { target: ic; property: "scale"; to: 1.18; duration: Tokens.durFast; easing.type: Tokens.easeMove }
+            NumberAnimation { target: ic; property: "scale"; to: 1; duration: Tokens.durNormal; easing.type: Tokens.easeGrow }
         }
 
         Image {
@@ -217,14 +217,14 @@ PanelWindow {
 
         implicitHeight: 44
         scale: trMouse.pressed ? 0.96 : 1
-        Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
+        Behavior on scale { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
 
         Rectangle {
             anchors.fill: parent
-            radius: 10
+            radius: Tokens.radiusMd
             color: Qt.rgba(1, 1, 1, 0.06)
             opacity: trMouse.containsMouse ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: 120 } }
+            Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
         }
 
         IconCircle {
@@ -250,7 +250,7 @@ PanelWindow {
                 text: tr.title
                 color: Tokens.textPrimary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 13
+                font.pixelSize: Tokens.fontBody
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
@@ -259,7 +259,7 @@ PanelWindow {
                 text: tr.subtitle
                 color: Tokens.textSecondary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 11
+                font.pixelSize: Tokens.fontSmall
                 elide: Text.ElideRight
             }
         }
@@ -295,7 +295,7 @@ PanelWindow {
             text: sc.title
             color: Tokens.textPrimary
             font.family: Tokens.fontFamily
-            font.pixelSize: 13
+            font.pixelSize: Tokens.fontBody
             font.weight: Font.DemiBold
         }
 
@@ -310,7 +310,7 @@ PanelWindow {
             sourceSize: Qt.size(36, 36)
             source: Quickshell.iconPath(sc.icon)
             scale: iconMouse.pressed ? 0.85 : 1
-            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeGrow } }
 
             MouseArea {
                 id: iconMouse
@@ -337,7 +337,7 @@ PanelWindow {
                 height: sc.active ? 10 : 6
                 radius: height / 2
                 color: Qt.rgba(1, 1, 1, 0.15)
-                Behavior on height { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                Behavior on height { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
                 // Fyllet
                 Rectangle {
@@ -347,7 +347,7 @@ PanelWindow {
                     color: Tokens.textPrimary
                     Behavior on width {
                         enabled: !scMouse.pressed
-                        NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+                        NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove }
                     }
                 }
             }
@@ -364,8 +364,8 @@ PanelWindow {
                 border.width: 1
                 opacity: sc.active ? 1 : 0
                 scale: scMouse.pressed ? 1.15 : sc.active ? 1 : 0.4
-                Behavior on opacity { NumberAnimation { duration: 140 } }
-                Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
+                Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
+                Behavior on scale { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
             }
 
             MouseArea {
@@ -391,7 +391,7 @@ PanelWindow {
             text: Math.round(sc.clamped * 100) + "%"
             color: Tokens.textSecondary
             font.family: Tokens.fontFamily
-            font.pixelSize: 11
+            font.pixelSize: Tokens.fontSmall
             font.features: { "tnum": 1 }
         }
     }
@@ -416,18 +416,18 @@ PanelWindow {
             width: 40
             height: 40
             radius: 20
-            color: pb.isArmed ? "#ff453a"
-                 : pbMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.2)
-                 : Qt.rgba(1, 1, 1, 0.12)
+            color: pb.isArmed ? Tokens.red
+                 : pbMouse.containsMouse ? Tokens.fillStrong
+                 : Tokens.fillHover
             scale: pbMouse.pressed ? 0.88 : 1
-            Behavior on color { ColorAnimation { duration: 150 } }
-            Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
+            Behavior on color { ColorAnimation { duration: Tokens.durFast } }
+            Behavior on scale { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
 
             SequentialAnimation {
                 running: pb.isArmed
                 loops: Animation.Infinite
-                NumberAnimation { target: pbCircle; property: "opacity"; to: 0.65; duration: 380; easing.type: Easing.InOutSine }
-                NumberAnimation { target: pbCircle; property: "opacity"; to: 1; duration: 380; easing.type: Easing.InOutSine }
+                NumberAnimation { target: pbCircle; property: "opacity"; to: 0.65; duration: Tokens.durSlow; easing.type: Easing.InOutSine }
+                NumberAnimation { target: pbCircle; property: "opacity"; to: 1; duration: Tokens.durSlow; easing.type: Easing.InOutSine }
                 onRunningChanged: if (!running) pbCircle.opacity = 1
             }
 
@@ -447,7 +447,7 @@ PanelWindow {
             text: pb.isArmed ? "Confirm?" : pb.label
             color: pb.isArmed ? Tokens.textPrimary : Tokens.textSecondary
             font.family: Tokens.fontFamily
-            font.pixelSize: 11
+            font.pixelSize: Tokens.fontSmall
             font.weight: pb.isArmed ? Font.DemiBold : Font.Normal
         }
 
@@ -519,7 +519,7 @@ PanelWindow {
             y: -20
             width: parent.width + 20
             height: parent.height + 20
-            radius: 20
+            radius: Tokens.radiusXl
             color: Tokens.barBg
         }
 
@@ -662,7 +662,7 @@ PanelWindow {
                 implicitHeight: cc.modesOpen ? modesCol.implicitHeight + 12 : 0
                 visible: implicitHeight > 0.5
                 clip: true
-                Behavior on implicitHeight { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
+                Behavior on implicitHeight { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeMove } }
 
                 Column {
                     id: modesCol
@@ -671,7 +671,7 @@ PanelWindow {
                     width: parent.width - 12
                     spacing: 2
                     opacity: cc.modesOpen ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                    Behavior on opacity { NumberAnimation { duration: Tokens.durNormal } }
 
                     Repeater {
                         model: ModeService.modes
@@ -684,14 +684,14 @@ PanelWindow {
                             width: modesCol.width
                             height: 48
                             scale: mrowMouse.pressed ? 0.97 : 1
-                            Behavior on scale { NumberAnimation { duration: 160; easing.type: Easing.OutBack } }
+                            Behavior on scale { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
 
                             Rectangle {
                                 anchors.fill: parent
-                                radius: 10
+                                radius: Tokens.radiusMd
                                 color: Qt.rgba(1, 1, 1, 0.06)
                                 opacity: mrowMouse.containsMouse ? 1 : 0
-                                Behavior on opacity { NumberAnimation { duration: 120 } }
+                                Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
                             }
 
                             IconCircle {
@@ -715,7 +715,7 @@ PanelWindow {
                                     text: mrow.modelData.label
                                     color: Tokens.textPrimary
                                     font.family: Tokens.fontFamily
-                                    font.pixelSize: 13
+                                    font.pixelSize: Tokens.fontBody
                                     font.weight: Font.DemiBold
                                     elide: Text.ElideRight
                                 }
@@ -724,7 +724,7 @@ PanelWindow {
                                     text: mrow.modelData.hint
                                     color: Tokens.textSecondary
                                     font.family: Tokens.fontFamily
-                                    font.pixelSize: 11
+                                    font.pixelSize: Tokens.fontSmall
                                     elide: Text.ElideRight
                                 }
                             }
@@ -736,12 +736,12 @@ PanelWindow {
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: "✓"
                                 color: Tokens.accent
-                                font.pixelSize: 15
+                                font.pixelSize: Tokens.fontTitle
                                 font.weight: Font.Bold
                                 opacity: mrow.on ? 1 : 0
                                 scale: mrow.on ? 1 : 0.4
-                                Behavior on opacity { NumberAnimation { duration: 150 } }
-                                Behavior on scale { NumberAnimation { duration: 220; easing.type: Easing.OutBack } }
+                                Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
+                                Behavior on scale { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
                             }
 
                             MouseArea {
@@ -871,16 +871,16 @@ PanelWindow {
                     height: 17
 
                     readonly property color fillColor:
-                          cc.charging ? "#30d158"
-                        : PowerProfiles.profile === PowerProfile.PowerSaver ? "#ff9f0a"
-                        : cc.batteryLevel < 0.2 ? "#ff453a"
+                          cc.charging ? Tokens.green
+                        : PowerProfiles.profile === PowerProfile.PowerSaver ? Tokens.orange
+                        : cc.batteryLevel < 0.2 ? Tokens.red
                         : Tokens.textPrimary
 
                     Rectangle {
                         id: bigBody
                         width: 32
                         height: parent.height
-                        radius: 4.5
+                        radius: Tokens.radiusSm
                         color: "transparent"
                         border.color: Qt.rgba(1, 1, 1, 0.45)
                         border.width: 1.2
@@ -892,8 +892,8 @@ PanelWindow {
                             height: parent.height - 5
                             radius: 2.5
                             color: bigBattery.fillColor
-                            Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
-                            Behavior on color { ColorAnimation { duration: 200 } }
+                            Behavior on width { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeMove } }
+                            Behavior on color { ColorAnimation { duration: Tokens.durNormal } }
                         }
                     }
 
@@ -920,15 +920,15 @@ PanelWindow {
                         text: "Battery"
                         color: Tokens.textPrimary
                         font.family: Tokens.fontFamily
-                        font.pixelSize: 13
+                        font.pixelSize: Tokens.fontBody
                         font.weight: Font.DemiBold
                     }
                     Text {
                         width: parent.width
                         text: cc.batteryStatus
-                        color: cc.charging ? "#30d158" : Tokens.textSecondary
+                        color: cc.charging ? Tokens.green : Tokens.textSecondary
                         font.family: Tokens.fontFamily
-                        font.pixelSize: 11
+                        font.pixelSize: Tokens.fontSmall
                         elide: Text.ElideRight
                     }
                 }
@@ -974,20 +974,20 @@ PanelWindow {
 
                             width: (profiles.width - profiles.spacing * 2) / 3
                             height: profiles.height
-                            radius: 8
+                            radius: Tokens.radiusMd
                             opacity: usable ? 1 : 0.4
                             color: selected ? Tokens.accent
-                                 : profMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.06)
+                                 : profMouse.containsMouse ? Tokens.fillHover : Qt.rgba(1, 1, 1, 0.06)
                             scale: profMouse.pressed ? 0.95 : 1
-                            Behavior on color { ColorAnimation { duration: 150 } }
-                            Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
+                            Behavior on color { ColorAnimation { duration: Tokens.durFast } }
+                            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeGrow } }
 
                             Text {
                                 anchors.centerIn: parent
                                 text: prof.modelData.label
                                 color: prof.selected ? "white" : Tokens.textPrimary
                                 font.family: Tokens.fontFamily
-                                font.pixelSize: 11
+                                font.pixelSize: Tokens.fontSmall
                                 font.weight: prof.selected ? Font.DemiBold : Font.Normal
                             }
 

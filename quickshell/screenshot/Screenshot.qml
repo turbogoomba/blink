@@ -110,7 +110,7 @@ Scope {
                 y: win.p1.y + 12
                 width: sizeText.implicitWidth + 14
                 height: 22
-                radius: 6
+                radius: Tokens.radiusSm
                 color: Qt.rgba(0, 0, 0, 0.7)
 
                 Text {
@@ -119,7 +119,7 @@ Scope {
                     text: Math.round(win.sw) + " × " + Math.round(win.sh)
                     color: "white"
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 11
+                    font.pixelSize: Tokens.fontSmall
                     font.weight: Font.Medium
                 }
             }

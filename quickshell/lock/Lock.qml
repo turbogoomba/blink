@@ -110,7 +110,7 @@ Scope {
                 anchors.fill: parent
                 opacity: 0
                 Component.onCompleted: fadeIn.start()
-                NumberAnimation { id: fadeIn; target: content; property: "opacity"; to: 1; duration: 300; easing.type: Easing.OutCubic }
+                NumberAnimation { id: fadeIn; target: content; property: "opacity"; to: 1; duration: Tokens.durSlow; easing.type: Tokens.easeMove }
 
                 // ================= Inner screen (inside the frame) =================
                 ClippingRectangle {
@@ -120,7 +120,7 @@ Scope {
                     anchors.leftMargin: 6
                     anchors.rightMargin: 6
                     anchors.bottomMargin: 6
-                    radius: 14
+                    radius: Tokens.radiusLg
                     color: "#101012"
 
                     Image {
@@ -159,7 +159,7 @@ Scope {
                             text: Qt.formatDate(surface.now, "dddd d MMMM")
                             color: Qt.rgba(0.9, 0.9, 0.91, 0.8)
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 20
+                            font.pixelSize: Tokens.fontLarge
                             font.weight: Font.Medium
                         }
 
@@ -179,8 +179,8 @@ Scope {
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: 330
                             height: 70
-                            radius: 14
-                            color: Qt.rgba(1, 1, 1, 0.07)
+                            radius: Tokens.radiusLg
+                            color: Tokens.fillIdle
                             border.color: Qt.rgba(1, 1, 1, 0.06)
                             border.width: 1
 
@@ -191,8 +191,8 @@ Scope {
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: 46
                                 height: 46
-                                radius: 10
-                                color: Qt.rgba(1, 1, 1, 0.12)
+                                radius: Tokens.radiusMd
+                                color: Tokens.fillHover
 
                                 Image {
                                     anchors.fill: parent
@@ -213,9 +213,9 @@ Scope {
                                 Text {
                                     width: parent.width
                                     text: root.player?.trackTitle ?? ""
-                                    color: "#e5e5e7"
+                                    color: Tokens.textPrimary
                                     font.family: Tokens.fontFamily
-                                    font.pixelSize: 13
+                                    font.pixelSize: Tokens.fontBody
                                     font.weight: Font.DemiBold
                                     elide: Text.ElideRight
                                 }
@@ -224,7 +224,7 @@ Scope {
                                     text: root.player?.trackArtist ?? ""
                                     color: Tokens.textSecondary
                                     font.family: Tokens.fontFamily
-                                    font.pixelSize: 11
+                                    font.pixelSize: Tokens.fontSmall
                                     elide: Text.ElideRight
                                 }
                             }
@@ -237,9 +237,9 @@ Scope {
                                 width: 34
                                 height: 34
                                 radius: 17
-                                color: playMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.2) : Qt.rgba(1, 1, 1, 0.12)
+                                color: playMouse.containsMouse ? Tokens.fillStrong : Tokens.fillHover
                                 scale: playMouse.pressed ? 0.92 : 1
-                                Behavior on scale { NumberAnimation { duration: 100 } }
+                                Behavior on scale { NumberAnimation { duration: Tokens.durFast } }
 
                                 Image {
                                     anchors.centerIn: parent
@@ -270,9 +270,9 @@ Scope {
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: "Herman"
-                            color: "#e5e5e7"
+                            color: Tokens.textPrimary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 14
+                            font.pixelSize: Tokens.fontBody
                             font.weight: Font.DemiBold
                         }
 
@@ -285,12 +285,12 @@ Scope {
                                 id: field
                                 width: parent.width
                                 height: parent.height
-                                radius: 14
+                                radius: Tokens.radiusLg
                                 color: root.failed ? Qt.rgba(1, 0.41, 0.38, 0.14) : Qt.rgba(0, 0, 0, 0.45)
                                 border.width: 1
                                 border.color: root.failed ? Qt.rgba(1, 0.41, 0.38, 0.6)
-                                    : input.activeFocus ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.10)
-                                Behavior on color { ColorAnimation { duration: 150 } }
+                                    : input.activeFocus ? Tokens.fillHover : Qt.rgba(1, 1, 1, 0.10)
+                                Behavior on color { ColorAnimation { duration: Tokens.durFast } }
 
                                 Image {
                                     id: lockIcon
@@ -313,9 +313,9 @@ Scope {
                                     anchors.verticalCenter: parent.verticalCenter
                                     echoMode: TextInput.Password
                                     passwordCharacter: "•"
-                                    color: "#e5e5e7"
+                                    color: Tokens.textPrimary
                                     font.family: Tokens.fontFamily
-                                    font.pixelSize: 13
+                                    font.pixelSize: Tokens.fontBody
                                     clip: true
                                     focus: true
                                     enabled: !root.checking
@@ -339,16 +339,16 @@ Scope {
                                     anchors.verticalCenter: parent.verticalCenter
                                     width: 30
                                     height: 30
-                                    radius: 9
+                                    radius: Tokens.radiusMd
                                     color: goMouse.pressed ? Qt.darker(Tokens.accent, 1.15) : Tokens.accent
                                     opacity: input.text.length > 0 ? 1 : 0.5
-                                    Behavior on opacity { NumberAnimation { duration: 120 } }
+                                    Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
 
                                     Text {
                                         anchors.centerIn: parent
                                         text: "→"
                                         color: "white"
-                                        font.pixelSize: 15
+                                        font.pixelSize: Tokens.fontTitle
                                         font.weight: Font.Bold
                                     }
 
@@ -362,9 +362,9 @@ Scope {
                                 SequentialAnimation {
                                     id: shake
                                     NumberAnimation { target: field; property: "x"; to: -10; duration: 50 }
-                                    NumberAnimation { target: field; property: "x"; to: 10; duration: 70 }
-                                    NumberAnimation { target: field; property: "x"; to: -6; duration: 60 }
-                                    NumberAnimation { target: field; property: "x"; to: 6; duration: 60 }
+                                    NumberAnimation { target: field; property: "x"; to: 10; duration: Tokens.durFast }
+                                    NumberAnimation { target: field; property: "x"; to: -6; duration: Tokens.durFast }
+                                    NumberAnimation { target: field; property: "x"; to: 6; duration: Tokens.durFast }
                                     NumberAnimation { target: field; property: "x"; to: 0; duration: 50 }
                                 }
                             }
@@ -398,7 +398,7 @@ Scope {
                             text: "Locked"
                             color: Tokens.textSecondary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 13
+                            font.pixelSize: Tokens.fontBody
                         }
                     }
 
@@ -420,7 +420,7 @@ Scope {
                                 radius: 3
                                 color: "transparent"
                                 border.width: 1.5
-                                border.color: "#e5e5e7"
+                                border.color: Tokens.textPrimary
 
                                 Rectangle {
                                     x: 2.5
@@ -428,9 +428,9 @@ Scope {
                                     height: parent.height - 5
                                     width: (parent.width - 5) * (UPower.displayDevice?.percentage ?? 0)
                                     radius: 1
-                                    color: !UPower.onBattery ? "#30d158"
-                                        : PowerProfiles.profile === PowerProfile.PowerSaver ? "#ff9f0a"
-                                        : (UPower.displayDevice?.percentage ?? 1) < 0.2 ? "#ff453a" : "#e5e5e7"
+                                    color: !UPower.onBattery ? Tokens.green
+                                        : PowerProfiles.profile === PowerProfile.PowerSaver ? Tokens.orange
+                                        : (UPower.displayDevice?.percentage ?? 1) < 0.2 ? Tokens.red : Tokens.textPrimary
                                 }
                             }
                             Rectangle {
@@ -438,16 +438,16 @@ Scope {
                                 width: 2
                                 height: 4
                                 radius: 1
-                                color: "#e5e5e7"
+                                color: Tokens.textPrimary
                             }
                         }
 
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: Qt.formatTime(surface.now, "HH:mm")
-                            color: "#e5e5e7"
+                            color: Tokens.textPrimary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 13
+                            font.pixelSize: Tokens.fontBody
                         }
                     }
                 }
@@ -493,7 +493,7 @@ Scope {
                         y: -20
                         width: 190
                         height: 78
-                        radius: 18
+                        radius: Tokens.radiusXl
                         color: "#000000"
                     }
 
@@ -513,12 +513,12 @@ Scope {
                                 width: open ? 9 : 12
                                 height: open ? 13 : (root.failed ? 4 : 3)
                                 radius: open ? 5 : 2
-                                color: root.failed ? "#ff8a83" : "#e5e5e7"
+                                color: root.failed ? "#ff8a83" : Tokens.textPrimary
                                 rotation: root.failed ? (index === 0 ? 18 : -18) : 0
-                                Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
-                                Behavior on height { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
-                                Behavior on rotation { NumberAnimation { duration: 150 } }
-                                Behavior on color { ColorAnimation { duration: 150 } }
+                                Behavior on width { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
+                                Behavior on height { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
+                                Behavior on rotation { NumberAnimation { duration: Tokens.durFast } }
+                                Behavior on color { ColorAnimation { duration: Tokens.durFast } }
                             }
                         }
                     }

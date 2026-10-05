@@ -91,7 +91,7 @@ Flickable {
             text: sr.label
             color: Theme.Tokens.textPrimary
             font.family: Theme.Tokens.fontFamily
-            font.pixelSize: 13
+            font.pixelSize: Theme.Tokens.fontBody
         }
 
         Text {
@@ -102,7 +102,7 @@ Flickable {
             text: sr.value.toFixed(sr.decimals)
             color: Theme.Tokens.textSecondary
             font.family: Theme.Tokens.fontFamily
-            font.pixelSize: 12
+            font.pixelSize: Theme.Tokens.fontBody
         }
 
         // Slider
@@ -167,7 +167,7 @@ Flickable {
     // ---------- Kort-bakgrunn ----------
     component CardBox: Rectangle {
         width: col.width
-        radius: 10
+        radius: Theme.Tokens.radiusMd
         color: Theme.Tokens.surface
         border.color: Theme.Tokens.border
         border.width: 1
@@ -178,7 +178,7 @@ Flickable {
         leftPadding: 4
         color: Theme.Tokens.textSecondary
         font.family: Theme.Tokens.fontFamily
-        font.pixelSize: 12
+        font.pixelSize: Theme.Tokens.fontBody
         font.weight: Font.Medium
     }
 
@@ -194,7 +194,7 @@ Flickable {
             text: "Hyprland"
             color: Theme.Tokens.textPrimary
             font.family: Theme.Tokens.fontFamily
-            font.pixelSize: 22
+            font.pixelSize: Theme.Tokens.fontLarge
             font.weight: Font.DemiBold
         }
 
@@ -209,7 +209,7 @@ Flickable {
                 text: "Window mode"
                 color: Theme.Tokens.textPrimary
                 font.family: Theme.Tokens.fontFamily
-                font.pixelSize: 13
+                font.pixelSize: Theme.Tokens.fontBody
             }
 
             Rectangle {
@@ -218,7 +218,7 @@ Flickable {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 200
                 height: 30
-                radius: 8
+                radius: Theme.Tokens.radiusMd
                 color: Theme.Tokens.bg
                 border.color: Theme.Tokens.border
                 border.width: 1
@@ -237,7 +237,7 @@ Flickable {
                             required property var modelData
                             width: (200 - 6) / 2
                             height: 24
-                            radius: 6
+                            radius: Theme.Tokens.radiusSm
                             color: StyleService.mode === modelData.id ? Theme.Tokens.accent : "transparent"
 
                             Text {
@@ -245,7 +245,7 @@ Flickable {
                                 text: modelData.label
                                 color: Theme.Tokens.textPrimary
                                 font.family: Theme.Tokens.fontFamily
-                                font.pixelSize: 12
+                                font.pixelSize: Theme.Tokens.fontBody
                                 font.weight: Font.Medium
                             }
 
@@ -319,7 +319,7 @@ Flickable {
         Rectangle {
             width: resetText.implicitWidth + 28
             height: 30
-            radius: 7
+            radius: Theme.Tokens.radiusSm
             color: resetMouse.containsMouse ? Theme.Tokens.border : Theme.Tokens.surface
             border.color: Theme.Tokens.border
             border.width: 1
@@ -330,7 +330,7 @@ Flickable {
                 text: "Reset to defaults"
                 color: Theme.Tokens.textPrimary
                 font.family: Theme.Tokens.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: Theme.Tokens.fontBody
             }
 
             MouseArea {

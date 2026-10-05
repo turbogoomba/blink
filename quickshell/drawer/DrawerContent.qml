@@ -19,7 +19,7 @@ Column {
     component SectionTitle: Text {
         color: Tokens.textPrimary
         font.family: Tokens.fontFamily
-        font.pixelSize: 13
+        font.pixelSize: Tokens.fontBody
         font.weight: Font.DemiBold
     }
 
@@ -77,8 +77,8 @@ Column {
 
         width: (content.width - 8) / 2
         height: 96
-        radius: 12
-        color: Qt.rgba(1, 1, 1, 0.07)
+        radius: Tokens.radiusMd
+        color: Tokens.fillIdle
         border.color: Qt.rgba(1, 1, 1, 0.06)
         border.width: 1
 
@@ -94,14 +94,14 @@ Column {
                     text: card.title
                     color: Tokens.textSecondary
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 11
+                    font.pixelSize: Tokens.fontSmall
                 }
                 Text {
                     anchors.right: parent.right
                     text: card.note
                     color: Tokens.textSecondary
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 11
+                    font.pixelSize: Tokens.fontSmall
                     font.features: { "tnum": 1 }
                 }
             }
@@ -122,7 +122,7 @@ Column {
                     text: card.unit
                     color: Tokens.textSecondary
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 11
+                    font.pixelSize: Tokens.fontSmall
                 }
             }
 
@@ -151,12 +151,12 @@ Column {
             anchors.horizontalCenter: parent.horizontalCenter
             width: 46
             height: 46
-            radius: 12
-            color: tile.dashed ? "transparent" : tileMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : Qt.rgba(1, 1, 1, 0.07)
+            radius: Tokens.radiusMd
+            color: tile.dashed ? "transparent" : tileMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : Tokens.fillIdle
             border.width: tile.dashed ? 1.5 : 0
             border.color: Tokens.border
             scale: tileMouse.pressed ? 0.92 : 1
-            Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
+            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeGrow } }
 
             Image {
                 anchors.centerIn: parent
@@ -171,7 +171,7 @@ Column {
                 visible: tile.dashed
                 text: "+"
                 color: Tokens.textSecondary
-                font.pixelSize: 20
+                font.pixelSize: Tokens.fontLarge
             }
         }
 
@@ -183,7 +183,7 @@ Column {
             text: tile.label
             color: Tokens.textSecondary
             font.family: Tokens.fontFamily
-            font.pixelSize: 10
+            font.pixelSize: Tokens.fontSmall
             elide: Text.ElideRight
         }
 
@@ -204,7 +204,7 @@ Column {
         SectionTitle {
             anchors.verticalCenter: parent.verticalCenter
             text: "System"
-            font.pixelSize: 15
+            font.pixelSize: Tokens.fontTitle
         }
         Text {
             anchors.right: parent.right
@@ -212,7 +212,7 @@ Column {
             text: content.host + (SystemService.uptime > 0 ? "  ·  up " + SystemService.duration(SystemService.uptime) : "")
             color: Tokens.textSecondary
             font.family: Tokens.fontFamily
-            font.pixelSize: 11
+            font.pixelSize: Tokens.fontSmall
         }
     }
 
@@ -240,7 +240,7 @@ Column {
             note: SystemService.gpuTemp >= 0 ? Math.round(SystemService.gpuTemp) + "°C" : ""
             value: SystemService.gpu >= 0 ? Math.round(SystemService.gpu * 100) + "%" : "–"
             history: SystemService.gpuHistory
-            lineColor: "#ff9f0a"
+            lineColor: Tokens.orange
         }
         StatCard {
             title: "Network"
@@ -264,7 +264,7 @@ Column {
                 text: "Disk"
                 color: Tokens.textSecondary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 11
+                font.pixelSize: Tokens.fontSmall
             }
             Text {
                 anchors.right: parent.right
@@ -272,7 +272,7 @@ Column {
                     ? Math.round(SystemService.diskUsed / 1e9) + " / " + Math.round(SystemService.diskTotal / 1e9) + " GB" : ""
                 color: Tokens.textSecondary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 11
+                font.pixelSize: Tokens.fontSmall
                 font.features: { "tnum": 1 }
             }
         }
@@ -301,7 +301,7 @@ Column {
             color: Tokens.textSecondary
             opacity: 0.7
             font.family: Tokens.fontFamily
-            font.pixelSize: 10
+            font.pixelSize: Tokens.fontSmall
             visible: SettingsService.favApps.length > 0
         }
     }
@@ -346,8 +346,8 @@ Column {
                 required property string modelData
                 width: (content.width - 6) / 2
                 height: 34
-                radius: 10
-                color: folderMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : Qt.rgba(1, 1, 1, 0.07)
+                radius: Tokens.radiusMd
+                color: folderMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : Tokens.fillIdle
 
                 Image {
                     id: folderIcon
@@ -368,7 +368,7 @@ Column {
                     text: folderRow.modelData.split("/").pop()
                     color: Tokens.textPrimary
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 12
+                    font.pixelSize: Tokens.fontBody
                     elide: Text.ElideRight
                 }
                 MouseArea {
@@ -388,18 +388,18 @@ Column {
         Rectangle {
             width: (content.width - 6) / 2
             height: 34
-            radius: 10
+            radius: Tokens.radiusMd
             color: content.dropActive ? Qt.rgba(Tokens.accent.r, Tokens.accent.g, Tokens.accent.b, 0.15) : "transparent"
             border.width: 1.5
             border.color: content.dropActive ? Tokens.accent : Tokens.border
-            Behavior on color { ColorAnimation { duration: 150 } }
+            Behavior on color { ColorAnimation { duration: Tokens.durFast } }
 
             Text {
                 anchors.centerIn: parent
                 text: content.dropActive ? "Drop to add" : "+ Drop a folder"
                 color: content.dropActive ? Tokens.textPrimary : Tokens.textSecondary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: Tokens.fontBody
             }
         }
     }

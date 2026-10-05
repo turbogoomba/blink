@@ -27,7 +27,7 @@ PanelWindow {
     property var windows: []
 
     property real reveal: open ? 1 : 0
-    Behavior on reveal { NumberAnimation { duration: sw.open ? 220 : 120; easing.type: Easing.OutCubic } }
+    Behavior on reveal { NumberAnimation { duration: sw.open ? 220 : 120; easing.type: Tokens.easeMove } }
     visible: open || reveal > 0.01
 
     function addr(t) {
@@ -146,11 +146,11 @@ PanelWindow {
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: 18
+                        radius: Tokens.radiusXl
                         color: Qt.rgba(1, 1, 1, tile.isSelected ? 0.14 : 0)
-                        border.color: tile.isSelected ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                        border.color: tile.isSelected ? Tokens.fillHover : "transparent"
                         border.width: 1
-                        Behavior on color { ColorAnimation { duration: 100 } }
+                        Behavior on color { ColorAnimation { duration: Tokens.durFast } }
                     }
 
                     Image {
@@ -160,7 +160,7 @@ PanelWindow {
                         sourceSize: Qt.size(112, 112)
                         source: sw.iconFor(tile.modelData)
                         scale: tile.isSelected ? 1.06 : 1
-                        Behavior on scale { NumberAnimation { duration: 160; easing.type: Easing.OutBack } }
+                        Behavior on scale { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
                     }
 
                     MouseArea {
@@ -186,7 +186,7 @@ PanelWindow {
             text: sw.windows[sw.selected]?.title ?? ""
             color: Tokens.textPrimary
             font.family: Tokens.fontFamily
-            font.pixelSize: 13
+            font.pixelSize: Tokens.fontBody
             font.weight: Font.Medium
             elide: Text.ElideRight
         }

@@ -48,7 +48,7 @@ Scope {
 
             // 0 = lukket, 1 = åpen. Alt animeres fra denne.
             property real progress: root.open ? 1 : 0
-            Behavior on progress { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
+            Behavior on progress { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeMove } }
             visible: root.open || progress > 0
 
             readonly property var monitor: Hyprland.monitorFor(modelData)
@@ -137,10 +137,10 @@ Scope {
 
                         width: 150
                         height: 84
-                        radius: 12
+                        radius: Tokens.radiusMd
                         color: dropHover ? Qt.rgba(0.37, 0.66, 0.83, 0.35)
-                             : pillMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12)
-                             : Qt.rgba(1, 1, 1, 0.07)
+                             : pillMouse.containsMouse ? Tokens.fillHover
+                             : Tokens.fillIdle
                         border.color: active || dropHover ? Tokens.accent : Qt.rgba(1, 1, 1, 0.1)
                         border.width: active || dropHover ? 2 : 1
 
@@ -168,7 +168,7 @@ Scope {
                             text: "Desktop " + pill.modelData.id
                             color: pill.active ? Tokens.textPrimary : Tokens.textSecondary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Tokens.fontSmall
                             font.weight: pill.active ? Font.DemiBold : Font.Normal
                         }
 
@@ -185,8 +185,8 @@ Scope {
                 Rectangle {
                     width: 84
                     height: 84
-                    radius: 12
-                    color: plusMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.05)
+                    radius: Tokens.radiusMd
+                    color: plusMouse.containsMouse ? Tokens.fillHover : Qt.rgba(1, 1, 1, 0.05)
                     border.color: Qt.rgba(1, 1, 1, 0.1)
                     border.width: 1
 
@@ -228,7 +228,7 @@ Scope {
                     text: "No windows"
                     color: Tokens.textSecondary
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 16
+                    font.pixelSize: Tokens.fontTitle
                 }
 
                 Repeater {
@@ -258,7 +258,7 @@ Scope {
 
                         ClippingRectangle {
                             anchors.fill: parent
-                            radius: 10
+                            radius: Tokens.radiusMd
                             color: Tokens.surface
                             border.color: tile.hovered ? Tokens.accent : "transparent"
                             border.width: 3
@@ -277,7 +277,7 @@ Scope {
                             anchors.topMargin: 8
                             width: Math.min(titleText.implicitWidth + 20, tile.width)
                             height: 26
-                            radius: 8
+                            radius: Tokens.radiusMd
                             color: Qt.rgba(0, 0, 0, 0.7)
                             visible: tile.hovered && win.progress === 1
 
@@ -291,7 +291,7 @@ Scope {
                                 text: tile.modelData.title
                                 color: "white"
                                 font.family: Tokens.fontFamily
-                                font.pixelSize: 12
+                                font.pixelSize: Tokens.fontBody
                                 elide: Text.ElideRight
                             }
                         }
@@ -346,7 +346,7 @@ Scope {
                 y: win.dragPoint.y - height / 2
                 width: 200
                 height: 120
-                radius: 8
+                radius: Tokens.radiusMd
                 opacity: 0.85
                 color: Tokens.surface
 

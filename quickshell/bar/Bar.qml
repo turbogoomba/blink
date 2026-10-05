@@ -64,7 +64,7 @@ PanelWindow {
                 text: bi.text
                 color: bi.textColor
                 font.family: Tokens.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: Tokens.fontBody
                 font.weight: Font.Medium
                 font.features: { "tnum": 1 }
             }
@@ -87,10 +87,10 @@ PanelWindow {
         property color baseColor: Tokens.accent
 
         property real shown: Math.max(0, Math.min(1, value))
-        Behavior on shown { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
+        Behavior on shown { NumberAnimation { duration: 600; easing.type: Tokens.easeMove } }
 
         readonly property color ringColor: value > 0.85 ? "#ff453a"
-            : value > 0.7 ? "#ff9f0a" : baseColor
+            : value > 0.7 ? Tokens.orange : baseColor
 
         implicitWidth: rsRow.implicitWidth
         implicitHeight: 16
@@ -138,13 +138,13 @@ PanelWindow {
             y: Tokens.barHeight - 2
             width: tipText.implicitWidth + 14
             height: 22
-            radius: 7
+            radius: Tokens.radiusSm
             color: Tokens.surface
             border.color: Tokens.border
             border.width: 1
             opacity: rsMouse.containsMouse ? 1 : 0
             visible: opacity > 0
-            Behavior on opacity { NumberAnimation { duration: 120 } }
+            Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
 
             Text {
                 id: tipText
@@ -152,7 +152,7 @@ PanelWindow {
                 text: rs.label + "  " + Math.round(rs.value * 100) + " %"
                 color: Tokens.textPrimary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 11
+                font.pixelSize: Tokens.fontSmall
             }
         }
 
@@ -203,10 +203,10 @@ PanelWindow {
 
             ParallelAnimation {
                 id: sweepAnim
-                NumberAnimation { id: sweepX; target: sweep; property: "x"; duration: 520; easing.type: Easing.OutCubic }
+                NumberAnimation { id: sweepX; target: sweep; property: "x"; duration: 520; easing.type: Tokens.easeMove }
                 SequentialAnimation {
-                    NumberAnimation { target: sweep; property: "opacity"; from: 0; to: 1; duration: 90 }
-                    NumberAnimation { target: sweep; property: "opacity"; to: 0; duration: 430; easing.type: Easing.InQuad }
+                    NumberAnimation { target: sweep; property: "opacity"; from: 0; to: 1; duration: Tokens.durFast }
+                    NumberAnimation { target: sweep; property: "opacity"; to: 0; duration: 430; easing.type: Tokens.easeShrink }
                 }
             }
         }
@@ -228,7 +228,7 @@ PanelWindow {
                 width: wsRow.implicitWidth + 16
                 height: 18
                 radius: 9
-                color: Qt.rgba(1, 1, 1, 0.07)
+                color: Tokens.fillIdle
 
                 readonly property var monitor: Hyprland.monitorFor(bar.screen)
                 readonly property var workspaces: Hyprland.workspaces.values
@@ -285,7 +285,7 @@ PanelWindow {
                             height: wsArea.dot
                             radius: wsArea.dot / 2
                             color: wsMouse.containsMouse ? Tokens.textPrimary : Tokens.textSecondary
-                            Behavior on color { ColorAnimation { duration: 150 } }
+                            Behavior on color { ColorAnimation { duration: Tokens.durFast } }
 
                             MouseArea {
                                 id: wsMouse
@@ -313,8 +313,8 @@ PanelWindow {
 
                     ParallelAnimation {
                         id: liquid
-                        NumberAnimation { id: leftAnim;  target: pill; property: "lx"; easing.type: Easing.OutCubic }
-                        NumberAnimation { id: rightAnim; target: pill; property: "rx"; easing.type: Easing.OutCubic }
+                        NumberAnimation { id: leftAnim;  target: pill; property: "lx"; easing.type: Tokens.easeMove }
+                        NumberAnimation { id: rightAnim; target: pill; property: "rx"; easing.type: Tokens.easeMove }
                     }
                 }
 
@@ -334,7 +334,7 @@ PanelWindow {
                 text: ToplevelManager.activeToplevel?.title ?? ""
                 color: Tokens.textPrimary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 13
+                font.pixelSize: Tokens.fontBody
                 font.weight: Font.Bold
                 elide: Text.ElideRight
             }
@@ -475,7 +475,7 @@ PanelWindow {
                             text: Math.round(bar.batteryLevel * 100) + "%"
                             color: Tokens.textPrimary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 12
+                            font.pixelSize: Tokens.fontBody
                             font.weight: Font.Medium
                         }
 
@@ -487,9 +487,9 @@ PanelWindow {
                             height: 11
 
                             readonly property color fillColor:
-                                  bar.charging ? "#30d158"
-                                : PowerProfiles.profile === PowerProfile.PowerSaver ? "#ff9f0a"
-                                : bar.batteryLevel < 0.2 ? "#ff453a"
+                                  bar.charging ? Tokens.green
+                                : PowerProfiles.profile === PowerProfile.PowerSaver ? Tokens.orange
+                                : bar.batteryLevel < 0.2 ? Tokens.red
                                 : Tokens.textPrimary
 
                             Rectangle {
@@ -508,8 +508,8 @@ PanelWindow {
                                     height: parent.height - 4
                                     radius: 1.5
                                     color: batIcon.fillColor
-                                    Behavior on width { NumberAnimation { duration: 300 } }
-                                    Behavior on color { ColorAnimation { duration: 200 } }
+                                    Behavior on width { NumberAnimation { duration: Tokens.durSlow } }
+                                    Behavior on color { ColorAnimation { duration: Tokens.durNormal } }
                                 }
                             }
 
@@ -531,7 +531,7 @@ PanelWindow {
                         text: Qt.formatDateTime(clock.date, "ddd d. MMM  HH:mm")
                         color: Tokens.textPrimary
                         font.family: Tokens.fontFamily
-                        font.pixelSize: 13
+                        font.pixelSize: Tokens.fontBody
                         font.weight: Font.Medium
                     }
                 }

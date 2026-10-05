@@ -136,9 +136,9 @@ Rectangle {
     clip: true
 
     // Springy morph, like the Dynamic Island
-    Behavior on width  { NumberAnimation { duration: 340; easing.type: Easing.OutBack; easing.overshoot: 0.7 } }
-    Behavior on height { NumberAnimation { duration: 340; easing.type: Easing.OutBack; easing.overshoot: 0.7 } }
-    Behavior on radius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+    Behavior on width  { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow; easing.overshoot: 0.7 } }
+    Behavior on height { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow; easing.overshoot: 0.7 } }
+    Behavior on radius { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
 
     // ---------- Bluetooth: lytt etter til/frakobling ----------
     Instantiator {
@@ -254,7 +254,7 @@ Rectangle {
                 text: tb.label
                 color: tb.selected ? Tokens.textPrimary : Tokens.textSecondary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: Tokens.fontBody
                 font.weight: Font.Medium
             }
 
@@ -272,7 +272,7 @@ Rectangle {
                     text: tb.badge
                     color: "white"
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 10
+                    font.pixelSize: Tokens.fontSmall
                     font.weight: Font.DemiBold
                 }
             }
@@ -297,7 +297,7 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             width: 52
             height: 52
-            radius: 10
+            radius: Tokens.radiusMd
             color: Tokens.surface
 
             Image {
@@ -326,7 +326,7 @@ Rectangle {
             text: ShelfService.nameOf(tile.modelData)
             color: Tokens.textSecondary
             font.family: Tokens.fontFamily
-            font.pixelSize: 10
+            font.pixelSize: Tokens.fontSmall
             elide: Text.ElideMiddle
         }
 
@@ -375,8 +375,8 @@ Rectangle {
                   : 8
             radius: Math.min(width, height) / 2
             color: Tokens.textPrimary
-            Behavior on width  { NumberAnimation { duration: 90 } }
-            Behavior on height { NumberAnimation { duration: 90 } }
+            Behavior on width  { NumberAnimation { duration: Tokens.durFast } }
+            Behavior on height { NumberAnimation { duration: Tokens.durFast } }
         }
 
         Canvas {
@@ -417,7 +417,7 @@ Rectangle {
         width: 40
         height: 20
         opacity: !notch.open && !notch.showOsd && !notch.showNotif && !notch.showBt && !notch.showClass && !notch.peek ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 150 } }
+        Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
 
         Row {
             id: eyes
@@ -429,8 +429,8 @@ Rectangle {
             // Startup: the eyes open
             transform: Scale { origin.y: eyes.height / 2; yScale: 0.1 + 0.9 * BootService.eyes }
 
-            Behavior on anchors.horizontalCenterOffset { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-            Behavior on y { NumberAnimation { duration: 150 } }
+            Behavior on anchors.horizontalCenterOffset { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
+            Behavior on y { NumberAnimation { duration: Tokens.durFast } }
 
             Eye { mood: face.mood }
             Eye { mood: face.mood }
@@ -443,7 +443,7 @@ Rectangle {
             width: 12
             height: 6
             opacity: face.smiling ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: 150 } }
+            Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
             onPaint: {
                 const c = getContext("2d")
                 c.reset()
@@ -469,8 +469,8 @@ Rectangle {
                 ? Quickshell.iconPath(ModeService.info(ShellState.mode)?.icon ?? "", "notifications-disabled-symbolic") : ""
             opacity: ShellState.mode !== "" ? 0.75 : 0
             scale: ShellState.mode !== "" ? 1 : 0.3
-            Behavior on opacity { NumberAnimation { duration: 150 } }
-            Behavior on scale { NumberAnimation { duration: 260; easing.type: Easing.OutBack } }
+            Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
+            Behavior on scale { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
         }
 
         // Small "o" mouth when surprised
@@ -486,8 +486,8 @@ Rectangle {
             border.width: 1.5
             opacity: face.mood === "surprised" ? 1 : 0
             scale: face.mood === "surprised" ? 1 : 0.3
-            Behavior on opacity { NumberAnimation { duration: 120 } }
-            Behavior on scale { NumberAnimation { duration: 220; easing.type: Easing.OutBack } }
+            Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
+            Behavior on scale { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
         }
 
         // Green bolt next to the face when the charger is plugged in
@@ -499,12 +499,12 @@ Rectangle {
             height: 12
             opacity: notch.reaction === "charging" ? 1 : 0
             scale: notch.reaction === "charging" ? 1 : 0.2
-            Behavior on opacity { NumberAnimation { duration: 150 } }
-            Behavior on scale { NumberAnimation { duration: 280; easing.type: Easing.OutBack; easing.overshoot: 2 } }
+            Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
+            Behavior on scale { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow; easing.overshoot: 2 } }
             onPaint: {
                 const c = getContext("2d")
                 c.reset()
-                c.fillStyle = "#30d158"
+                c.fillStyle = Tokens.green
                 c.beginPath()
                 c.moveTo(5, 0); c.lineTo(0, 7); c.lineTo(3.5, 7)
                 c.lineTo(2.5, 12); c.lineTo(8, 4.5); c.lineTo(4.5, 4.5)
@@ -551,10 +551,10 @@ Rectangle {
         anchors.topMargin: Tokens.barHeight - 6
         opacity: notch.showClass ? 1 : 0
         visible: opacity > 0
-        Behavior on opacity { NumberAnimation { duration: 150 } }
+        Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
         transform: Translate {
             y: notch.showClass ? 0 : -10
-            Behavior on y { NumberAnimation { duration: 320; easing.type: Easing.OutBack } }
+            Behavior on y { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow } }
         }
 
         Rectangle {
@@ -563,7 +563,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: Math.max(30, classCode.implicitWidth + 12)
             height: 22
-            radius: 6
+            radius: Tokens.radiusSm
             color: Tokens.accent
 
             Text {
@@ -572,7 +572,7 @@ Rectangle {
                 text: notch.nextClass ? TimetableService.shortTitle(notch.nextClass) : ""
                 color: "white"
                 font.family: Tokens.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: Tokens.fontBody
                 font.weight: Font.Bold
             }
         }
@@ -590,14 +590,14 @@ Rectangle {
                 text: "Next class"
                 color: Tokens.textSecondary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 10
+                font.pixelSize: Tokens.fontSmall
             }
             Text {
                 width: parent.width
                 text: notch.nextClass ? (notch.nextClass.location || notch.nextClass.title || "") : ""
                 color: Tokens.textPrimary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 13
+                font.pixelSize: Tokens.fontBody
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
@@ -608,9 +608,9 @@ Rectangle {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             text: notch.classMins + " min"
-            color: notch.classMins <= 3 ? "#ff9f0a" : Tokens.accent
+            color: notch.classMins <= 3 ? Tokens.orange : Tokens.accent
             font.family: Tokens.fontFamily
-            font.pixelSize: 15
+            font.pixelSize: Tokens.fontTitle
             font.weight: Font.DemiBold
             font.features: { "tnum": 1 }
         }
@@ -625,7 +625,7 @@ Rectangle {
         anchors.rightMargin: 18
         opacity: notch.showOsd ? 1 : 0
         visible: opacity > 0
-        Behavior on opacity { NumberAnimation { duration: 120 } }
+        Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
 
         readonly property bool isWs: OsdService.kind === "workspace"
 
@@ -640,7 +640,7 @@ Rectangle {
                 text: "Desktop " + OsdService.wsId
                 color: Tokens.textPrimary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: Tokens.fontBody
                 font.weight: Font.DemiBold
             }
 
@@ -662,8 +662,8 @@ Rectangle {
                         height: 7
                         radius: 3.5
                         color: current ? Tokens.accent : Tokens.textSecondary
-                        Behavior on width { NumberAnimation { duration: 260; easing.type: Easing.OutBack } }
-                        Behavior on color { ColorAnimation { duration: 200 } }
+                        Behavior on width { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
+                        Behavior on color { ColorAnimation { duration: Tokens.durNormal } }
                     }
                 }
             }
@@ -696,8 +696,8 @@ Rectangle {
                 width: parent.width * (OsdService.muted ? 0 : OsdService.value)
                 height: parent.height
                 radius: 3
-                color: OsdService.kind === "brightness" ? "#ffd60a" : Tokens.textPrimary
-                Behavior on width { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                color: OsdService.kind === "brightness" ? Tokens.yellow : Tokens.textPrimary
+                Behavior on width { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
             }
         }
 
@@ -711,7 +711,7 @@ Rectangle {
             text: OsdService.muted ? "Mute" : Math.round(OsdService.value * 100) + "%"
             color: Tokens.textSecondary
             font.family: Tokens.fontFamily
-            font.pixelSize: 12
+            font.pixelSize: Tokens.fontBody
             font.weight: Font.Medium
             font.features: { "tnum": 1 }
         }
@@ -728,7 +728,7 @@ Rectangle {
         spacing: 6
         opacity: notch.showRec ? 1 : 0
         visible: opacity > 0
-        Behavior on opacity { NumberAnimation { duration: 150 } }
+        Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
 
         Rectangle {
             id: recDot
@@ -736,7 +736,7 @@ Rectangle {
             width: 9
             height: 9
             radius: 4.5
-            color: "#ff453a"
+            color: Tokens.red
 
             SequentialAnimation on opacity {
                 running: notch.showRec
@@ -749,9 +749,9 @@ Rectangle {
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: RecordService.elapsed
-            color: "#ff453a"
+            color: Tokens.red
             font.family: Tokens.fontFamily
-            font.pixelSize: 12
+            font.pixelSize: Tokens.fontBody
             font.weight: Font.DemiBold
             font.features: { "tnum": 1 }
         }
@@ -776,7 +776,7 @@ Rectangle {
         anchors { top: parent.top; left: parent.left; right: parent.right }
         height: notch.baseHeight
         opacity: notch.compact ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 150 } }
+        Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
 
         ClippingRectangle {
             anchors.left: parent.left
@@ -784,7 +784,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: 20
             height: 20
-            radius: 5
+            radius: Tokens.radiusSm
             color: notch.hasMusic ? Tokens.surface : "transparent"
 
             Image {
@@ -804,7 +804,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             spacing: 2
             visible: notch.hasMusic
-            Behavior on anchors.rightMargin { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+            Behavior on anchors.rightMargin { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
 
             Repeater {
                 model: 4
@@ -816,7 +816,7 @@ Rectangle {
                     height: 3 + (CavaService.small[index] ?? 0)
                     radius: 1.5
                     color: Tokens.accent
-                    Behavior on height { NumberAnimation { duration: 60 } }
+                    Behavior on height { NumberAnimation { duration: Tokens.durFast } }
                 }
             }
         }
@@ -829,7 +829,7 @@ Rectangle {
             text: ShelfService.files.length
             color: Tokens.textPrimary
             font.family: Tokens.fontFamily
-            font.pixelSize: 12
+            font.pixelSize: Tokens.fontBody
             font.weight: Font.DemiBold
         }
     }
@@ -842,7 +842,7 @@ Rectangle {
         anchors.margins: 16
         opacity: notch.peek ? 1 : 0
         enabled: notch.peek
-        Behavior on opacity { NumberAnimation { duration: 150 } }
+        Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
 
         ClippingRectangle {
             id: peekArt
@@ -850,7 +850,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: 64
             height: 64
-            radius: 12
+            radius: Tokens.radiusMd
             color: Tokens.surface
 
             Image {
@@ -874,7 +874,7 @@ Rectangle {
                 text: notch.player?.trackTitle ?? ""
                 color: Tokens.textPrimary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 14
+                font.pixelSize: Tokens.fontBody
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
@@ -883,7 +883,7 @@ Rectangle {
                 text: notch.player?.trackArtist ?? ""
                 color: Tokens.textSecondary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: Tokens.fontBody
                 elide: Text.ElideRight
             }
         }
@@ -916,7 +916,7 @@ Rectangle {
             anchors.bottomMargin: -8
             height: 3
             radius: 1.5
-            color: Qt.rgba(1, 1, 1, 0.12)
+            color: Tokens.fillHover
             visible: notch.progress > 0
 
             Rectangle {
@@ -940,7 +940,7 @@ Rectangle {
         anchors.bottomMargin: 8
         opacity: notch.showBt ? 1 : 0
         visible: opacity > 0
-        Behavior on opacity { NumberAnimation { duration: 150 } }
+        Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
 
         readonly property real level: notch.btDevice?.battery ?? 0
         readonly property bool hasBattery: notch.btConnected && (notch.btDevice?.batteryAvailable ?? false)
@@ -968,14 +968,14 @@ Rectangle {
                 text: notch.btConnected ? "Connected" : "Disconnected"
                 color: Tokens.textSecondary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 11
+                font.pixelSize: Tokens.fontSmall
             }
             Text {
                 width: parent.width
                 text: notch.btDevice?.name ?? ""
                 color: notch.btConnected ? Tokens.textPrimary : Tokens.textSecondary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 14
+                font.pixelSize: Tokens.fontBody
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
@@ -1005,7 +1005,7 @@ Rectangle {
                     c.beginPath()
                     c.arc(width / 2, height / 2, r, 0, 2 * Math.PI)
                     c.stroke()
-                    c.strokeStyle = level < 0.2 ? "#ff453a" : "#30d158"
+                    c.strokeStyle = level < 0.2 ? Tokens.red : Tokens.green
                     c.beginPath()
                     c.arc(width / 2, height / 2, r, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * level)
                     c.stroke()
@@ -1018,7 +1018,7 @@ Rectangle {
                 text: Math.round(parent.parent.level * 100)
                 color: Tokens.textPrimary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 10
+                font.pixelSize: Tokens.fontSmall
                 font.weight: Font.DemiBold
             }
         }
@@ -1036,7 +1036,7 @@ Rectangle {
         spacing: 14
         opacity: notch.open ? 1 : 0
         enabled: notch.open
-        Behavior on opacity { NumberAnimation { duration: 150 } }
+        Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
 
         // ---------- Faner + uke ----------
         Item {
@@ -1057,7 +1057,7 @@ Rectangle {
                 text: "Week " + notch.week
                 color: Tokens.textSecondary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: Tokens.fontBody
                 font.weight: Font.Medium
             }
         }
@@ -1080,7 +1080,7 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     width: 76
                     height: 76
-                    radius: 12
+                    radius: Tokens.radiusMd
                     color: Tokens.surface
 
                     Image {
@@ -1104,7 +1104,7 @@ Rectangle {
                         text: notch.player?.trackTitle ?? ""
                         color: Tokens.textPrimary
                         font.family: Tokens.fontFamily
-                        font.pixelSize: 14
+                        font.pixelSize: Tokens.fontBody
                         font.weight: Font.DemiBold
                         elide: Text.ElideRight
                     }
@@ -1113,7 +1113,7 @@ Rectangle {
                         text: notch.player?.trackArtist ?? ""
                         color: Tokens.textSecondary
                         font.family: Tokens.fontFamily
-                        font.pixelSize: 12
+                        font.pixelSize: Tokens.fontBody
                         elide: Text.ElideRight
                     }
                     Row {
@@ -1140,7 +1140,7 @@ Rectangle {
                         width: parent.width
                         height: 3
                         radius: 1.5
-                        color: Qt.rgba(1, 1, 1, 0.12)
+                        color: Tokens.fillHover
                         visible: notch.progress > 0
 
                         Rectangle {
@@ -1159,7 +1159,7 @@ Rectangle {
                     text: "Nothing playing"
                     color: Tokens.textSecondary
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 13
+                    font.pixelSize: Tokens.fontBody
                 }
             }
 
@@ -1186,7 +1186,7 @@ Rectangle {
                         : "Timetable"
                     color: Tokens.textPrimary
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 13
+                    font.pixelSize: Tokens.fontBody
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                 }
@@ -1207,8 +1207,8 @@ Rectangle {
                             anchors.verticalCenter: parent.verticalCenter
                             width: Math.max(28, codeText.implicitWidth + 10)
                             height: 18
-                            radius: 4
-                            color: cls.live ? "#30d158" : Tokens.accent
+                            radius: Tokens.radiusSm
+                            color: cls.live ? Tokens.green : Tokens.accent
 
                             Text {
                                 id: codeText
@@ -1216,7 +1216,7 @@ Rectangle {
                                 text: TimetableService.shortTitle(cls.modelData)
                                 color: "white"
                                 font.family: Tokens.fontFamily
-                                font.pixelSize: 11
+                                font.pixelSize: Tokens.fontSmall
                                 font.weight: Font.Bold
                             }
                         }
@@ -1230,7 +1230,7 @@ Rectangle {
                             text: cls.modelData.location || cls.modelData.title || ""
                             color: Tokens.textPrimary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 12
+                            font.pixelSize: Tokens.fontBody
                             elide: Text.ElideRight
                         }
 
@@ -1239,9 +1239,9 @@ Rectangle {
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
                             text: TimetableService.now && TimetableService.whenText(cls.modelData)
-                            color: cls.live ? "#30d158" : Tokens.textSecondary
+                            color: cls.live ? Tokens.green : Tokens.textSecondary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 12
+                            font.pixelSize: Tokens.fontBody
                         }
                     }
                 }
@@ -1260,7 +1260,7 @@ Rectangle {
                         : "Loading..."
                     color: Tokens.textPrimary
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 13
+                    font.pixelSize: Tokens.fontBody
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                 }
@@ -1281,7 +1281,7 @@ Rectangle {
                             anchors.verticalCenter: parent.verticalCenter
                             width: Math.max(28, lineText.implicitWidth + 10)
                             height: 18
-                            radius: 4
+                            radius: Tokens.radiusSm
                             color: BusService.lineColor(dep.modelData.mode)
 
                             Text {
@@ -1290,7 +1290,7 @@ Rectangle {
                                 text: dep.modelData.line
                                 color: "white"
                                 font.family: Tokens.fontFamily
-                                font.pixelSize: 11
+                                font.pixelSize: Tokens.fontSmall
                                 font.weight: Font.Bold
                             }
                         }
@@ -1304,7 +1304,7 @@ Rectangle {
                             text: dep.modelData.dest
                             color: Tokens.textPrimary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 12
+                            font.pixelSize: Tokens.fontBody
                             elide: Text.ElideRight
                         }
 
@@ -1315,7 +1315,7 @@ Rectangle {
                             text: dep.mins === 0 ? "Now" : dep.mins + " min"
                             color: dep.modelData.realtime ? Tokens.textPrimary : Tokens.textSecondary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 12
+                            font.pixelSize: Tokens.fontBody
                             font.weight: dep.mins <= 2 ? Font.DemiBold : Font.Normal
                         }
                     }
@@ -1348,7 +1348,7 @@ Rectangle {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 height: 70
-                radius: 12
+                radius: Tokens.radiusMd
                 color: "transparent"
                 border.color: notch.dragging ? Tokens.accent : Tokens.border
                 border.width: 1.5
@@ -1358,7 +1358,7 @@ Rectangle {
                     text: "Drop files here"
                     color: notch.dragging ? Tokens.textPrimary : Tokens.textSecondary
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 12
+                    font.pixelSize: Tokens.fontBody
                 }
 
                 Text {
@@ -1370,7 +1370,7 @@ Rectangle {
                     text: "Clear"
                     color: clearMouse.containsMouse ? Tokens.textPrimary : Tokens.textSecondary
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 11
+                    font.pixelSize: Tokens.fontSmall
 
                     MouseArea {
                         id: clearMouse
@@ -1395,7 +1395,7 @@ Rectangle {
                 text: "No notifications"
                 color: Tokens.textSecondary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 13
+                font.pixelSize: Tokens.fontBody
             }
 
             Text {
@@ -1405,7 +1405,7 @@ Rectangle {
                 text: "Clear all"
                 color: clearAllMouse.containsMouse ? Tokens.textPrimary : Tokens.textSecondary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 11
+                font.pixelSize: Tokens.fontSmall
 
                 MouseArea {
                     id: clearAllMouse
@@ -1431,7 +1431,7 @@ Rectangle {
 
                     width: list.width
                     height: 52
-                    radius: 10
+                    radius: Tokens.radiusMd
                     color: entryMouse.containsMouse ? Tokens.surface : Qt.rgba(1, 1, 1, 0.04)
 
                     Image {
@@ -1459,7 +1459,7 @@ Rectangle {
                             text: entry.modelData.appName + "  ·  " + NotificationService.ago(entry.modelData.time)
                             color: Tokens.textSecondary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 10
+                            font.pixelSize: Tokens.fontSmall
                             elide: Text.ElideRight
                         }
                         Text {
@@ -1467,7 +1467,7 @@ Rectangle {
                             text: entry.modelData.summary
                             color: Tokens.textPrimary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 13
+                            font.pixelSize: Tokens.fontBody
                             font.weight: Font.DemiBold
                             elide: Text.ElideRight
                         }
@@ -1479,7 +1479,7 @@ Rectangle {
                             color: Tokens.textPrimary
                             opacity: 0.75
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Tokens.fontSmall
                             elide: Text.ElideRight
                             maximumLineCount: 1
                         }
@@ -1507,10 +1507,10 @@ Rectangle {
         anchors.bottomMargin: 10
         opacity: notch.showNotif ? 1 : 0
         visible: opacity > 0
-        Behavior on opacity { NumberAnimation { duration: 150 } }
+        Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
         transform: Translate {
             y: notch.showNotif ? 0 : -14
-            Behavior on y { NumberAnimation { duration: 320; easing.type: Easing.OutBack } }
+            Behavior on y { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow } }
         }
 
         ClippingRectangle {
@@ -1544,7 +1544,7 @@ Rectangle {
                 text: notch.notif?.appName ?? ""
                 color: Tokens.textSecondary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 11
+                font.pixelSize: Tokens.fontSmall
                 elide: Text.ElideRight
             }
             Text {
@@ -1552,7 +1552,7 @@ Rectangle {
                 text: notch.notif?.summary ?? ""
                 color: Tokens.textPrimary
                 font.family: Tokens.fontFamily
-                font.pixelSize: 14
+                font.pixelSize: Tokens.fontBody
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
@@ -1563,7 +1563,7 @@ Rectangle {
                 color: Tokens.textPrimary
                 opacity: 0.8
                 font.family: Tokens.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: Tokens.fontBody
                 elide: Text.ElideRight
                 maximumLineCount: 1
             }

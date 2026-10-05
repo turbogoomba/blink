@@ -56,7 +56,7 @@ Scope {
         WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
         property real progress: root.open ? 1 : 0
-        Behavior on progress { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
+        Behavior on progress { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeMove } }
         visible: root.open || progress > 0
 
         onVisibleChanged: if (visible) keys.forceActiveFocus()
@@ -95,7 +95,7 @@ Scope {
             // Svart flate, avrundet bare øverst
             Rectangle {
                 anchors.fill: parent
-                radius: 20
+                radius: Tokens.radiusXl
                 color: Tokens.barBg
             }
             Rectangle {
@@ -153,7 +153,7 @@ Scope {
                     ClippingRectangle {
                         width: parent.width
                         height: width * 9 / 16
-                        radius: 14
+                        radius: Tokens.radiusLg
                         color: Tokens.surface
 
                         Image {
@@ -170,7 +170,7 @@ Scope {
                             text: "Put pictures in ~/Pictures/Wallpapers"
                             color: Tokens.textSecondary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: 14
+                            font.pixelSize: Tokens.fontBody
                         }
                     }
 
@@ -179,7 +179,7 @@ Scope {
                         text: content.selected !== "" ? WallpaperService.nameOf(content.selected) : ""
                         color: Tokens.textPrimary
                         font.family: Tokens.fontFamily
-                        font.pixelSize: 14
+                        font.pixelSize: Tokens.fontBody
                         font.weight: Font.DemiBold
                     }
 
@@ -211,7 +211,7 @@ Scope {
                             Rectangle {
                                 anchors.fill: thumbImg
                                 anchors.margins: -4
-                                radius: 12
+                                radius: Tokens.radiusMd
                                 color: "transparent"
                                 border.color: Tokens.accent
                                 border.width: 2
@@ -224,7 +224,7 @@ Scope {
                                 y: 4
                                 width: 132
                                 height: 74
-                                radius: 8
+                                radius: Tokens.radiusMd
                                 color: Tokens.surface
                                 opacity: thumb.selected ? 1 : 0.7
 
@@ -275,14 +275,14 @@ Scope {
                                 text: "Slideshow"
                                 color: Tokens.textSecondary
                                 font.family: Tokens.fontFamily
-                                font.pixelSize: 12
+                                font.pixelSize: Tokens.fontBody
                             }
 
                             Rectangle {
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: segRow.implicitWidth + 6
                                 height: 28
-                                radius: 8
+                                radius: Tokens.radiusMd
                                 color: Tokens.surface
 
                                 Row {
@@ -304,7 +304,7 @@ Scope {
 
                                             width: segText.implicitWidth + 18
                                             height: 22
-                                            radius: 6
+                                            radius: Tokens.radiusSm
                                             color: on ? Tokens.accent : "transparent"
 
                                             Text {
@@ -313,7 +313,7 @@ Scope {
                                                 text: modelData.label
                                                 color: Tokens.textPrimary
                                                 font.family: Tokens.fontFamily
-                                                font.pixelSize: 12
+                                                font.pixelSize: Tokens.fontBody
                                                 font.weight: Font.Medium
                                             }
 
@@ -332,7 +332,7 @@ Scope {
                             anchors.verticalCenter: parent.verticalCenter
                             width: setText.implicitWidth + 28
                             height: 30
-                            radius: 8
+                            radius: Tokens.radiusMd
                             color: setMouse.containsMouse ? Qt.lighter(Tokens.accent, 1.1) : Tokens.accent
 
                             Text {
@@ -341,7 +341,7 @@ Scope {
                                 text: "Set Wallpaper"
                                 color: "white"
                                 font.family: Tokens.fontFamily
-                                font.pixelSize: 12
+                                font.pixelSize: Tokens.fontBody
                                 font.weight: Font.DemiBold
                             }
 

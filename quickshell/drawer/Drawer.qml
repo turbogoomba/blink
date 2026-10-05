@@ -31,12 +31,12 @@ PanelWindow {
 
     // Handle and drawer movement
     property real handleReveal: handleShown || open ? 1 : 0
-    Behavior on handleReveal { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+    Behavior on handleReveal { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
     property real reveal: open ? 1 : 0
     Behavior on reveal {
         NumberAnimation {
             duration: drawer.open ? 420 : 240
-            easing.type: drawer.open ? Easing.OutBack : Easing.InCubic
+            easing.type: drawer.open ? Tokens.easeGrow : Tokens.easeShrink
             easing.overshoot: 0.8
         }
     }
@@ -119,7 +119,7 @@ PanelWindow {
             x: drawer.onLeft ? -10 : 0
             width: parent.width + 10
             height: parent.height
-            radius: 10
+            radius: Tokens.radiusMd
             color: Tokens.barBg
         }
         Rectangle {
@@ -206,7 +206,7 @@ PanelWindow {
         // Round only on the screen side
         Rectangle {
             anchors.fill: parent
-            radius: 20
+            radius: Tokens.radiusXl
             color: Tokens.barBg
         }
         Rectangle {

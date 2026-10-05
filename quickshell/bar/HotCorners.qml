@@ -66,8 +66,8 @@ Scope {
             color: Tokens.accent
             opacity: hover.hovered && !win.fullscreen ? 0.55 : 0
             scale: hover.hovered && !win.fullscreen ? 1 : 0.4
-            Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-            Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
+            Behavior on opacity { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
+            Behavior on scale { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
         }
 
         Item {

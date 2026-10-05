@@ -31,7 +31,7 @@ Flickable {
 
         width: col.width
         height: 52
-        radius: 10
+        radius: Theme.Tokens.radiusMd
         color: Theme.Tokens.surface
         border.color: Theme.Tokens.border
         border.width: 1
@@ -109,7 +109,7 @@ Flickable {
             text: Math.round(vr.volume * 100) + "%"
             color: Theme.Tokens.textSecondary
             font.family: Theme.Tokens.fontFamily
-            font.pixelSize: 12
+            font.pixelSize: Theme.Tokens.fontBody
         }
     }
 
@@ -122,7 +122,7 @@ Flickable {
 
         width: col.width
         height: dlCol.implicitHeight
-        radius: 10
+        radius: Theme.Tokens.radiusMd
         color: Theme.Tokens.surface
         border.color: Theme.Tokens.border
         border.width: 1
@@ -147,7 +147,7 @@ Flickable {
                     Rectangle {
                         anchors.fill: parent
                         anchors.margins: 4
-                        radius: 7
+                        radius: Theme.Tokens.radiusSm
                         color: Theme.Tokens.surfaceAlt
                         visible: devMouse.containsMouse
                     }
@@ -168,7 +168,7 @@ Flickable {
                         text: panel.nameOf(dev.modelData)
                         color: Theme.Tokens.textPrimary
                         font.family: Theme.Tokens.fontFamily
-                        font.pixelSize: 13
+                        font.pixelSize: Theme.Tokens.fontBody
                         font.weight: dev.selected ? Font.DemiBold : Font.Normal
                         elide: Text.ElideRight
                     }
@@ -211,7 +211,7 @@ Flickable {
             text: "Sound"
             color: Theme.Tokens.textPrimary
             font.family: Theme.Tokens.fontFamily
-            font.pixelSize: 22
+            font.pixelSize: Theme.Tokens.fontLarge
             font.weight: Font.DemiBold
         }
 
@@ -220,7 +220,7 @@ Flickable {
             text: "Output"
             color: Theme.Tokens.textSecondary
             font.family: Theme.Tokens.fontFamily
-            font.pixelSize: 12
+            font.pixelSize: Theme.Tokens.fontBody
             font.weight: Font.Medium
         }
 
@@ -241,7 +241,7 @@ Flickable {
             text: "Input"
             color: Theme.Tokens.textSecondary
             font.family: Theme.Tokens.fontFamily
-            font.pixelSize: 12
+            font.pixelSize: Theme.Tokens.fontBody
             font.weight: Font.Medium
         }
 

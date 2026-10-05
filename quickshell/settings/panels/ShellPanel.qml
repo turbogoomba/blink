@@ -30,7 +30,7 @@ Flickable {
         topPadding: 8
         color: Theme.Tokens.textSecondary
         font.family: Theme.Tokens.fontFamily
-        font.pixelSize: 12
+        font.pixelSize: Theme.Tokens.fontBody
         font.weight: Font.DemiBold
         font.capitalization: Font.AllUppercase
     }
@@ -40,7 +40,7 @@ Flickable {
         default property alias content: inner.data
         width: col.width
         height: inner.implicitHeight
-        radius: 10
+        radius: Theme.Tokens.radiusMd
         color: Theme.Tokens.surface
         border.color: Theme.Tokens.border
         border.width: 1
@@ -76,7 +76,7 @@ Flickable {
                 text: row.title
                 color: Theme.Tokens.textPrimary
                 font.family: Theme.Tokens.fontFamily
-                font.pixelSize: 13
+                font.pixelSize: Theme.Tokens.fontBody
                 elide: Text.ElideRight
             }
             Text {
@@ -85,7 +85,7 @@ Flickable {
                 text: row.subtitle
                 color: Theme.Tokens.textSecondary
                 font.family: Theme.Tokens.fontFamily
-                font.pixelSize: 11
+                font.pixelSize: Theme.Tokens.fontSmall
                 elide: Text.ElideRight
             }
         }
@@ -120,7 +120,7 @@ Flickable {
         height: 22
         radius: 11
         color: checked ? Theme.Tokens.accent : Theme.Tokens.border
-        Behavior on color { ColorAnimation { duration: 150 } }
+        Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
 
         Rectangle {
             width: 18
@@ -129,7 +129,7 @@ Flickable {
             y: 2
             x: sw.checked ? sw.width - width - 2 : 2
             color: "white"
-            Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+            Behavior on x { NumberAnimation { duration: Theme.Tokens.durNormal; easing.type: Theme.Tokens.easeMove } }
         }
 
         MouseArea {
@@ -148,7 +148,7 @@ Flickable {
 
         width: segRow.implicitWidth + 4
         height: 26
-        radius: 7
+        radius: Theme.Tokens.radiusSm
         color: Theme.Tokens.surfaceAlt
         border.color: Theme.Tokens.border
         border.width: 1
@@ -168,10 +168,10 @@ Flickable {
 
                     width: optText.implicitWidth + 20
                     height: 22
-                    radius: 5
+                    radius: Theme.Tokens.radiusSm
                     color: selected ? Theme.Tokens.accent
                          : optMouse.containsMouse ? Theme.Tokens.surface : "transparent"
-                    Behavior on color { ColorAnimation { duration: 120 } }
+                    Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
 
                     Text {
                         id: optText
@@ -179,7 +179,7 @@ Flickable {
                         text: opt.modelData.label
                         color: opt.selected ? "white" : Theme.Tokens.textPrimary
                         font.family: Theme.Tokens.fontFamily
-                        font.pixelSize: 12
+                        font.pixelSize: Theme.Tokens.fontBody
                     }
 
                     MouseArea {
@@ -234,7 +234,7 @@ Flickable {
                 anchors.verticalCenter: parent.verticalCenter
                 color: "white"
                 scale: drag.pressed ? 1.15 : 1
-                Behavior on scale { NumberAnimation { duration: 120 } }
+                Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast } }
             }
 
             MouseArea {
@@ -261,7 +261,7 @@ Flickable {
             text: sl.value + sl.suffix
             color: Theme.Tokens.textSecondary
             font.family: Theme.Tokens.fontFamily
-            font.pixelSize: 12
+            font.pixelSize: Theme.Tokens.fontBody
         }
     }
 
@@ -273,10 +273,10 @@ Flickable {
 
         width: btnText.implicitWidth + 24
         height: 26
-        radius: 7
+        radius: Theme.Tokens.radiusSm
         color: btnMouse.pressed ? Qt.darker(Theme.Tokens.accent, 1.2) : Theme.Tokens.accent
         scale: btnMouse.pressed ? 0.96 : 1
-        Behavior on scale { NumberAnimation { duration: 100 } }
+        Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast } }
 
         Text {
             id: btnText
@@ -284,7 +284,7 @@ Flickable {
             text: btn.text
             color: "white"
             font.family: Theme.Tokens.fontFamily
-            font.pixelSize: 12
+            font.pixelSize: Theme.Tokens.fontBody
             font.weight: Font.Medium
         }
 
@@ -305,7 +305,7 @@ Flickable {
 
         width: col.width - 32
         height: 30
-        radius: 7
+        radius: Theme.Tokens.radiusSm
         color: Theme.Tokens.surfaceAlt
         border.color: input.activeFocus ? Theme.Tokens.accent : Theme.Tokens.border
         border.width: 1
@@ -321,7 +321,7 @@ Flickable {
             color: Theme.Tokens.textPrimary
             selectionColor: Theme.Tokens.accent
             font.family: Theme.Tokens.fontFamily
-            font.pixelSize: 12
+            font.pixelSize: Theme.Tokens.fontBody
             onAccepted: fld.apply(text)
             onActiveFocusChanged: if (!activeFocus) fld.apply(text)
 
@@ -351,7 +351,7 @@ Flickable {
                 : "Notifications"
             color: Theme.Tokens.textPrimary
             font.family: Theme.Tokens.fontFamily
-            font.pixelSize: 22
+            font.pixelSize: Theme.Tokens.fontLarge
             font.weight: Font.DemiBold
             bottomPadding: 6
         }
@@ -596,7 +596,7 @@ Flickable {
                             text: "Calendar link (.ics from Mine studier). Press Enter to save."
                             color: Theme.Tokens.textSecondary
                             font.family: Theme.Tokens.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Theme.Tokens.fontSmall
                         }
                         Field {
                             value: SettingsService.timetableUrl

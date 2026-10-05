@@ -23,7 +23,7 @@ PanelWindow {
     Behavior on reveal {
         NumberAnimation {
             duration: ShellState.launcherOpen ? 420 : 220
-            easing.type: ShellState.launcherOpen ? Easing.OutBack : Easing.InCubic
+            easing.type: ShellState.launcherOpen ? Tokens.easeGrow : Tokens.easeShrink
             easing.overshoot: 0.8
         }
     }
@@ -154,7 +154,7 @@ PanelWindow {
         readonly property real startW: 200
         readonly property real startH: Tokens.barHeight + 8
         property real fullH: topPad + content.implicitHeight + 8
-        Behavior on fullH { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+        Behavior on fullH { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
         anchors.horizontalCenter: parent.horizontalCenter
         y: 0
@@ -167,7 +167,7 @@ PanelWindow {
             y: -24
             width: parent.width
             height: parent.height + 24
-            radius: 22
+            radius: Tokens.radiusXl
             color: Tokens.barBg
         }
 
@@ -195,8 +195,8 @@ PanelWindow {
                     anchors.rightMargin: 10
                     anchors.topMargin: 4
                     anchors.bottomMargin: 4
-                    radius: 14
-                    color: Qt.rgba(1, 1, 1, 0.07)
+                    radius: Tokens.radiusLg
+                    color: Tokens.fillIdle
                     border.color: Qt.rgba(1, 1, 1, 0.06)
                     border.width: 1
                 }
@@ -223,7 +223,7 @@ PanelWindow {
                     color: Tokens.textPrimary
                     selectionColor: Tokens.accent
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 20
+                    font.pixelSize: Tokens.fontLarge
 
                     Keys.onPressed: event => {
                         if (event.key === Qt.Key_Escape) {
@@ -278,7 +278,7 @@ PanelWindow {
 
                         width: parent.width - 12
                         height: 44
-                        radius: 10
+                        radius: Tokens.radiusMd
                         color: isSelected ? Tokens.accent : "transparent"
 
                         Image {
@@ -304,7 +304,7 @@ PanelWindow {
                                 text: resultRow.modelData.name ?? ""
                                 color: Tokens.textPrimary
                                 font.family: Tokens.fontFamily
-                                font.pixelSize: 14
+                                font.pixelSize: Tokens.fontBody
                                 font.weight: Font.DemiBold
                                 elide: Text.ElideRight
                             }
@@ -315,7 +315,7 @@ PanelWindow {
                                 color: resultRow.isSelected ? Tokens.textPrimary : Tokens.textSecondary
                                 opacity: resultRow.isSelected ? 0.8 : 1
                                 font.family: Tokens.fontFamily
-                                font.pixelSize: 12
+                                font.pixelSize: Tokens.fontBody
                                 elide: Text.ElideRight
                             }
                         }
@@ -348,7 +348,7 @@ PanelWindow {
         signal triggered()
         width: parent.width
         height: 32
-        radius: 7
+        radius: Tokens.radiusSm
         color: rowMouse.containsMouse ? Tokens.accent : "transparent"
         Text {
             anchors.left: parent.left
@@ -357,7 +357,7 @@ PanelWindow {
             text: row.label
             color: Tokens.textPrimary
             font.family: Tokens.fontFamily
-            font.pixelSize: 13
+            font.pixelSize: Tokens.fontBody
         }
         MouseArea {
             id: rowMouse
@@ -377,14 +377,14 @@ PanelWindow {
         y: launcher.menuY
         width: 210
         height: menuCol.implicitHeight + 10
-        radius: 12
-        color: "#1c1c1e"
-        border.color: "#3a3a3c"
+        radius: Tokens.radiusMd
+        color: Tokens.bg
+        border.color: Tokens.border
         border.width: 1
         visible: launcher.menuEntry !== null && launcher.reveal > 0.9
         scale: visible ? 1 : 0.94
         transformOrigin: Item.TopLeft
-        Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutBack } }
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeGrow } }
 
         // Clicks on the menu itself stay here
         MouseArea { anchors.fill: parent }
