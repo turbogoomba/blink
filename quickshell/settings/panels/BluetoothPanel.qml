@@ -80,6 +80,17 @@ Flickable {
                         }
                     }
 
+                    // Once paired: trust it (so it reconnects on its own) and connect right away.
+                    // Pairing alone is not enough; without trust the bond can be dropped again.
+                    Connections {
+                        target: dev.modelData
+                        function onPairedChanged() {
+                            if (!dev.modelData.paired) return
+                            dev.modelData.trusted = true
+                            dev.modelData.connect()
+                        }
+                    }
+
                     Image {
                         id: devIcon
                         anchors.left: parent.left
