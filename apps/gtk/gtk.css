@@ -25,3 +25,154 @@
 @define-color dialog_fg_color #e5e5e7;
 
 @define-color borders #3a3a3c;
+
+/* ============================================================
+   Thunar, Finder style: soft grey sidebar,
+   flat toolbar, path as pills, rounded selections in the accent.
+   Only applies inside Thunar windows.
+   ============================================================ */
+@define-color blink_black #161618;   /* sidebar and toolbar: soft dark grey */
+@define-color blink_page #1c1c1e;    /* where the files are: same grey as the app themes */
+
+.thunar, ThunarWindow {
+  background-color: @blink_page;
+  font-family: "IBM Plex Sans", sans-serif;
+}
+
+/* Sidebar */
+.thunar .sidebar,
+.thunar .sidebar treeview,
+.thunar .sidebar viewport,
+ThunarWindow .sidebar,
+ThunarWindow .sidebar treeview {
+  background-color: @blink_black;
+  border: none;
+}
+.thunar .sidebar treeview,
+ThunarWindow .sidebar treeview {
+  padding: 4px 6px;
+}
+.thunar .sidebar treeview:selected,
+ThunarWindow .sidebar treeview:selected {
+  background-color: alpha(@accent_bg_color, 0.22);
+  color: @window_fg_color;
+  border-radius: 6px;
+}
+.thunar .sidebar treeview:hover,
+ThunarWindow .sidebar treeview:hover {
+  background-color: alpha(#ffffff, 0.07);
+}
+
+/* Toolbar: flat, quiet buttons */
+.thunar toolbar,
+ThunarWindow toolbar {
+  background-color: @blink_black;
+  border: none;
+  box-shadow: none;
+  padding: 6px 8px;
+}
+.thunar toolbar button,
+ThunarWindow toolbar button {
+  background: none;
+  border: none;
+  box-shadow: none;
+  border-radius: 6px;
+  min-height: 26px;
+  min-width: 26px;
+}
+.thunar toolbar button:hover,
+ThunarWindow toolbar button:hover {
+  background-color: alpha(#ffffff, 0.12);
+}
+.thunar toolbar button:active,
+ThunarWindow toolbar button:active {
+  background-color: alpha(#ffffff, 0.20);
+}
+
+/* Path: plain text like Finder. A pill on hover, the current folder in the accent. */
+.thunar .path-bar,
+ThunarWindow .path-bar {
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+.thunar .path-bar button,
+.thunar .path-bar-button,
+ThunarWindow .path-bar button {
+  background: none;
+  border: none;
+  box-shadow: none;
+  border-radius: 6px;
+  margin: 0 1px;
+  padding: 2px 10px;
+  color: alpha(@window_fg_color, 0.7);
+}
+.thunar .path-bar button:hover,
+.thunar .path-bar-button:hover,
+ThunarWindow .path-bar button:hover {
+  background-color: alpha(#ffffff, 0.10);
+  color: @window_fg_color;
+}
+.thunar .path-bar button:checked,
+.thunar .path-bar-button:checked,
+ThunarWindow .path-bar button:checked {
+  background-color: @accent_bg_color;
+  color: rgba(0, 0, 0, 0.85);
+  font-weight: 600;
+}
+/* Empty buttons and boxes in the toolbar stay invisible until you point at them */
+.thunar toolbar button:not(:hover):not(:checked):not(:active),
+ThunarWindow toolbar button:not(:hover):not(:checked):not(:active) {
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+.thunar toolbar entry,
+ThunarWindow toolbar entry {
+  background-color: alpha(#ffffff, 0.07);
+  border: none;
+  box-shadow: none;
+  border-radius: 6px;
+}
+
+/* Files: rounded selection */
+.thunar .view,
+.thunar iconview,
+.thunar treeview.view,
+ThunarWindow .view {
+  background-color: @blink_page;
+}
+.thunar .view:selected,
+.thunar iconview:selected,
+ThunarWindow .view:selected {
+  background-color: alpha(@accent_bg_color, 0.85);
+  color: rgba(0, 0, 0, 0.85);
+  border-radius: 10px;
+}
+.thunar iconview,
+ThunarWindow iconview {
+  -GtkIconView-selection-box-alpha: 0;
+}
+
+/* Lines between parts: barely there */
+.thunar paned > separator,
+ThunarWindow paned > separator {
+  background-color: alpha(#ffffff, 0.06);
+  min-width: 1px;
+  background-image: none;
+}
+
+/* Status bar and scrollbars: small and out of the way */
+.thunar statusbar,
+ThunarWindow statusbar {
+  background-color: @blink_black;
+  font-size: 11px;
+  color: alpha(@window_fg_color, 0.6);
+}
+.thunar scrollbar slider,
+ThunarWindow scrollbar slider {
+  min-width: 6px;
+  min-height: 6px;
+  border-radius: 3px;
+  background-color: alpha(#ffffff, 0.18);
+}

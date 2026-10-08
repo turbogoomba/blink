@@ -4,73 +4,79 @@ import Quickshell
 import Quickshell.Io
 
 Singleton {
-    id: root
+	id: root
 
-    readonly property string dir: Quickshell.env("HOME") + "/Pictures/Wallpapers"
-    property var files: []
-    property string current: ""
-    property int slideshowMinutes: 0   // 0 = av
+	readonly property string dir: Quickshell.env("HOME") + "/Pictures/Wallpapers"
+	property var files: []
+	property string current: ""
+	property int slideshowMinutes: 0   // 0 = av
 
-    Component.onCompleted: refresh()
+	Component.onCompleted: refresh()
 
-    function refresh() {
-        listProc.running = true
-        currentProc.running = true
-    }
+	function refresh() {
+		listProc.running = true
+		currentProc.running = true
+	}
 
-    // Alle bildene i mappa
-    Process {
-        id: listProc
-        command: ["sh", "-c",
-            `find "${root.dir}" -maxdepth 1 -type f \\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' -o -iname '*.gif' \\) | sort`]
-        stdout: StdioCollector {
-            onStreamFinished: root.files = text.trim().split("\n").filter(l => l !== "")
-        }
-    }
+	// Alle bildene i mappa
+	Process {
+		id: listProc
+		command: ["sh", "-c",
+		`find "${root.dir}" -maxdepth 1 -type f \\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' -o -iname '*.gif' \\) | sort`]
+		stdout: StdioCollector {
+			onStreamFinished: root.files = text.trim().split("\n").filter(l => l !== "")
+		}
+	}
 
-    // Bakgrunnen som vises nå
-    Process {
-        id: currentProc
-        command: ["awww", "query"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const m = text.match(/image: (.+)/)
-                if (m) root.current = m[1].trim()
-            }
-        }
-    }
+	// Bakgrunnen som vises nå
+	Process {
+		id: currentProc
+		command: ["awww", "query"]
+		stdout: StdioCollector {
+			onStreamFinished: {
+				const m = text.match(/image: (.+)/)
+				if (m) root.current = m[1].trim()
+			}
+		}
+	}
 
-    function apply(path, transition) {
-        current = path
-        Quickshell.execDetached(["awww", "img", path,
-            "--transition-type", transition,
-            "--transition-duration", "1",
-            "--transition-fps", "60"])
-    }
+	function apply(path, transition) {
+		current = path
+		Quickshell.execDetached(["awww", "img", path,
+		"--transition-type", transition,
+		"--transition-duration", "1",
+		"--transition-fps", "60"])
 
-    function nameOf(path) { return path.split("/").pop() }
+		// Oppdater pywal-farger (Kitty, Starship osv.)
+		Quickshell.execDetached(["wal", "-i", path,
+		"--backend", "colorz",
+		"-n",
+		"-o", Quickshell.env("HOME") + "/scripts/wal-reload.sh"])
+	}
 
-    // ---------- Slideshow ----------
-    FileView {
-        id: settings
-        path: Quickshell.env("HOME") + "/.config/blink/slideshow"
-        printErrors: false
-        onLoaded: root.slideshowMinutes = parseInt(text()) || 0
-    }
+	function nameOf(path) { return path.split("/").pop() }
 
-    function setSlideshow(minutes) {
-        slideshowMinutes = minutes
-        settings.setText(String(minutes))
-    }
+	// ---------- Slideshow ----------
+	FileView {
+		id: settings
+		path: Quickshell.env("HOME") + "/.config/blink/slideshow"
+		printErrors: false
+		onLoaded: root.slideshowMinutes = parseInt(text()) || 0
+	}
 
-    Timer {
-        interval: Math.max(1, root.slideshowMinutes) * 60000
-        running: root.slideshowMinutes > 0
-        repeat: true
-        onTriggered: {
-            const others = root.files.filter(f => f !== root.current)
-            if (others.length === 0) return
-            root.apply(others[Math.floor(Math.random() * others.length)], "fade")
-        }
-    }
+	function setSlideshow(minutes) {
+		slideshowMinutes = minutes
+		settings.setText(String(minutes))
+	}
+
+	Timer {
+		interval: Math.max(1, root.slideshowMinutes) * 60000
+		running: root.slideshowMinutes > 0
+		repeat: true
+		onTriggered: {
+			const others = root.files.filter(f => f !== root.current)
+			if (others.length === 0) return
+			root.apply(others[Math.floor(Math.random() * others.length)], "fade")
+		}
+	}
 }

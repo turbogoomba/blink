@@ -8,7 +8,7 @@ FloatingWindow {
     title: "Settings"
     implicitWidth: 960
     implicitHeight: 640
-    color: Theme.Tokens.barBg
+    color: Theme.Tokens.windowBg
 
     property string activePanel: "wifi"
     property string query: ""
@@ -83,7 +83,7 @@ FloatingWindow {
         id: sidebar
         anchors { top: parent.top; bottom: parent.bottom; left: parent.left }
         width: 220
-        color: Theme.Tokens.barBg
+        color: Theme.Tokens.sidebarBg
 
         Rectangle {
             anchors { top: parent.top; bottom: parent.bottom; right: parent.right }
