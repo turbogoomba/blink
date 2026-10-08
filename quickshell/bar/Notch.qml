@@ -28,6 +28,12 @@ Rectangle {
     // Bluetooth-hendelse
     property var btDevice: null
     property bool btConnected: false
+    property bool btLow: false   // the toast is a low-battery warning
+    property var btWarned: ({})  // devices already warned about (by address)
+
+    // Connected devices that report battery, shown in the Nook
+    readonly property var btBatteries: Bluetooth.devices.values
+        .filter(d => d.connected && d.batteryAvailable)
 
     // Where the mouse is along the bar (-1 left ... 1 right), NaN = not over the bar.
     // Set by Bar.qml so the eyes can follow the mouse.
@@ -147,16 +153,33 @@ Rectangle {
             required property var modelData
             target: modelData
             function onConnectedChanged() {
+                notch.btLow = false
                 notch.btDevice = modelData
                 notch.btConnected = modelData.connected
                 btTimer.restart()
+            }
+            // Warn once when a device drops under 15 %
+            function onBatteryChanged() {
+                if (!modelData.connected || !modelData.batteryAvailable) return
+                const key = modelData.address
+                if (modelData.battery > 0.2) delete notch.btWarned[key]
+                else if (modelData.battery < 0.15 && !notch.btWarned[key]) {
+                    notch.btWarned[key] = true
+                    notch.btLow = true
+                    notch.btDevice = modelData
+                    notch.btConnected = true
+                    btTimer.restart()
+                }
             }
         }
     }
     Timer {
         id: btTimer
         interval: 3500
-        onTriggered: notch.btDevice = null
+        onTriggered: {
+            notch.btDevice = null
+            notch.btLow = false
+        }
     }
 
     // ---------- Mus ----------
@@ -976,8 +999,9 @@ Rectangle {
             spacing: 1
 
             Text {
-                text: notch.btConnected ? "Connected" : "Disconnected"
-                color: Tokens.textSecondary
+                text: notch.btLow ? "Low battery"
+                    : notch.btConnected ? "Connected" : "Disconnected"
+                color: notch.btLow ? Tokens.red : Tokens.textSecondary
                 font.family: Tokens.fontFamily
                 font.pixelSize: Tokens.fontSmall
             }
@@ -993,45 +1017,13 @@ Rectangle {
         }
 
         // Batteriring
-        Item {
+        BatteryRing {
             id: batteryRing
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             width: parent.hasBattery ? 34 : 0
-            height: 34
             visible: parent.hasBattery
-
-            Canvas {
-                id: ring
-                anchors.fill: parent
-                property real level: parent.parent.level
-                onLevelChanged: requestPaint()
-                onPaint: {
-                    const c = getContext("2d")
-                    c.reset()
-                    const r = width / 2 - 2.5
-                    c.lineWidth = 3
-                    c.lineCap = "round"
-                    c.strokeStyle = "rgba(255,255,255,0.15)"
-                    c.beginPath()
-                    c.arc(width / 2, height / 2, r, 0, 2 * Math.PI)
-                    c.stroke()
-                    c.strokeStyle = level < 0.2 ? Tokens.red : Tokens.green
-                    c.beginPath()
-                    c.arc(width / 2, height / 2, r, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * level)
-                    c.stroke()
-                }
-                Component.onCompleted: requestPaint()
-            }
-
-            Text {
-                anchors.centerIn: parent
-                text: Math.round(parent.parent.level * 100)
-                color: Tokens.textPrimary
-                font.family: Tokens.fontFamily
-                font.pixelSize: Tokens.fontSmall
-                font.weight: Font.DemiBold
-            }
+            level: parent.level
         }
     }
 
@@ -1328,6 +1320,53 @@ Rectangle {
                             font.family: Tokens.fontFamily
                             font.pixelSize: Tokens.fontBody
                             font.weight: dep.mins <= 2 ? Font.DemiBold : Font.Normal
+                        }
+                    }
+                }
+            }
+        }
+
+        // ---------- NOOK: Bluetooth battery ----------
+        Flow {
+            width: parent.width
+            spacing: Tokens.spaceSm
+            visible: notch.tab === "nook" && notch.btBatteries.length > 0
+
+            Repeater {
+                model: notch.btBatteries
+
+                delegate: Rectangle {
+                    id: devPill
+                    required property var modelData
+                    width: devRow.implicitWidth + 2 * Tokens.spaceSm
+                    height: 34
+                    radius: Tokens.radiusMd
+                    color: Tokens.surface
+
+                    Row {
+                        id: devRow
+                        anchors.centerIn: parent
+                        spacing: Tokens.spaceSm
+
+                        Image {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 18
+                            height: 18
+                            sourceSize: Qt.size(36, 36)
+                            source: Quickshell.iconPath(devPill.modelData.icon || "bluetooth", "bluetooth")
+                        }
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: devPill.modelData.name
+                            color: Tokens.textPrimary
+                            font.family: Tokens.fontFamily
+                            font.pixelSize: Tokens.fontBody
+                        }
+                        BatteryRing {
+                            anchors.verticalCenter: parent.verticalCenter
+                            size: 24
+                            lineWidth: 2.5
+                            level: devPill.modelData.battery
                         }
                     }
                 }
