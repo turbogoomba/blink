@@ -49,3 +49,12 @@ require("style")
 ---- VINDUSREGLER ----
 -- Ignorer apper som ber om å starte maksimert (f.eks. kitty)
 hl.window_rule({ match = { class = ".*" }, suppress_event = "maximize" })
+
+-- Thunar always opens floating and centered, like a Finder window
+hl.window_rule({
+    name = "thunar-float",
+    match = { class = "^([Tt]hunar)$" },
+    float = true,
+    center = true,
+    size = { "(monitor_w*0.55)", "(monitor_h*0.6)" },
+})

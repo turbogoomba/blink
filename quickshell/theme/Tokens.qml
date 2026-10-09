@@ -15,6 +15,9 @@ Singleton {
 	readonly property color border: "#3a3a3c"
 	readonly property color textPrimary: "#e5e5e7"
 	readonly property color textSecondary: "#98989d"
+	// App windows (Settings): soft grey instead of the bar's black
+	readonly property color windowBg: "#1c1c1e"
+	readonly property color sidebarBg: "#161618"
 	// Accent: picked from the wallpaper by AccentService (falls back to the blue)
 	readonly property color defaultAccent: "#5fa8d3"
 	property color accent: defaultAccent
