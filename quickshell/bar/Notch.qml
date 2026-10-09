@@ -2,6 +2,7 @@ import QtQuick
 import QtQml
 import Quickshell
 import Quickshell.Widgets
+import Quickshell.Io
 import Quickshell.Bluetooth
 import Quickshell.Services.Mpris
 import Quickshell.Services.UPower
@@ -34,6 +35,27 @@ Rectangle {
     // Connected devices that report battery, shown in the Nook
     readonly property var btBatteries: Bluetooth.devices.values
         .filter(d => d.connected && d.batteryAvailable)
+
+    // Other devices with a battery, like a mouse on a USB dongle (reported by UPower).
+    // Bluetooth devices also show up in UPower, so those are skipped here.
+    readonly property var dongleBatteries: UPower.devices.values
+        .filter(d => !d.isLaptopBattery && !d.powerSupply
+            && d.type !== UPowerDeviceType.LinePower
+            && !d.nativePath.startsWith("/org/bluez")
+            && d.percentage > 0
+            // Logitech Bluetooth devices are also reported by the kernel driver,
+            // so skip anything with the same name as a connected Bluetooth device
+            && !notch.btBatteries.some(b => b.name === d.model || b.deviceName === d.model))
+    function upowerIcon(d) {
+        return d.type === UPowerDeviceType.Mouse ? "input-mouse"
+             : d.type === UPowerDeviceType.Keyboard ? "input-keyboard"
+             : d.type === UPowerDeviceType.Headset || d.type === UPowerDeviceType.Headphones ? "audio-headset"
+             : d.type === UPowerDeviceType.GamingInput ? "input-gaming"
+             : "battery"
+    }
+    function upowerName(d) {
+        return d.model || (d.type === UPowerDeviceType.Mouse ? "Mouse" : "Device")
+    }
 
     // Where the mouse is along the bar (-1 left ... 1 right), NaN = not over the bar.
     // Set by Bar.qml so the eyes can follow the mouse.
@@ -173,6 +195,31 @@ Rectangle {
             }
         }
     }
+    Instantiator {
+        model: UPower.devices
+        delegate: Connections {
+            required property var modelData
+            target: modelData
+            function onPercentageChanged() {
+                if (!notch.dongleBatteries.includes(modelData)) return
+                const key = "upower:" + modelData.nativePath
+                if (modelData.percentage > 0.2) delete notch.btWarned[key]
+                else if (modelData.percentage < 0.15 && !notch.btWarned[key]) {
+                    notch.btWarned[key] = true
+                    notch.btLow = true
+                    // Same shape as a Bluetooth device, so the toast can show it
+                    notch.btDevice = {
+                        icon: notch.upowerIcon(modelData),
+                        name: notch.upowerName(modelData),
+                        battery: modelData.percentage,
+                        batteryAvailable: true
+                    }
+                    notch.btConnected = true
+                    btTimer.restart()
+                }
+            }
+        }
+    }
     Timer {
         id: btTimer
         interval: 3500
@@ -229,6 +276,54 @@ Rectangle {
     }
 
     // ---------- Små byggeklosser ----------
+    component DevicePill: Rectangle {
+        id: pill
+        property string icon: "bluetooth"
+        property string label: ""
+        property real level: 0
+        property string levelText: ""   // "Low", "Full"... for devices without an exact percentage
+        width: pillRow.implicitWidth + 2 * Tokens.spaceSm
+        height: 34
+        radius: Tokens.radiusMd
+        color: Tokens.surface
+
+        Row {
+            id: pillRow
+            anchors.centerIn: parent
+            spacing: Tokens.spaceSm
+
+            Image {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 18
+                height: 18
+                sourceSize: Qt.size(36, 36)
+                source: Quickshell.iconPath(pill.icon, "bluetooth")
+            }
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: pill.label
+                color: Tokens.textPrimary
+                font.family: Tokens.fontFamily
+                font.pixelSize: Tokens.fontBody
+            }
+            Text {
+                visible: pill.levelText !== ""
+                anchors.verticalCenter: parent.verticalCenter
+                text: pill.levelText
+                color: pill.level < 0.15 ? Tokens.red : Tokens.textSecondary
+                font.family: Tokens.fontFamily
+                font.pixelSize: Tokens.fontBody
+            }
+            BatteryRing {
+                anchors.verticalCenter: parent.verticalCenter
+                size: 24
+                lineWidth: 2.5
+                level: pill.level
+                showText: pill.levelText === ""
+            }
+        }
+    }
+
     component CtrlButton: Item {
         id: btn
         scale: btnMouse.pressed ? Tokens.pressScaleIcon : 1
@@ -1326,48 +1421,62 @@ Rectangle {
             }
         }
 
-        // ---------- NOOK: Bluetooth battery ----------
+        // ---------- NOOK: device batteries ----------
         Flow {
             width: parent.width
             spacing: Tokens.spaceSm
-            visible: notch.tab === "nook" && notch.btBatteries.length > 0
+            topPadding: Tokens.spaceMd       // a bit of air under the timetable
+            bottomPadding: Tokens.spaceXs
+            visible: notch.tab === "nook"
+                && notch.btBatteries.length + notch.dongleBatteries.length > 0
 
             Repeater {
                 model: notch.btBatteries
-
-                delegate: Rectangle {
-                    id: devPill
+                delegate: DevicePill {
                     required property var modelData
-                    width: devRow.implicitWidth + 2 * Tokens.spaceSm
-                    height: 34
-                    radius: Tokens.radiusMd
-                    color: Tokens.surface
+                    icon: modelData.icon || "bluetooth"
+                    label: modelData.name
+                    level: modelData.battery
+                }
+            }
+            Repeater {
+                model: notch.dongleBatteries
+                delegate: DevicePill {
+                    id: dongle
+                    required property var modelData
+                    icon: notch.upowerIcon(modelData)
+                    label: notch.upowerName(modelData)
 
-                    Row {
-                        id: devRow
-                        anchors.centerIn: parent
-                        spacing: Tokens.spaceSm
+                    // Many Logitech mice only report a rough level (Full, High, Normal, Low,
+                    // Critical). UPower then turns it into a made-up percentage, so read the
+                    // real level from the kernel and show the word instead of a number.
+                    readonly property string sysPath: modelData.nativePath.startsWith("/")
+                        ? modelData.nativePath : "/sys/class/power_supply/" + modelData.nativePath
+                    property bool exact: true
+                    readonly property string sysLevel: (levelFile.text() ?? "").trim()
+                    readonly property var levelMap: ({ Critical: 0.05, Low: 0.12, Normal: 0.5, High: 0.8, Full: 1 })
+                    readonly property bool coarse: !exact && levelMap[sysLevel] !== undefined
 
-                        Image {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 18
-                            height: 18
-                            sourceSize: Qt.size(36, 36)
-                            source: Quickshell.iconPath(devPill.modelData.icon || "bluetooth", "bluetooth")
-                        }
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: devPill.modelData.name
-                            color: Tokens.textPrimary
-                            font.family: Tokens.fontFamily
-                            font.pixelSize: Tokens.fontBody
-                        }
-                        BatteryRing {
-                            anchors.verticalCenter: parent.verticalCenter
-                            size: 24
-                            lineWidth: 2.5
-                            level: devPill.modelData.battery
-                        }
+                    level: coarse ? levelMap[sysLevel] : modelData.percentage
+                    levelText: coarse ? sysLevel : ""
+
+                    FileView {
+                        path: dongle.sysPath + "/capacity"
+                        printErrors: false
+                        onLoadFailed: dongle.exact = false
+                    }
+                    FileView {
+                        id: levelFile
+                        path: dongle.sysPath + "/capacity_level"
+                        printErrors: false
+                    }
+                    Timer {
+                        // sysfs does not notify on change, so look again now and then
+                        interval: 60000
+                        repeat: true
+                        running: notch.open
+                        triggeredOnStart: true
+                        onTriggered: levelFile.reload()
                     }
                 }
             }
