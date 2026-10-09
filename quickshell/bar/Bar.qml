@@ -523,6 +523,36 @@ PanelWindow {
                                     Behavior on width { NumberAnimation { duration: Tokens.durSlow } }
                                     Behavior on color { ColorAnimation { duration: Tokens.durNormal } }
                                 }
+
+                                // Lightning bolt while charging
+                                Canvas {
+                                    anchors.centerIn: parent
+                                    width: 8
+                                    height: 11
+                                    opacity: bar.charging ? 1 : 0
+                                    scale: bar.charging ? 1 : 0.4
+                                    Behavior on opacity { NumberAnimation { duration: Tokens.durNormal } }
+                                    Behavior on scale { NumberAnimation { duration: Tokens.durSlow; easing.type: Easing.OutBack } }
+                                    onPaint: {
+                                        const c = getContext("2d")
+                                        c.reset()
+                                        c.beginPath()
+                                        c.moveTo(4.8, 0.5)
+                                        c.lineTo(0.8, 6.2)
+                                        c.lineTo(3.7, 6.2)
+                                        c.lineTo(3.0, 10.5)
+                                        c.lineTo(7.2, 4.6)
+                                        c.lineTo(4.3, 4.6)
+                                        c.closePath()
+                                        c.lineJoin = "round"
+                                        c.lineWidth = 1.5
+                                        c.strokeStyle = Tokens.barBg.toString()
+                                        c.stroke()
+                                        c.fillStyle = Tokens.textPrimary.toString()
+                                        c.fill()
+                                    }
+                                    Component.onCompleted: requestPaint()
+                                }
                             }
 
                             Rectangle {
