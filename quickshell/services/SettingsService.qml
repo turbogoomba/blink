@@ -3,11 +3,20 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../theme"
 
 // All shell settings, saved to ~/.config/blink/settings.json
 // (per machine, outside the repo). Change a value here -> it is saved automatically.
 Singleton {
     id: root
+
+    // Bar: "top" (with the notch) or "left" (Caelestia-style side bar)
+    property alias barPosition: adapter.barPosition
+    readonly property bool sideBar: barPosition === "left"
+    readonly property int sideWidth: 52
+    // How far down the screen content starts, and where it starts on the left
+    readonly property int topInset: sideBar ? 6 : Tokens.barHeight
+    readonly property int leftInset: sideBar ? sideWidth : 6
 
     // Hot corners
     property alias hotCornersEnabled: adapter.hotCornersEnabled
@@ -105,6 +114,7 @@ Singleton {
 
         JsonAdapter {
             id: adapter
+            property string barPosition: "top"
             property bool hotCornersEnabled: true
             property string cornerTopLeft: "mission"
             property string cornerTopRight: "controlcenter"

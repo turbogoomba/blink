@@ -425,7 +425,7 @@ PanelWindow {
         id: panel
         anchors.top: parent.top
         anchors.right: parent.right
-        anchors.topMargin: Tokens.barHeight
+        anchors.topMargin: SettingsService.topInset
         anchors.rightMargin: 6   // the frame: the sheet must sit flush against it
         width: 340
         readonly property real fullHeight: content.implicitHeight + 24

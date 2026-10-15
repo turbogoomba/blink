@@ -49,9 +49,9 @@ Variants {
                 Rectangle {
                     required property var modelData
                     x: win.frameT + modelData.inset
-                    y: Tokens.barHeight + modelData.inset
+                    y: SettingsService.topInset + modelData.inset
                     width: win.width - 2 * win.frameT - 2 * modelData.inset
-                    height: win.height - Tokens.barHeight - win.frameT - 2 * modelData.inset
+                    height: win.height - SettingsService.topInset - win.frameT - 2 * modelData.inset
                     radius: Math.max(0, win.radius - modelData.inset)
                     color: "transparent"
                     border.color: Tokens.accent
@@ -90,8 +90,8 @@ Variants {
         }
 
         // ---------- Bars: 24 per side, mirrored around the middle ----------
-        readonly property real barsTop: Tokens.barHeight + 24
-        readonly property real span: height - Tokens.barHeight - frameT - 48
+        readonly property real barsTop: SettingsService.topInset + 24
+        readonly property real span: height - SettingsService.topInset - frameT - 48
         readonly property int count: CavaService.bars * 2
         readonly property real slot: span / count
 

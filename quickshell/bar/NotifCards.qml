@@ -25,7 +25,8 @@ PanelWindow {
     property int typingUid: -1
     onTypingUidChanged: NotificationService.pausePopups(typingUid >= 0 || sheetHover.hovered)
 
-    readonly property bool active: SettingsService.notifStyle === "corner"
+    // The side bar has no notch, so cards are used there too
+    readonly property bool active: SettingsService.notifStyle === "corner" || SettingsService.sideBar
     readonly property bool onLeft: SettingsService.notifCorner === "left"
     readonly property int frameT: 6
     readonly property int pad: Tokens.spaceMd
@@ -102,8 +103,8 @@ PanelWindow {
 
     Item {
         id: sheet
-        x: win.onLeft ? win.frameT : win.width - win.frameT - width
-        y: Tokens.barHeight
+        x: win.onLeft ? SettingsService.leftInset : win.width - win.frameT - width
+        y: SettingsService.topInset
         width: 372
         height: 0
         clip: true

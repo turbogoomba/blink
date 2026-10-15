@@ -26,8 +26,17 @@ ShellRoot {
 
     // Bar på hver skjerm
     Variants {
-        model: Quickshell.screens
+        model: SettingsService.sideBar ? [] : Quickshell.screens
         BarUI.Bar {
+            required property var modelData
+            screen: modelData
+        }
+    }
+
+    // Side bar (Settings > Display & Dock > Bar position)
+    Variants {
+        model: SettingsService.sideBar ? Quickshell.screens : []
+        BarUI.SideBar {
             required property var modelData
             screen: modelData
         }

@@ -61,7 +61,7 @@ PanelWindow {
 
     component Fillet: Canvas {
         property bool mirrored: false
-        y: Tokens.barHeight
+        y: SettingsService.topInset
         width: 14
         height: 14
         opacity: Math.min(1, wx.reveal * 4)
@@ -103,7 +103,7 @@ PanelWindow {
         id: sheet
         width: 340
         x: Math.max(6, Math.min(wx.width - width - 6, ShellState.weatherAnchorX - width / 2))
-        y: Tokens.barHeight
+        y: SettingsService.topInset
         readonly property real fullHeight: body.implicitHeight + 28
         height: fullHeight * Math.max(0, wx.reveal)
         clip: true

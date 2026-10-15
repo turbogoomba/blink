@@ -370,6 +370,20 @@ Flickable {
             width: col.width
             spacing: Theme.Tokens.spaceMd
 
+            SectionTitle { text: "Bar" }
+            Group {
+                SettingRow {
+                    title: "Position"
+                    subtitle: "Top bar with the notch, or a side bar on the left"
+                    divider: false
+                    Segments {
+                        options: [{ value: "top", label: "Top" }, { value: "left", label: "Left" }]
+                        current: SettingsService.barPosition
+                        apply: function(v) { SettingsService.barPosition = v }
+                    }
+                }
+            }
+
             SectionTitle { text: "Wallpaper" }
             Group {
                 SettingRow {

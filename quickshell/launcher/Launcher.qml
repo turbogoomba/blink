@@ -129,7 +129,7 @@ PanelWindow {
     // Concave corners where the sheet meets the bar
     component Fillet: Canvas {
         property bool mirrored: false
-        y: Tokens.barHeight
+        y: SettingsService.topInset
         width: 14
         height: 14
         opacity: Math.min(1, launcher.reveal * 4)
@@ -150,10 +150,10 @@ PanelWindow {
     // The sheet: starts as the notch and grows down out of it
     Item {
         id: box
-        readonly property real topPad: Tokens.barHeight + 6
+        readonly property real topPad: SettingsService.topInset + 6
         readonly property real fullW: 640
         readonly property real startW: 200
-        readonly property real startH: Tokens.barHeight + 8
+        readonly property real startH: SettingsService.topInset + 8
         property real fullH: topPad + content.implicitHeight + 8
         Behavior on fullH { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 

@@ -27,9 +27,9 @@ Variants {
         // Black over everything inside the frame, fades away to reveal the wallpaper
         Rectangle {
             x: win.frameT
-            y: Tokens.barHeight
+            y: SettingsService.topInset
             width: win.width - 2 * win.frameT
-            height: win.height - Tokens.barHeight - win.frameT
+            height: win.height - SettingsService.topInset - win.frameT
             radius: win.radius
             color: "#000000"
             opacity: BootService.cover
@@ -54,7 +54,7 @@ Variants {
                 if (width <= 0 || height <= 0) return
                 const r = win.radius
                 const x0 = win.frameT + 0.75
-                const y0 = Tokens.barHeight + 0.75
+                const y0 = SettingsService.topInset + 0.75
                 const x1 = width - win.frameT - 0.75
                 const y1 = height - win.frameT - 0.75
                 const cx = width / 2

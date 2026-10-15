@@ -25,6 +25,8 @@ Scope {
 
             PanelWindow {
                 screen: s.modelData
+                // The side bar takes this edge when it is on
+                visible: !SettingsService.sideBar
                 anchors { top: true; bottom: true; left: true }
                 implicitWidth: frame.thickness
                 exclusiveZone: frame.thickness
@@ -37,6 +39,18 @@ Scope {
                 screen: s.modelData
                 anchors { top: true; bottom: true; right: true }
                 implicitWidth: frame.thickness
+                exclusiveZone: frame.thickness
+                color: frame.color
+                mask: Region {}
+                WlrLayershell.namespace: "frame"
+            }
+
+            // Top edge, only with the side bar (the top bar covers it otherwise)
+            PanelWindow {
+                screen: s.modelData
+                visible: SettingsService.sideBar
+                anchors { top: true; left: true; right: true }
+                implicitHeight: frame.thickness
                 exclusiveZone: frame.thickness
                 color: frame.color
                 mask: Region {}
@@ -86,21 +100,21 @@ Scope {
 
                 // Øverst til venstre
                 Corner {
-                    x: frame.thickness
-                    y: Tokens.barHeight
+                    x: SettingsService.leftInset
+                    y: SettingsService.topInset
                     cx: width
                     cy: height
                 }
                 // Øverst til høyre
                 Corner {
                     x: corners.width - frame.thickness - width
-                    y: Tokens.barHeight
+                    y: SettingsService.topInset
                     cx: 0
                     cy: height
                 }
                 // Nederst til venstre
                 Corner {
-                    x: frame.thickness
+                    x: SettingsService.leftInset
                     y: corners.height - frame.thickness - height
                     cx: width
                     cy: 0
