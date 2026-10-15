@@ -189,11 +189,16 @@ PanelWindow {
             y: launcher.fromBottom ? box.height - box.fullH + box.topPad : box.topPad
             width: box.fullW
             opacity: Math.max(0, Math.min(1, (launcher.reveal - 0.35) / 0.5))
+            // From the bottom the whole list is flipped: search field at the bottom,
+            // best match right above it. Each row flips itself back so it reads normally.
+            transform: Scale { origin.y: content.height / 2; yScale: launcher.fromBottom ? -1 : 1 }
 
             // ---------- Søkefelt ----------
             Item {
+                id: searchRow
                 width: parent.width
                 height: 56
+                transform: Scale { origin.y: searchRow.height / 2; yScale: launcher.fromBottom ? -1 : 1 }
 
                 Rectangle {
                     anchors.fill: parent
@@ -236,11 +241,12 @@ PanelWindow {
                             if (launcher.menuEntry) launcher.menuEntry = null
                             else launcher.close()
                             event.accepted = true
-                        } else if (event.key === Qt.Key_Down) {
-                            launcher.selected = Math.min(launcher.selected + 1, launcher.results.length - 1)
-                            event.accepted = true
-                        } else if (event.key === Qt.Key_Up) {
-                            launcher.selected = Math.max(launcher.selected - 1, 0)
+                        } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Up) {
+                            // From the bottom the list is upside down, so the arrows swap
+                            const next = (event.key === Qt.Key_Down) !== launcher.fromBottom
+                            launcher.selected = next
+                                ? Math.min(launcher.selected + 1, launcher.results.length - 1)
+                                : Math.max(launcher.selected - 1, 0)
                             event.accepted = true
                         } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                             launcher.launch(launcher.results[launcher.selected])
@@ -278,6 +284,7 @@ PanelWindow {
 
                     Rectangle {
                         id: resultRow
+                        transform: Scale { origin.y: resultRow.height / 2; yScale: launcher.fromBottom ? -1 : 1 }
                         scale: resultRowMouse.pressed ? Tokens.pressScale : 1
                         Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
                         required property var modelData
