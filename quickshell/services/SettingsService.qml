@@ -32,6 +32,8 @@ Singleton {
 
     // Dock
     property alias dockEnabled: adapter.dockEnabled
+    // Apps the launcher never shows, by name (other settings apps that Blink's own Settings replace)
+    property alias launcherHidden: adapter.launcherHidden
     property alias dockSize: adapter.dockSize
     // "bottom", "left" or "right". The drawer goes on the other side.
     property alias drawerEnabled: adapter.drawerEnabled
@@ -138,6 +140,7 @@ Singleton {
             property string notchRight: "auto"
             property string timetableUrl: ""
             property bool dockEnabled: true
+            property var launcherHidden: ["System Settings", "KDE System Settings", "Thunar Preferences", "Volume Control"]
             property int dockSize: 60
             property bool drawerEnabled: true
             property bool bootAnimation: true

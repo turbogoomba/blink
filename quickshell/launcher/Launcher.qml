@@ -42,6 +42,7 @@ PanelWindow {
         const scored = []
         for (const e of DesktopEntries.applications.values) {
             if (e.noDisplay) continue
+            if ((SettingsService.launcherHidden ?? []).indexOf(e.name) >= 0) continue
             const name = (e.name ?? "").toLowerCase()
             const generic = (e.genericName ?? "").toLowerCase()
             const keywords = (e.keywords ?? []).join(" ").toLowerCase()
@@ -56,7 +57,8 @@ PanelWindow {
         for (const b of builtins) {
             const name = b.name.toLowerCase()
             let score = -1
-            if (name.startsWith(q) || b.keys.some(k => k.startsWith(q))) score = 3
+            // A little above apps with the same match, so Blink's Settings comes first
+            if (name.startsWith(q) || b.keys.some(k => k.startsWith(q))) score = 3.5
             else if (name.includes(q) || b.keys.some(k => k.includes(q))) score = 2
             if (score >= 0) scored.push({ entry: b, score: score })
         }

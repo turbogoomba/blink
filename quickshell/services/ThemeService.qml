@@ -179,6 +179,8 @@ if [ "$F" = 1 ] && [ -f "$A/firefox/userChrome.css" ]; then
             "$A/firefox/userChrome.css" > "$P/chrome/userChrome.css.blink" && mv -f "$P/chrome/userChrome.css.blink" "$P/chrome/userChrome.css"
         sed -e "s|#000000|$FRAME|gI" -e "s|#2c2c2e|$SURF|gI" -e "s|#3a3a3c|$BORD|gI" -e "s|#e5e5e7|$TXT|gI" \\
             "$A/firefox/userContent.css" > "$P/chrome/userContent.css.blink" && mv -f "$P/chrome/userContent.css.blink" "$P/chrome/userContent.css"
+        # Firefox keeps a compiled copy of the old CSS; drop it so a restart shows the new theme
+        rm -rf "$HOME/.cache/mozilla/firefox/$(basename "$P")/startupCache" "$P/startupCache" 2>/dev/null
     fi
 fi
 
