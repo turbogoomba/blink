@@ -20,6 +20,8 @@ Singleton {
 
     // Extra numbers, only measured while the drawer is open (set `detailed`)
     property bool detailed: false
+    // The side bar shows GPU usage too, so it keeps the extra stats running
+    property bool barStats: false
     property real gpu: -1          // 0 til 1, -1 = unknown
     property real cpuTemp: -1      // °C
     property real gpuTemp: -1      // °C
@@ -91,7 +93,7 @@ Singleton {
                 parse(stat, mem)
             }
         }
-        if (detailed && !details.running) details.running = true
+        if ((detailed || barStats) && !details.running) details.running = true
     }
 
     Process {
@@ -109,7 +111,13 @@ Singleton {
     Process {
         id: details
         command: ["sh", "-c", `
-g=$(cat /sys/class/drm/card*/device/gpu_busy_percent 2>/dev/null | head -1)
+# The GPU with the most video memory (the real card, not the one in the CPU)
+g=""; best=-1
+for c in /sys/class/drm/card*/device; do
+    [ -r "$c/gpu_busy_percent" ] || continue
+    v=$(cat "$c/mem_info_vram_total" 2>/dev/null || echo 0)
+    if [ "$v" -gt "$best" ]; then best=$v; g=$(cat "$c/gpu_busy_percent"); fi
+done
 ct=""; gt=""
 for d in /sys/class/hwmon/hwmon*; do
     case "$(cat "$d/name" 2>/dev/null)" in
