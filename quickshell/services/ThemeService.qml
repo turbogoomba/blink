@@ -165,9 +165,13 @@ if [ "$F" = 1 ] && [ -f "$A/firefox/userChrome.css" ]; then
     done
     if [ -n "$P" ]; then
         mkdir -p "$P/chrome"
+        # Light themes: white tabs and address bar on the grey frame, so they stand out
+        if [ "$LIGHT" = 1 ]; then FTAB=$SURF; FFIELD=$SURF; FSCHEME=light
+        else FTAB=$SURF2; FFIELD=$SIDE; FSCHEME=dark; fi
         sed -e "s|--mr-bg: #[0-9a-fA-F]*;|--mr-bg: $FRAME;|" \\
-            -e "s|--mr-surface: #[0-9a-fA-F]*;|--mr-surface: $SURF2;|" \\
-            -e "s|--mr-surface-alt: #[0-9a-fA-F]*;|--mr-surface-alt: $SIDE;|" \\
+            -e "s|--mr-surface: #[0-9a-fA-F]*;|--mr-surface: $FTAB;|" \\
+            -e "s|--mr-surface-alt: #[0-9a-fA-F]*;|--mr-surface-alt: $FFIELD;|" \\
+            -e "s|color-scheme: dark|color-scheme: $FSCHEME|" \\
             -e "s|--mr-border: #[0-9a-fA-F]*;|--mr-border: $BORD;|" \\
             -e "s|--mr-text: #[0-9a-fA-F]*;|--mr-text: $TXT;|" \\
             -e "s|--mr-text-dim: #[0-9a-fA-F]*;|--mr-text-dim: $TXT2;|" \\

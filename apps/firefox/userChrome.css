@@ -14,6 +14,7 @@
   --mr-text-dim: #98989d;
   --mr-accent: #5fa8d3;
   --mr-radius: 9px;
+  color-scheme: dark !important;
 
   /* Firefox's own color variables */
   --toolbar-bgcolor: var(--mr-bg) !important;
@@ -37,6 +38,11 @@
   --chrome-content-separator-color: transparent !important;
   --tabs-border-color: transparent !important;
   --toolbarbutton-border-radius: 8px !important;
+  --toolbarbutton-icon-fill: var(--mr-text) !important;
+  --toolbarbutton-icon-fill-attention: var(--mr-accent) !important;
+  --urlbar-box-bgcolor: var(--mr-surface) !important;
+  --urlbar-box-text-color: var(--mr-text) !important;
+  --tab-hover-background-color: color-mix(in srgb, var(--mr-text) 7%, transparent) !important;
   --toolbarbutton-hover-background: color-mix(in srgb, var(--mr-text) 8%, transparent) !important;
   --toolbarbutton-active-background: color-mix(in srgb, var(--mr-text) 14%, transparent) !important;
 }
@@ -48,7 +54,29 @@
 /* ---------- One flat, quiet top ---------- */
 #navigator-toolbox {
   background: var(--mr-bg) !important;
+  color: var(--mr-text) !important;
   border-bottom: none !important;
+}
+/* Text and icons always in the theme's text color, also when Firefox
+   itself thinks it is dark and Blink is light (or the other way) */
+#navigator-toolbox .toolbarbutton-1,
+#navigator-toolbox .toolbarbutton-icon,
+.tab-label,
+.tab-close-button,
+#urlbar-input,
+#urlbar .urlbar-icon,
+#identity-icon,
+#tracking-protection-icon {
+  color: var(--mr-text) !important;
+  fill: var(--mr-text) !important;
+}
+#urlbar-input::placeholder {
+  color: var(--mr-text-dim) !important;
+  opacity: 1 !important;
+}
+#urlbar ::selection {
+  background-color: var(--mr-accent) !important;
+  color: white !important;
 }
 #nav-bar,
 #TabsToolbar,
@@ -286,13 +314,13 @@ menu[_moz-menuactive] {
   color: white !important;
 }
 
-/* ---------- The page: rounded, no outline ---------- */
+/* ---------- The page: flush with the window, Hyprland rounds the corners ---------- */
 #tabbrowser-tabpanels {
   background: var(--mr-bg) !important;
 }
 .browserStack > browser {
-  border-radius: 10px !important;
-  margin: 0 6px 6px !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
   outline: none !important;
   box-shadow: none !important;
 }
