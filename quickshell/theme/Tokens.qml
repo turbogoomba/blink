@@ -8,6 +8,11 @@ import Quickshell
 Singleton {
 	// ---------- Colors ----------
 	readonly property int barHeight: 40
+	// The black frame around the screen
+	readonly property int frameT: 10
+	// Shadow under the bar, frame and sheets, so they float over the wallpaper
+	readonly property color shadowColor: Qt.rgba(0, 0, 0, 0.55)
+	readonly property real shadowBlur: 0.8
 	// Text and icons in the top bar
 	readonly property int barFont: 14
 	readonly property int barIcon: 18

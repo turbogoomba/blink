@@ -117,9 +117,9 @@ Scope {
                     id: inner
                     anchors.fill: parent
                     anchors.topMargin: Tokens.barHeight
-                    anchors.leftMargin: 6
-                    anchors.rightMargin: 6
-                    anchors.bottomMargin: 6
+                    anchors.leftMargin: Tokens.frameT
+                    anchors.rightMargin: Tokens.frameT
+                    anchors.bottomMargin: Tokens.frameT
                     radius: Tokens.radiusLg
                     color: "#101012"
 

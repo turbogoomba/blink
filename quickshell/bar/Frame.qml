@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import "../theme"
@@ -8,7 +9,7 @@ Scope {
     id: frame
 
     // Juster disse for tykkere/tynnere ramme og rundere hjørner
-    property int thickness: 6
+    property int thickness: Tokens.frameT
     property int radius: 14
     property color color: Tokens.barBg
 
@@ -75,56 +76,38 @@ Scope {
                 exclusionMode: ExclusionMode.Ignore
                 color: "transparent"
                 mask: Region {}
+                // Under the windows, so the shadow only falls on the wallpaper
+                WlrLayershell.layer: WlrLayer.Bottom
                 WlrLayershell.namespace: "frame-corners"
 
-                // Et svart kvadrat med en kvartsirkel skåret ut
-                component Corner: Canvas {
-                    property real cx: 0
-                    property real cy: 0
+                // The frame's inner edge: a black ring with rounded inner corners,
+                // with a soft shadow falling onto the wallpaper
+                readonly property real ringB: 60
+                Item {
+                    id: ringSource
+                    anchors.fill: parent
+                    visible: false
 
-                    width: frame.radius
-                    height: frame.radius
-
-                    onPaint: {
-                        const c = getContext("2d")
-                        c.reset()
-                        c.fillStyle = frame.color.toString()
-                        c.fillRect(0, 0, width, height)
-                        c.globalCompositeOperation = "destination-out"
-                        c.beginPath()
-                        c.arc(cx, cy, width, 0, 2 * Math.PI)
-                        c.fill()
+                    Rectangle {
+                        x: SettingsService.leftInset - corners.ringB
+                        y: SettingsService.topInset - corners.ringB
+                        width: corners.width - SettingsService.leftInset - frame.thickness + 2 * corners.ringB
+                        height: corners.height - SettingsService.topInset - frame.thickness + 2 * corners.ringB
+                        radius: frame.radius + corners.ringB
+                        color: "transparent"
+                        border.color: frame.color
+                        border.width: corners.ringB
                     }
-                    Component.onCompleted: requestPaint()
                 }
 
-                // Øverst til venstre
-                Corner {
-                    x: SettingsService.leftInset
-                    y: SettingsService.topInset
-                    cx: width
-                    cy: height
-                }
-                // Øverst til høyre
-                Corner {
-                    x: corners.width - frame.thickness - width
-                    y: SettingsService.topInset
-                    cx: 0
-                    cy: height
-                }
-                // Nederst til venstre
-                Corner {
-                    x: SettingsService.leftInset
-                    y: corners.height - frame.thickness - height
-                    cx: width
-                    cy: 0
-                }
-                // Nederst til høyre
-                Corner {
-                    x: corners.width - frame.thickness - width
-                    y: corners.height - frame.thickness - height
-                    cx: 0
-                    cy: 0
+                MultiEffect {
+                    source: ringSource
+                    anchors.fill: ringSource
+                    shadowEnabled: true
+                    shadowColor: Tokens.shadowColor
+                    shadowBlur: Tokens.shadowBlur
+                    blurMax: 32
+                    shadowVerticalOffset: 2
                 }
             }
         }

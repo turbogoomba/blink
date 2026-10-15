@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -23,7 +24,7 @@ PanelWindow {
     WlrLayershell.namespace: "powermenu"
 
     readonly property bool open: ShellState.powerMenuOpen
-    readonly property int frameT: ShellState.gameMode ? 0 : 6
+    readonly property int frameT: ShellState.gameMode ? 0 : Tokens.frameT
     readonly property int sheetW: 340
 
     // 0 = hidden inside the frame, 1 = fully out
@@ -284,6 +285,15 @@ PanelWindow {
     Item {
         id: sheet
         width: win.sheetW * win.reveal
+        // Soft shadow, so it floats over what is under it
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Tokens.shadowColor
+            shadowBlur: Tokens.shadowBlur
+            blurMax: 32
+            shadowVerticalOffset: 2
+        }
         height: content.implicitHeight + 2 * 18
         x: win.width - win.frameT - width
         y: win.height - win.frameT - height

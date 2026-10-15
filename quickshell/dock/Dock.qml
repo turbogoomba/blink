@@ -14,7 +14,7 @@ PanelWindow {
 
     readonly property string side: SettingsService.dockPosition
     readonly property bool horizontal: side === "bottom"
-    readonly property int frameT: 6
+    readonly property int frameT: Tokens.frameT
 
     anchors {
         bottom: true

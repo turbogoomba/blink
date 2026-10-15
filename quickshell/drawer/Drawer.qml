@@ -13,7 +13,7 @@ PanelWindow {
 
     readonly property string side: SettingsService.drawerSide
     readonly property bool onLeft: side === "left"
-    readonly property int frameT: 6
+    readonly property int frameT: Tokens.frameT
     readonly property int sheetW: 310
 
     screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0]

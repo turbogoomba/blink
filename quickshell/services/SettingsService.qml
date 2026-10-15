@@ -15,8 +15,8 @@ Singleton {
     readonly property bool sideBar: barPosition === "left"
     readonly property int sideWidth: 52
     // How far down the screen content starts, and where it starts on the left
-    readonly property int topInset: sideBar ? 6 : Tokens.barHeight
-    readonly property int leftInset: sideBar ? sideWidth : 6
+    readonly property int topInset: sideBar ? Tokens.frameT : Tokens.barHeight
+    readonly property int leftInset: sideBar ? sideWidth : Tokens.frameT
 
     // Hot corners
     property alias hotCornersEnabled: adapter.hotCornersEnabled

@@ -21,7 +21,7 @@ Variants {
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "boot"
 
-        readonly property int frameT: 6
+        readonly property int frameT: Tokens.frameT
         readonly property int radius: 14
 
         // Black over everything inside the frame, fades away to reveal the wallpaper

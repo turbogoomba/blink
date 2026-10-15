@@ -13,7 +13,7 @@ Scope {
     property int index: 0
 
     // Må stemme med Frame.qml
-    readonly property int frameThickness: 6
+    readonly property int frameThickness: Tokens.frameT
     readonly property int fillet: 14
 
     function syncIndex() {

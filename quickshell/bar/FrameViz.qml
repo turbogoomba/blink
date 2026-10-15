@@ -22,7 +22,7 @@ Variants {
         WlrLayershell.namespace: "frameviz"
         visible: CavaService.active
 
-        readonly property int frameT: 6
+        readonly property int frameT: Tokens.frameT
         readonly property int radius: 14
         readonly property bool glow: SettingsService.frameViz === "glow" || SettingsService.frameViz === "both"
         readonly property bool bars: SettingsService.frameViz === "bars" || SettingsService.frameViz === "both"

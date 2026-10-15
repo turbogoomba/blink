@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
@@ -19,7 +20,7 @@ PanelWindow {
     WlrLayershell.namespace: "notchpanel"
 
     readonly property int leftEdge: SettingsService.sideWidth
-    readonly property int topEdge: 6
+    readonly property int topEdge: Tokens.frameT
 
     // Anything worth showing?
     readonly property bool active: notch.open || notch.showOsd || notch.showNotif || notch.showBt
@@ -75,6 +76,15 @@ PanelWindow {
     Item {
         id: holder
         x: win.leftEdge
+        // Soft shadow, so it floats over what is under it
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Tokens.shadowColor
+            shadowBlur: Tokens.shadowBlur
+            blurMax: 32
+            shadowVerticalOffset: 2
+        }
         y: win.topEdge
         width: notch.width * win.reveal
         height: notch.height

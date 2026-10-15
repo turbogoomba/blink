@@ -27,7 +27,7 @@ PanelWindow {
 
     readonly property bool active: SettingsService.notifStyle === "corner"
     readonly property bool onLeft: SettingsService.notifCorner === "left"
-    readonly property int frameT: 6
+    readonly property int frameT: Tokens.frameT
     readonly property int pad: Tokens.spaceMd
 
     readonly property var shown: active ? NotificationService.popups.slice(0, Math.max(1, SettingsService.notifMax)) : []
