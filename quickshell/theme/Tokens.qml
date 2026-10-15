@@ -9,7 +9,7 @@ Singleton {
 	// ---------- Colors ----------
 	readonly property int barHeight: 40
 	// The black frame around the screen
-	readonly property int frameT: 10
+	readonly property int frameT: 16
 	// Shadow under the bar, frame and sheets, so they float over the wallpaper
 	readonly property color shadowColor: Qt.rgba(0, 0, 0, 0.55)
 	readonly property real shadowBlur: 0.8

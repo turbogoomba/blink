@@ -10,7 +10,7 @@ Scope {
 
     // Juster disse for tykkere/tynnere ramme og rundere hjørner
     property int thickness: Tokens.frameT
-    property int radius: 14
+    property int radius: 20
     property color color: Tokens.barBg
 
     // Game Mode hides the frame so games get the whole screen
