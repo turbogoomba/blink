@@ -67,13 +67,6 @@ Flickable {
             width: parent.width
             spacing: Theme.Tokens.spaceXs
             Text {
-                text: "Hyprland"
-                color: Theme.Tokens.textPrimary
-                font.family: Theme.Tokens.fontFamily
-                font.pixelSize: Theme.Tokens.fontLarge
-                font.weight: Font.DemiBold
-            }
-            Text {
                 width: parent.width
                 wrapMode: Text.WordWrap
                 text: "Changes apply right away. A dot means the setting is changed from the normal config."

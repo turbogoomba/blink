@@ -1,29 +1,44 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
+import "../bar"
 import "../services"
 import "../theme" as Theme
 
 FloatingWindow {
     id: settingsWindow
     title: "Settings"
-    implicitWidth: 960
-    implicitHeight: 640
-    color: Theme.Tokens.windowBg
+    implicitWidth: 1040
+    implicitHeight: 700
+    color: "#161618"
 
     property string activePanel: "wifi"
     property string query: ""
     property string pendingSection: ""
 
-    // All pages. ready = false shows "Coming soon".
+    // Line icons for the sidebar (24x24 SVG paths, drawn in the accent color)
+    readonly property var glyphs: ({
+        wifi:    "M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19h.01",
+        bt:      "M7 7l10 10-5 4V3l5 4L7 17",
+        sound:   "M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12",
+        look:    "M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4c0-4.4-4-8-9-8zM7.5 11h.01M10 7.5h.01M15 7.5h.01",
+        bell:    "M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4",
+        corner:  "M5 3l14 7-6 2-2 6z",
+        notch:   "M3 6h18v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4zM9 11v1M15 11v1",
+        windows: "M3 5h8v14H3zM13 5h8v6h-8zM13 13h8v6h-8z",
+        search:  "M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14M20 20l-4-4"
+    })
+
+    // All pages, in sidebar order. `group` starts a new heading. ready = false shows "Coming soon".
     readonly property var panels: [
-        { id: "wifi",          label: "Wi-Fi",          icon: "network-wireless-symbolic",        source: "panels/WifiPanel.qml",      ready: true },
-        { id: "bluetooth",     label: "Bluetooth",      icon: "bluetooth-active-symbolic",        source: "panels/BluetoothPanel.qml", ready: true },
-        { id: "sound",         label: "Sound",          icon: "audio-volume-high-symbolic",       source: "panels/SoundPanel.qml",     ready: true },
-        { id: "notifications", label: "Notifications",  icon: "preferences-system-notifications", source: "panels/ShellPanel.qml",     ready: true, page: "notifications" },
-        { id: "desktop",       label: "Display & Dock", icon: "preferences-desktop-wallpaper",    source: "panels/ShellPanel.qml",     ready: true, page: "desktop" },
-        { id: "corners",       label: "Hot Corners",    icon: "input-mouse",                      source: "panels/ShellPanel.qml",     ready: true, page: "corners" },
-        { id: "notch",         label: "Notch",          icon: "x-office-calendar",                source: "panels/ShellPanel.qml",     ready: true, page: "notch" },
-        { id: "hyprland",      label: "Hyprland",       icon: "preferences-system-windows",       source: "panels/HyprlandPanel.qml",  ready: true }
+        { id: "wifi",          group: "Network",     label: "Wi-Fi",         glyph: "wifi",    sub: "Networks, school and work Wi-Fi",              source: "panels/WifiPanel.qml",      ready: true },
+        { id: "bluetooth",     group: "",            label: "Bluetooth",     glyph: "bt",      sub: "Pair and connect your devices",                source: "panels/BluetoothPanel.qml", ready: true },
+        { id: "sound",         group: "Devices",     label: "Sound",         glyph: "sound",   sub: "Speakers, headphones and microphones",         source: "panels/SoundPanel.qml",     ready: true },
+        { id: "desktop",       group: "Personalize", label: "Appearance",    glyph: "look",    sub: "Bar, wallpaper, colors and the dock",          source: "panels/ShellPanel.qml",     ready: true, page: "desktop" },
+        { id: "notifications", group: "",            label: "Notifications", glyph: "bell",    sub: "How and where notifications show up",          source: "panels/ShellPanel.qml",     ready: true, page: "notifications" },
+        { id: "corners",       group: "Desktop",     label: "Hot Corners",   glyph: "corner",  sub: "Actions in the corners of the screen",         source: "panels/ShellPanel.qml",     ready: true, page: "corners" },
+        { id: "notch",         group: "",            label: "Notch",         glyph: "notch",   sub: "What the notch shows",                         source: "panels/ShellPanel.qml",     ready: true, page: "notch" },
+        { id: "hyprland",      group: "System",      label: "Windows",       glyph: "windows", sub: "How Hyprland places, spaces and animates windows", source: "panels/HyprlandPanel.qml",  ready: true }
     ]
     readonly property var current: panels.find(p => p.id === activePanel)
     function panelLabel(id) { return (panels.find(p => p.id === id) ?? { label: "" }).label }
@@ -78,175 +93,286 @@ FloatingWindow {
         activePanel = panelId
     }
 
+    // ---------- Who is using it (shown at the top of the sidebar) ----------
+    property string fullName: ""
+    property string hostName: ""
+    readonly property string userName: Quickshell.env("USER") ?? ""
+    readonly property string displayName: fullName !== "" ? fullName
+        : userName.charAt(0).toUpperCase() + userName.slice(1)
+
+    Process {
+        running: true
+        command: ["sh", "-c", 'getent passwd "$USER" | cut -d: -f5 | cut -d, -f1; cat /etc/hostname']
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const lines = text.split("\n").map(l => l.trim())
+                settingsWindow.fullName = (lines[0] ?? "").split(" ")[0]
+                settingsWindow.hostName = lines[1] ?? ""
+            }
+        }
+    }
+
+    Shortcut {
+        sequence: "Ctrl+F"
+        onActivated: searchInput.forceActiveFocus()
+    }
+
+    function soft(c, a) { return Qt.rgba(c.r, c.g, c.b, a) }
+
     // ---------- Sidebar ----------
     Rectangle {
         id: sidebar
         anchors { top: parent.top; bottom: parent.bottom; left: parent.left }
-        width: 220
-        color: Theme.Tokens.sidebarBg
+        width: 260
+        color: "#111113"
 
         Rectangle {
             anchors { top: parent.top; bottom: parent.bottom; right: parent.right }
             width: 1
-            color: Theme.Tokens.divider
+            color: Qt.rgba(1, 1, 1, 0.06)
         }
 
-        Column {
-            anchors { top: parent.top; left: parent.left; right: parent.right }
-            anchors.topMargin: Theme.Tokens.spaceXl
-            anchors.leftMargin: Theme.Tokens.spaceMd
-            anchors.rightMargin: Theme.Tokens.spaceMd
-            spacing: 2
+        Flickable {
+            anchors.fill: parent
+            contentHeight: sideCol.implicitHeight + 32
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
 
-            // Search
-            Rectangle {
-                width: parent.width
-                height: 32
-                radius: Theme.Tokens.radiusMd
-                color: Theme.Tokens.fillIdle
-                border.width: searchInput.activeFocus ? 1 : 0
-                border.color: Theme.Tokens.accent
+            Column {
+                id: sideCol
+                x: 12
+                y: 16
+                width: parent.width - 24
+                spacing: 2
 
-                Text {
-                    id: searchIcon
-                    anchors.left: parent.left
-                    anchors.leftMargin: Theme.Tokens.spaceSm + 2
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "⌕"
-                    color: Theme.Tokens.textSecondary
-                    font.pixelSize: Theme.Tokens.fontTitle
-                }
-
-                TextInput {
-                    id: searchInput
-                    anchors.left: searchIcon.right
-                    anchors.leftMargin: Theme.Tokens.spaceSm
-                    anchors.right: clearBtn.left
-                    anchors.rightMargin: Theme.Tokens.spaceXs
-                    anchors.verticalCenter: parent.verticalCenter
-                    color: Theme.Tokens.textPrimary
-                    selectionColor: Theme.Tokens.accent
-                    selectedTextColor: Theme.Tokens.onAccent
-                    font.family: Theme.Tokens.fontFamily
-                    font.pixelSize: Theme.Tokens.fontBody
-                    clip: true
-                    onTextChanged: settingsWindow.query = text
-                    Keys.onEscapePressed: text = ""
-
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        visible: searchInput.text === ""
-                        text: "Search settings"
-                        color: Theme.Tokens.textSecondary
-                        font: searchInput.font
-                    }
-                }
-
-                Text {
-                    id: clearBtn
-                    anchors.right: parent.right
-                    anchors.rightMargin: Theme.Tokens.spaceSm
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible: searchInput.text !== ""
-                    width: visible ? implicitWidth : 0
-                    text: "✕"
-                    color: clearMouse.containsMouse ? Theme.Tokens.textPrimary : Theme.Tokens.textSecondary
-                    font.pixelSize: Theme.Tokens.fontSmall
-                    MouseArea {
-                        id: clearMouse
-                        anchors.fill: parent
-                        anchors.margins: -4
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: searchInput.text = ""
-                    }
-                }
-            }
-
-            Item { width: 1; height: Theme.Tokens.spaceMd - 2 }
-
-            Repeater {
-                model: settingsWindow.panels
-
-                delegate: Column {
-                    id: navEntry
-                    required property var modelData
-                    readonly property bool selected: settingsWindow.query === "" && modelData.id === settingsWindow.activePanel
-                    readonly property bool showSections: selected && modelData.id === "hyprland"
+                // Who
+                Rectangle {
                     width: parent.width
-                    spacing: 2
-                    opacity: settingsWindow.query === "" ? 1 : 0.45
-                    Behavior on opacity { NumberAnimation { duration: Theme.Tokens.durFast } }
+                    height: 60
+                    radius: 14
+                    color: Qt.rgba(1, 1, 1, 0.04)
 
                     Rectangle {
-                        id: item
-                        width: parent.width
-                        height: 32
-                        radius: Theme.Tokens.radiusSm
-                        color: navEntry.selected ? Theme.Tokens.accent
-                             : itemMouse.containsMouse ? Theme.Tokens.fillHover
-                             : "transparent"
-                        scale: itemMouse.pressed ? Theme.Tokens.pressScale : 1
-                        Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
-
-                        Image {
-                            id: itemIcon
-                            anchors.left: parent.left
-                            anchors.leftMargin: Theme.Tokens.spaceMd
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 16
-                            height: 16
-                            sourceSize: Qt.size(32, 32)
-                            source: Quickshell.iconPath(navEntry.modelData.icon, "application-x-executable")
+                        id: avatar
+                        anchors.left: parent.left
+                        anchors.leftMargin: 10
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 40
+                        height: 40
+                        radius: 20
+                        color: Theme.Tokens.accent
+                        Text {
+                            anchors.centerIn: parent
+                            text: settingsWindow.displayName.charAt(0)
+                            color: Theme.Tokens.onAccent
+                            font.family: Theme.Tokens.fontFamily
+                            font.pixelSize: 17
+                            font.weight: Font.Bold
                         }
+                    }
+                    Column {
+                        anchors.left: avatar.right
+                        anchors.leftMargin: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 1
+                        Text {
+                            text: settingsWindow.displayName
+                            color: Theme.Tokens.textPrimary
+                            font.family: Theme.Tokens.fontFamily
+                            font.pixelSize: 14
+                            font.weight: Font.DemiBold
+                        }
+                        Text {
+                            text: (settingsWindow.hostName || "Linux") + " · Blink"
+                            color: Theme.Tokens.textSecondary
+                            font.family: Theme.Tokens.fontFamily
+                            font.pixelSize: 12
+                        }
+                    }
+                }
+
+                Item { width: 1; height: 12 }
+
+                // Search
+                Rectangle {
+                    width: parent.width
+                    height: 34
+                    radius: 10
+                    color: Qt.rgba(1, 1, 1, 0.06)
+                    border.width: searchInput.activeFocus ? 1 : 0
+                    border.color: Theme.Tokens.accent
+
+                    LineIcon {
+                        id: searchIcon
+                        anchors.left: parent.left
+                        anchors.leftMargin: 10
+                        anchors.verticalCenter: parent.verticalCenter
+                        d: settingsWindow.glyphs.search
+                        tint: Theme.Tokens.textSecondary
+                        size: 15
+                    }
+
+                    TextInput {
+                        id: searchInput
+                        anchors.left: searchIcon.right
+                        anchors.leftMargin: 8
+                        anchors.right: hint.left
+                        anchors.rightMargin: 6
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: Theme.Tokens.textPrimary
+                        selectionColor: Theme.Tokens.accent
+                        selectedTextColor: Theme.Tokens.onAccent
+                        font.family: Theme.Tokens.fontFamily
+                        font.pixelSize: 13
+                        clip: true
+                        onTextChanged: settingsWindow.query = text
+                        Keys.onEscapePressed: text = ""
 
                         Text {
-                            anchors.left: itemIcon.right
-                            anchors.leftMargin: Theme.Tokens.spaceMd
                             anchors.verticalCenter: parent.verticalCenter
-                            text: navEntry.modelData.label
-                            color: navEntry.selected ? Theme.Tokens.onAccent : Theme.Tokens.textPrimary
-                            font.family: Theme.Tokens.fontFamily
-                            font.pixelSize: Theme.Tokens.fontBody
-                            font.weight: navEntry.selected ? Font.Medium : Font.Normal
-                        }
-
-                        MouseArea {
-                            id: itemMouse
-                            cursorShape: Qt.PointingHandCursor
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onClicked: settingsWindow.open(navEntry.modelData.id)
+                            visible: searchInput.text === ""
+                            text: "Search settings"
+                            color: Theme.Tokens.textSecondary
+                            font: searchInput.font
                         }
                     }
 
-                    // Hyprland sections, under the Hyprland entry while it is open
-                    Repeater {
-                        model: navEntry.showSections ? HyprSettingsService.sections : []
-                        delegate: Rectangle {
-                            id: subItem
-                            required property var modelData
-                            readonly property bool current: (panelLoader.item?.currentSection ?? "") === modelData.id
-                            width: navEntry.width
-                            height: 28
-                            radius: Theme.Tokens.radiusSm
-                            color: current ? Theme.Tokens.fillIdle : subMouse.containsMouse ? Theme.Tokens.fillHover : "transparent"
-                            Text {
+                    // Ctrl F hint, or clear
+                    Rectangle {
+                        id: hint
+                        anchors.right: parent.right
+                        anchors.rightMargin: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: hintText.implicitWidth + 12
+                        height: 18
+                        radius: 5
+                        color: hintMouse.containsMouse && searchInput.text !== "" ? Theme.Tokens.fillHover : Qt.rgba(1, 1, 1, 0.08)
+                        Text {
+                            id: hintText
+                            anchors.centerIn: parent
+                            text: searchInput.text === "" ? "Ctrl F" : "Clear"
+                            color: Theme.Tokens.textSecondary
+                            font.family: Theme.Tokens.fontFamily
+                            font.pixelSize: 11
+                        }
+                        MouseArea {
+                            id: hintMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            enabled: searchInput.text !== ""
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: searchInput.text = ""
+                        }
+                    }
+                }
+
+                Item { width: 1; height: 4 }
+
+                Repeater {
+                    model: settingsWindow.panels
+
+                    delegate: Column {
+                        id: navEntry
+                        required property var modelData
+                        readonly property bool selected: settingsWindow.query === "" && modelData.id === settingsWindow.activePanel
+                        readonly property bool showSections: selected && modelData.id === "hyprland"
+                        width: parent.width
+                        spacing: 2
+                        opacity: settingsWindow.query === "" ? 1 : 0.45
+                        Behavior on opacity { NumberAnimation { duration: Theme.Tokens.durFast } }
+
+                        // Group heading
+                        Text {
+                            visible: navEntry.modelData.group !== ""
+                            leftPadding: 10
+                            topPadding: 14
+                            bottomPadding: 4
+                            text: navEntry.modelData.group.toUpperCase()
+                            color: "#6e6e73"
+                            font.family: Theme.Tokens.fontFamily
+                            font.pixelSize: 11
+                            font.weight: Font.DemiBold
+                            font.letterSpacing: 0.9
+                        }
+
+                        Rectangle {
+                            id: item
+                            width: parent.width
+                            height: 36
+                            radius: 10
+                            color: navEntry.selected ? settingsWindow.soft(Theme.Tokens.accent, 0.16)
+                                 : itemMouse.containsMouse ? Theme.Tokens.fillIdle
+                                 : "transparent"
+                            scale: itemMouse.pressed ? Theme.Tokens.pressScale : 1
+                            Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
+                            Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
+
+                            Rectangle {
+                                id: iconBox
                                 anchors.left: parent.left
-                                anchors.leftMargin: 40
+                                anchors.leftMargin: 8
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: subItem.modelData.label
-                                color: subItem.current ? Theme.Tokens.textPrimary : Theme.Tokens.textSecondary
-                                font.family: Theme.Tokens.fontFamily
-                                font.pixelSize: Theme.Tokens.fontBody
-                                font.weight: subItem.current ? Font.Medium : Font.Normal
+                                width: 24
+                                height: 24
+                                radius: 7
+                                color: navEntry.selected ? Theme.Tokens.accent : Qt.rgba(1, 1, 1, 0.07)
+                                Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
+                                LineIcon {
+                                    anchors.centerIn: parent
+                                    d: settingsWindow.glyphs[navEntry.modelData.glyph] ?? ""
+                                    tint: navEntry.selected ? Theme.Tokens.onAccent : Theme.Tokens.accent
+                                    size: 14
+                                }
                             }
+
+                            Text {
+                                anchors.left: iconBox.right
+                                anchors.leftMargin: 10
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: navEntry.modelData.label
+                                color: Theme.Tokens.textPrimary
+                                font.family: Theme.Tokens.fontFamily
+                                font.pixelSize: 13
+                                font.weight: Font.Medium
+                            }
+
                             MouseArea {
-                                id: subMouse
+                                id: itemMouse
+                                cursorShape: Qt.PointingHandCursor
                                 anchors.fill: parent
                                 hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: settingsWindow.open("hyprland", subItem.modelData.id)
+                                onClicked: settingsWindow.open(navEntry.modelData.id)
+                            }
+                        }
+
+                        // Hyprland sections, under the Windows entry while it is open
+                        Repeater {
+                            model: navEntry.showSections ? HyprSettingsService.sections : []
+                            delegate: Rectangle {
+                                id: subItem
+                                required property var modelData
+                                readonly property bool current: (panelLoader.item?.currentSection ?? "") === modelData.id
+                                width: navEntry.width
+                                height: 28
+                                radius: 8
+                                color: current ? Theme.Tokens.fillIdle : subMouse.containsMouse ? Theme.Tokens.fillHover : "transparent"
+                                Text {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 42
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: subItem.modelData.label
+                                    color: subItem.current ? Theme.Tokens.textPrimary : Theme.Tokens.textSecondary
+                                    font.family: Theme.Tokens.fontFamily
+                                    font.pixelSize: 13
+                                    font.weight: subItem.current ? Font.Medium : Font.Normal
+                                }
+                                MouseArea {
+                                    id: subMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: settingsWindow.open("hyprland", subItem.modelData.id)
+                                }
                             }
                         }
                     }
@@ -259,9 +385,33 @@ FloatingWindow {
     Item {
         anchors { top: parent.top; bottom: parent.bottom; left: sidebar.right; right: parent.right }
 
+        // Page title and a line about what is on it
+        Column {
+            id: header
+            visible: settingsWindow.query === ""
+            x: 32
+            y: 28
+            width: parent.width - 64
+            spacing: 4
+            Text {
+                text: settingsWindow.current?.label ?? ""
+                color: Theme.Tokens.textPrimary
+                font.family: Theme.Tokens.fontFamily
+                font.pixelSize: 26
+                font.weight: Font.DemiBold
+            }
+            Text {
+                text: settingsWindow.current?.sub ?? ""
+                color: Theme.Tokens.textSecondary
+                font.family: Theme.Tokens.fontFamily
+                font.pixelSize: 13
+            }
+        }
+
         Loader {
             id: panelLoader
-            anchors.fill: parent
+            anchors { top: header.bottom; bottom: parent.bottom; left: parent.left; right: parent.right }
+            anchors.topMargin: -8
             visible: settingsWindow.query === ""
             source: settingsWindow.current?.ready ? settingsWindow.current.source : ""
             onLoaded: {

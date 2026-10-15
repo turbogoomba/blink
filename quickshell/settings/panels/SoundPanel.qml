@@ -210,18 +210,10 @@ Flickable {
     // ---------- Innholdet ----------
     Column {
         id: col
-        x: 28
-        y: 28
-        width: panel.width - 56
+        x: 32
+        y: 24
+        width: panel.width - 64
         spacing: Theme.Tokens.spaceLg
-
-        Text {
-            text: "Sound"
-            color: Theme.Tokens.textPrimary
-            font.family: Theme.Tokens.fontFamily
-            font.pixelSize: Theme.Tokens.fontLarge
-            font.weight: Font.DemiBold
-        }
 
         Text {
             leftPadding: Theme.Tokens.spaceXs

@@ -29,11 +29,13 @@ Flickable {
     component SectionTitle: Text {
         width: col.width
         topPadding: Theme.Tokens.spaceSm
+        leftPadding: 4
         color: Theme.Tokens.textSecondary
         font.family: Theme.Tokens.fontFamily
-        font.pixelSize: Theme.Tokens.fontBody
+        font.pixelSize: 12
         font.weight: Font.DemiBold
         font.capitalization: Font.AllUppercase
+        font.letterSpacing: 0.7
     }
 
     // Rounded card that stacks rows with dividers
@@ -41,8 +43,8 @@ Flickable {
         default property alias content: inner.data
         width: col.width
         height: inner.implicitHeight
-        radius: Theme.Tokens.radiusMd
-        color: Theme.Tokens.fillIdle
+        radius: 16
+        color: "#1e1e21"
         border.color: "transparent"
         border.width: 1
         clip: true
@@ -119,18 +121,18 @@ Flickable {
         property bool checked: false
         property var apply: function(v) {}
 
-        width: 38
-        height: 22
-        radius: 11
+        width: 44
+        height: 26
+        radius: 13
         color: checked ? Theme.Tokens.accent : Theme.Tokens.fillStrong
         Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
 
         Rectangle {
-            width: 18
-            height: 18
-            radius: 9
-            y: 2
-            x: sw.checked ? sw.width - width - 2 : 2
+            width: 20
+            height: 20
+            radius: 10
+            y: 3
+            x: sw.checked ? sw.width - width - 3 : 3
             color: "white"
             Behavior on x { NumberAnimation { duration: Theme.Tokens.durNormal; easing.type: Theme.Tokens.easeMove } }
         }
@@ -347,22 +349,10 @@ Flickable {
 
     Column {
         id: col
-        x: 28
-        y: 28
-        width: panel.width - 56
+        x: 32
+        y: 24
+        width: panel.width - 64
         spacing: Theme.Tokens.spaceMd
-
-        Text {
-            text: panel.page === "desktop" ? "Display & Dock"
-                : panel.page === "corners" ? "Hot Corners"
-                : panel.page === "notch" ? "Notch"
-                : "Notifications"
-            color: Theme.Tokens.textPrimary
-            font.family: Theme.Tokens.fontFamily
-            font.pixelSize: Theme.Tokens.fontLarge
-            font.weight: Font.DemiBold
-            bottomPadding: Theme.Tokens.spaceSm
-        }
 
         // ---------- Desktop & Dock ----------
         Column {

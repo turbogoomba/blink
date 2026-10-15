@@ -31,63 +31,105 @@ Flickable {
 
     Column {
         id: col
-        x: 28
-        y: 28
-        width: panel.width - 56
+        x: 32
+        y: 24
+        width: panel.width - 64
         spacing: Theme.Tokens.spaceLg
 
-        // ---------- Overskrift ----------
-        Text {
-            text: "Wi-Fi"
-            color: Theme.Tokens.textPrimary
-            font.family: Theme.Tokens.fontFamily
-            font.pixelSize: Theme.Tokens.fontLarge
-            font.weight: Font.DemiBold
-        }
-
-        // ---------- Av/på ----------
+        // ---------- Status ----------
         Rectangle {
+            id: hero
             width: parent.width
-            height: 48
-            radius: Theme.Tokens.radiusMd
-            color: Theme.Tokens.fillIdle
-            border.color: "transparent"
+            height: 88
+            radius: 18
+            readonly property bool on: NetworkService.wifiEnabled
+            color: on ? Qt.rgba(Theme.Tokens.accent.r, Theme.Tokens.accent.g, Theme.Tokens.accent.b, 0.12) : Theme.Tokens.fillIdle
             border.width: 1
+            border.color: on ? Qt.rgba(Theme.Tokens.accent.r, Theme.Tokens.accent.g, Theme.Tokens.accent.b, 0.35) : "transparent"
+            Behavior on color { ColorAnimation { duration: Theme.Tokens.durNormal } }
 
-            Text {
+            Rectangle {
+                id: heroIcon
                 anchors.left: parent.left
-                anchors.leftMargin: Theme.Tokens.spaceLg
+                anchors.leftMargin: 18
                 anchors.verticalCenter: parent.verticalCenter
-                text: NetworkService.ethernetConnected
-                    ? "Wi-Fi  ·  Ethernet connected"
-                    : "Wi-Fi"
-                color: Theme.Tokens.textPrimary
-                font.family: Theme.Tokens.fontFamily
-                font.pixelSize: Theme.Tokens.fontBody
+                width: 52
+                height: 52
+                radius: 16
+                color: hero.on ? Theme.Tokens.accent : Theme.Tokens.fillStrong
+                Behavior on color { ColorAnimation { duration: Theme.Tokens.durNormal } }
+                Image {
+                    anchors.centerIn: parent
+                    width: 26
+                    height: 26
+                    sourceSize: Qt.size(52, 52)
+                    source: Quickshell.iconPath(hero.on ? "network-wireless-symbolic" : "network-wireless-disabled-symbolic", "network-wireless")
+                }
             }
 
-            // Bryter
+            Column {
+                anchors.left: heroIcon.right
+                anchors.leftMargin: 16
+                anchors.right: toggle.left
+                anchors.rightMargin: 16
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 3
+                Text {
+                    width: parent.width
+                    elide: Text.ElideRight
+                    text: !hero.on ? "Wi-Fi is off"
+                        : NetworkService.connected && NetworkService.ssid !== "" ? "Connected to " + NetworkService.ssid
+                        : NetworkService.connectingSsid !== "" ? "Connecting to " + NetworkService.connectingSsid + "..."
+                        : "Not connected"
+                    color: Theme.Tokens.textPrimary
+                    font.family: Theme.Tokens.fontFamily
+                    font.pixelSize: 17
+                    font.weight: Font.DemiBold
+                }
+                Text {
+                    width: parent.width
+                    elide: Text.ElideRight
+                    text: {
+                        const parts = []
+                        if (hero.on && NetworkService.connected) {
+                            const s = NetworkService.signalStrength
+                            parts.push(s > 75 ? "Strong signal" : s > 50 ? "Good signal" : s > 25 ? "Fair signal" : "Weak signal")
+                        } else if (hero.on) {
+                            parts.push("Pick a network below")
+                        } else {
+                            parts.push("Turn it on to see networks")
+                        }
+                        if (NetworkService.ethernetConnected) parts.push("Ethernet connected")
+                        return parts.join("  ·  ")
+                    }
+                    color: Theme.Tokens.textSecondary
+                    font.family: Theme.Tokens.fontFamily
+                    font.pixelSize: 13
+                }
+            }
+
+            // Switch
             Rectangle {
                 id: toggle
                 scale: toggleMouse.pressed ? Theme.Tokens.pressScale : 1
                 Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                 anchors.right: parent.right
-                anchors.rightMargin: Theme.Tokens.spaceLg
+                anchors.rightMargin: 20
                 anchors.verticalCenter: parent.verticalCenter
-                width: 38
-                height: 22
-                radius: 11
-                color: NetworkService.wifiEnabled ? Theme.Tokens.accent : Theme.Tokens.fillStrong
+                width: 44
+                height: 26
+                radius: 13
+                color: hero.on ? Theme.Tokens.accent : Theme.Tokens.fillStrong
                 Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
 
                 Rectangle {
-                    width: 18
-                    height: 18
-                    radius: 9
-                    y: 2
-                    x: NetworkService.wifiEnabled ? toggle.width - width - 2 : 2
+                    width: 20
+                    height: 20
+                    radius: 10
+                    y: 3
+                    x: hero.on ? toggle.width - width - 3 : 3
                     color: "white"
-                    Behavior on x { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
+                    Behavior on x { NumberAnimation { duration: Theme.Tokens.durNormal; easing.type: Theme.Tokens.easeMove } }
                 }
 
                 MouseArea {
@@ -99,6 +141,7 @@ Flickable {
                 }
             }
         }
+
 
         // ---------- Overskrift + oppdater ----------
         Item {
