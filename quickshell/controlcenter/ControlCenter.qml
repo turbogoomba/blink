@@ -34,7 +34,7 @@ PanelWindow {
     Behavior on reveal {
         id: openBehavior   // targetValue = where it is going, read before the animation starts
         NumberAnimation {
-            duration: openBehavior.targetValue > 0.5 ? 460 : 260
+            duration: openBehavior.targetValue > 0.5 ? Tokens.durOpen : Tokens.durClose
             easing.type: openBehavior.targetValue > 0.5 ? Tokens.easeGrow : Tokens.easeShrink
             easing.overshoot: Tokens.bounce
         }

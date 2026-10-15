@@ -107,7 +107,9 @@ Singleton {
 	// ---------- Motion ----------
 	readonly property int durFast: 120    // hover, press
 	readonly property int durNormal: 200  // most changes
-	readonly property int durSlow: 320    // panels opening and closing
+	readonly property int durSlow: 320    // morphs (the notch changing shape)
+	readonly property int durOpen: 440    // sheets and menus growing out of the frame
+	readonly property int durClose: 240   // ... and going back in (closing is quicker)
 	readonly property int easeMove: Easing.OutCubic   // fades and movement
 	readonly property int easeGrow: Easing.OutBack    // things growing out of the frame/notch, press bounce
 	readonly property int easeShrink: Easing.InCubic  // things closing

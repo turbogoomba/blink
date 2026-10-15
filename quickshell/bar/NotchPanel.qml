@@ -28,11 +28,22 @@ PanelWindow {
     Behavior on reveal {
         id: openBehavior
         NumberAnimation {
-            duration: openBehavior.targetValue > 0.5 ? 440 : 240
+            duration: openBehavior.targetValue > 0.5 ? Tokens.durOpen : Tokens.durClose
             easing.type: openBehavior.targetValue > 0.5 ? Tokens.easeGrow : Tokens.easeShrink
             easing.overshoot: Tokens.bounce
         }
     }
+    // 0 → 1 without the overshoot, for fades and the corners
+    readonly property real calm: Math.max(0, Math.min(1, reveal))
+    // The content fades in once the panel is about half out, and out first when it closes
+    readonly property real contentOpacity: Math.max(0, Math.min(1, (reveal - 0.4) / 0.45))
+
+    // The size the panel grows to. Kept when it closes, so it shrinks from the
+    // size it had instead of jumping to the small idle notch first.
+    property real panelW: 660
+    property real panelH: 200
+    Binding { target: win; property: "panelW"; value: notch.width; when: win.active; restoreMode: Binding.RestoreNone }
+    Binding { target: win; property: "panelH"; value: notch.height; when: win.active; restoreMode: Binding.RestoreNone }
 
     visible: !ShellState.gameMode
 
@@ -68,14 +79,20 @@ PanelWindow {
         Component.onCompleted: requestPaint()
     }
     // Right of the notch, under the top edge
-    Fillet { x: holder.x + holder.width; y: win.topEdge }
+    Fillet { x: holder.x + holder.width; y: win.topEdge; scale: win.calm; transformOrigin: Item.TopLeft }
     // Under the notch, next to the side bar
-    Fillet { x: win.leftEdge; y: win.topEdge + notch.height }
+    Fillet { x: win.leftEdge; y: win.topEdge + holder.height; scale: win.calm; transformOrigin: Item.TopLeft }
 
-    // Clip, so it slides out from behind the side bar
+    // Grows out of the corner where the side bar meets the top edge, in both
+    // directions at once, like it is poured out of the bar
     Item {
         id: holder
         x: win.leftEdge
+        y: win.topEdge
+        width: win.panelW * win.reveal
+        height: Math.max(0, win.panelH * (0.35 + 0.65 * win.reveal))
+        visible: win.reveal > 0.005
+        clip: true
         // Soft shadow, so it floats over what is under it
         layer.enabled: true
         layer.effect: MultiEffect {
@@ -85,34 +102,43 @@ PanelWindow {
             blurMax: 32
             shadowVerticalOffset: 2
         }
-        y: win.topEdge
-        width: notch.width * win.reveal
-        height: notch.height
-        clip: true
+
+        // The shape: square where it joins the bar and the top edge, round at the bottom right
+        Rectangle {
+            anchors.fill: parent
+            color: Tokens.barBg
+            bottomRightRadius: Math.min(24, height / 2, width / 2)
+        }
 
         Item {
+            id: box
             // Stays against the bar even when the bounce overshoots
-            x: Math.min(0, holder.width - notch.width)
-            width: notch.width
-            height: notch.height
-
-            // Square corners where it joins the bar and the top edge; only the
-            // bottom-right corner stays round
-            Rectangle {
-                width: notch.width
-                height: notch.height / 2
-                color: Tokens.barBg
-            }
-            Rectangle {
-                width: notch.width / 2
-                height: notch.height
-                color: Tokens.barBg
-            }
+            x: Math.min(0, holder.width - win.panelW)
+            y: Math.min(0, holder.height - win.panelH)
+            width: win.panelW
+            height: win.panelH
+            opacity: win.contentOpacity
 
             Notch {
                 id: notch
                 baseHeight: Tokens.barHeight
                 lookTarget: NaN
+                // No morph of its own while the panel slides; tab changes inside still morph
+                animateSize: win.reveal > 0.98
+                color: "transparent"
+            }
+
+            // What you see is a live picture of the notch (it still takes the mouse
+            // and keys). When it closes, the notch has already gone back to idle,
+            // so the picture stops updating and keeps showing the open panel while
+            // it slides back in.
+            ShaderEffectSource {
+                id: snapshot
+                width: win.panelW
+                height: win.panelH
+                sourceItem: notch
+                hideSource: true
+                live: win.active
             }
         }
     }

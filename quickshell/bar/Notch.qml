@@ -163,9 +163,11 @@ Rectangle {
     color: Tokens.barBg
     clip: true
 
-    // Springy morph, like the Dynamic Island
-    Behavior on width  { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow; easing.overshoot: Tokens.bounce } }
-    Behavior on height { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow; easing.overshoot: Tokens.bounce } }
+    // Springy morph, like the Dynamic Island. The side bar's notch panel turns it
+    // off while it slides in and out, so the two animations do not fight.
+    property bool animateSize: true
+    Behavior on width  { enabled: notch.animateSize; NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow; easing.overshoot: Tokens.bounce } }
+    Behavior on height { enabled: notch.animateSize; NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow; easing.overshoot: Tokens.bounce } }
     Behavior on radius { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
 
     // ---------- Bluetooth: lytt etter til/frakobling ----------

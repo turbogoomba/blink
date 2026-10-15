@@ -36,7 +36,7 @@ PanelWindow {
     Behavior on reveal {
         id: openBehavior   // targetValue = where it is going, read before the animation starts
         NumberAnimation {
-            duration: openBehavior.targetValue > 0.5 ? 440 : 240
+            duration: openBehavior.targetValue > 0.5 ? Tokens.durOpen : Tokens.durClose
             easing.type: openBehavior.targetValue > 0.5 ? Tokens.easeGrow : Tokens.easeShrink
             easing.overshoot: Tokens.bounce
         }
@@ -353,6 +353,8 @@ PanelWindow {
             y: 18
             width: win.sheetW - 38
             spacing: 14
+            // Fades in once the sheet is partly out, and out first when it closes
+            opacity: Math.max(0, Math.min(1, (win.reveal - 0.3) / 0.5))
 
             // Header
             Item {

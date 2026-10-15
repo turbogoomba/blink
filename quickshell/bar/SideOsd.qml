@@ -39,7 +39,7 @@ PanelWindow {
     Behavior on reveal {
         id: openBehavior
         NumberAnimation {
-            duration: openBehavior.targetValue > 0.5 ? 440 : 240
+            duration: openBehavior.targetValue > 0.5 ? Tokens.durOpen : Tokens.durClose
             easing.type: openBehavior.targetValue > 0.5 ? Tokens.easeGrow : Tokens.easeShrink
             easing.overshoot: Tokens.bounce
         }
