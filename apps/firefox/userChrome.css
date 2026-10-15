@@ -1,13 +1,13 @@
 /* ============================================
-   Blink — Firefox (v2, calmer)
+   Blink — Firefox (v3, black and minimal: the same black as the frame)
    The colors below are replaced by Blink when you pick a theme
    (Settings > Appearance). Restart Firefox to see a new theme.
    ============================================ */
 
 :root {
-  --mr-bg: #1c1c1e;
-  --mr-surface: #2c2c2e;
-  --mr-surface-alt: #242426;
+  --mr-bg: #000000;
+  --mr-surface: #1c1c1e;
+  --mr-surface-alt: #111113;
   --mr-border: #3a3a3c;
   --mr-text: #e5e5e7;
   --mr-text-dim: #98989d;
@@ -57,7 +57,10 @@
   border: none !important;
 }
 #nav-bar {
-  padding-block: 2px 6px !important;
+  padding-block: 0 6px !important;
+}
+#PersonalToolbar {
+  display: none !important;
 }
 
 /* Window buttons: Hyprland does not need them */

@@ -74,7 +74,8 @@ Singleton {
             Tokens.themeName,
             t.window, t.sidebar, t.surface, t.surfaceAlt, t.border, t.text, t.text2,
             hex(Tokens.accent), hex(Qt.lighter(Tokens.accent, 1.18)), hex(Tokens.onAccent),
-            t.light ? "1" : "0"]
+            t.light ? "1" : "0",
+            t.frame]
         writer.running = true
     }
 
@@ -82,7 +83,8 @@ Singleton {
 
     readonly property string script: `
 A=$1; K=$2; G=$3; V=$4; S=$5; F=$6; NAME=$7; WIN=$8; SIDE=$9; shift 9
-SURF=$1; SURF2=$2; BORD=$3; TXT=$4; TXT2=$5; ACC=$6; ACCL=$7; ONACC=$8; LIGHT=$9
+SURF=$1; SURF2=$2; BORD=$3; TXT=$4; TXT2=$5; ACC=$6; ACCL=$7; ONACC=$8; LIGHT=$9; shift 9
+FRAME=$1
 
 # ---------- Kitty ----------
 if [ "$K" = 1 ]; then
@@ -163,15 +165,15 @@ if [ "$F" = 1 ] && [ -f "$A/firefox/userChrome.css" ]; then
     done
     if [ -n "$P" ]; then
         mkdir -p "$P/chrome"
-        sed -e "s|--mr-bg: #[0-9a-fA-F]*;|--mr-bg: $WIN;|" \
-            -e "s|--mr-surface: #[0-9a-fA-F]*;|--mr-surface: $SURF;|" \
-            -e "s|--mr-surface-alt: #[0-9a-fA-F]*;|--mr-surface-alt: $SURF2;|" \
-            -e "s|--mr-border: #[0-9a-fA-F]*;|--mr-border: $BORD;|" \
-            -e "s|--mr-text: #[0-9a-fA-F]*;|--mr-text: $TXT;|" \
-            -e "s|--mr-text-dim: #[0-9a-fA-F]*;|--mr-text-dim: $TXT2;|" \
-            -e "s|--mr-accent: #[0-9a-fA-F]*;|--mr-accent: $ACC;|" \
+        sed -e "s|--mr-bg: #[0-9a-fA-F]*;|--mr-bg: $FRAME;|" \\
+            -e "s|--mr-surface: #[0-9a-fA-F]*;|--mr-surface: $SURF2;|" \\
+            -e "s|--mr-surface-alt: #[0-9a-fA-F]*;|--mr-surface-alt: $SIDE;|" \\
+            -e "s|--mr-border: #[0-9a-fA-F]*;|--mr-border: $BORD;|" \\
+            -e "s|--mr-text: #[0-9a-fA-F]*;|--mr-text: $TXT;|" \\
+            -e "s|--mr-text-dim: #[0-9a-fA-F]*;|--mr-text-dim: $TXT2;|" \\
+            -e "s|--mr-accent: #[0-9a-fA-F]*;|--mr-accent: $ACC;|" \\
             "$A/firefox/userChrome.css" > "$P/chrome/userChrome.css.blink" && mv -f "$P/chrome/userChrome.css.blink" "$P/chrome/userChrome.css"
-        sed -e "s|#1c1c1e|$WIN|gI" -e "s|#2c2c2e|$SURF|gI" -e "s|#3a3a3c|$BORD|gI" -e "s|#e5e5e7|$TXT|gI" \
+        sed -e "s|#000000|$FRAME|gI" -e "s|#2c2c2e|$SURF|gI" -e "s|#3a3a3c|$BORD|gI" -e "s|#e5e5e7|$TXT|gI" \\
             "$A/firefox/userContent.css" > "$P/chrome/userContent.css.blink" && mv -f "$P/chrome/userContent.css.blink" "$P/chrome/userContent.css"
     fi
 fi
