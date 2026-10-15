@@ -13,6 +13,8 @@ Singleton {
     property alias hotCornersEnabled: adapter.hotCornersEnabled
     property alias cornerTopLeft: adapter.cornerTopLeft
     property alias cornerTopRight: adapter.cornerTopRight
+    property alias cornerBottomLeft: adapter.cornerBottomLeft
+    property alias cornerBottomRight: adapter.cornerBottomRight
     property alias cornerDelay: adapter.cornerDelay
 
     // Notch: "auto" (timetable if a link exists), "timetable" or "buses"
@@ -106,6 +108,8 @@ Singleton {
             property bool hotCornersEnabled: true
             property string cornerTopLeft: "mission"
             property string cornerTopRight: "controlcenter"
+            property string cornerBottomLeft: "none"
+            property string cornerBottomRight: "power"
             property int cornerDelay: 250
             property string notchRight: "auto"
             property string timetableUrl: ""

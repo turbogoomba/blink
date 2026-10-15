@@ -393,6 +393,15 @@ PanelWindow {
             opacity: BootService.bar
             transform: Translate { x: -(1 - BootService.bar) * 60 }
 
+            // Keep awake is on (click opens the power menu)
+            BarItem {
+                visible: IdleService.awake
+                anchors.verticalCenter: parent.verticalCenter
+                iconSource: Qt.resolvedUrl("../icons/coffee.svg")
+                text: IdleService.left > 0 ? IdleService.left + "m" : ""
+                onClicked: ShellState.powerMenuOpen = !ShellState.powerMenuOpen
+            }
+
             // Vær
             BarItem {
                 id: weatherItem

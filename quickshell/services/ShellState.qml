@@ -15,6 +15,7 @@ Singleton {
     property bool weatherOpen: false
     property real weatherAnchorX: 0
     property bool soundOpen: false
+    property bool powerMenuOpen: false
     property real soundAnchorX: 0
 
     // Bumped every time a screenshot is taken (the notch face reacts)

@@ -7,7 +7,7 @@ import "../services"
 import "../theme"
 
 // Hot corners. What each corner does is set in Settings > Hot Corners.
-// Actions: "mission", "controlcenter", "launcher", "wallpaper", "none"
+// Actions: "mission", "controlcenter", "launcher", "wallpaper", "power", "none"
 Scope {
     id: root
 
@@ -25,19 +25,22 @@ Scope {
         else if (action === "wallpaper") callIpc("wallpaper")
         else if (action === "launcher") ShellState.launcherOpen = !ShellState.launcherOpen
         else if (action === "controlcenter") ShellState.controlCenterOpen = !ShellState.controlCenterOpen
+        else if (action === "power") ShellState.powerMenuOpen = !ShellState.powerMenuOpen
     }
 
     component Corner: PanelWindow {
         id: win
         required property var modelData
         property bool right: false
+        property bool bottom: false
         property string action: "none"
         readonly property bool active: SettingsService.hotCornersEnabled && action !== "none" && !ShellState.focusMode
 
         screen: modelData
         visible: active
         color: "transparent"
-        anchors.top: true
+        anchors.top: !bottom
+        anchors.bottom: bottom
         anchors.left: !right
         anchors.right: right
         implicitWidth: 48
@@ -62,7 +65,7 @@ Scope {
             height: 56
             radius: 28
             x: win.right ? parent.width - 28 : -28
-            y: -28
+            y: win.bottom ? parent.height - 28 : -28
             color: Tokens.accent
             opacity: hover.hovered && !win.fullscreen ? 0.55 : 0
             scale: hover.hovered && !win.fullscreen ? 1 : 0.4
@@ -75,7 +78,7 @@ Scope {
             width: 4
             height: 4
             x: win.right ? parent.width - width : 0
-            y: 0
+            y: win.bottom ? parent.height - height : 0
 
             HoverHandler {
                 id: hover
@@ -113,6 +116,24 @@ Scope {
         Corner {
             right: true
             action: SettingsService.cornerTopRight
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        Corner {
+            bottom: true
+            right: false
+            action: SettingsService.cornerBottomLeft
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        Corner {
+            bottom: true
+            right: true
+            action: SettingsService.cornerBottomRight
         }
     }
 }

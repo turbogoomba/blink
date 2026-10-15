@@ -43,6 +43,7 @@ ShellRoot {
     BarUI.NotifCards {}
     BarUI.Weather {}
     BarUI.SoundMenu {}
+    BarUI.PowerMenu {}
     SwitcherUI.Switcher {}
     LockUI.Lock {}
 

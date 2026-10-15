@@ -18,6 +18,7 @@ Flickable {
         { value: "controlcenter", label: "Control Center" },
         { value: "launcher",      label: "Launcher" },
         { value: "wallpaper",     label: "Wallpaper" },
+        { value: "power",         label: "Power Menu" },
         { value: "none",          label: "Nothing" }
     ]
 
@@ -508,7 +509,7 @@ Flickable {
             Group {
                 SettingRow {
                     title: "Hot corners"
-                    subtitle: "Move the mouse into a top corner to trigger an action"
+                    subtitle: "Move the mouse into a screen corner to trigger an action"
                     divider: false
                     Toggle {
                         checked: SettingsService.hotCornersEnabled
@@ -543,6 +544,36 @@ Flickable {
                         options: panel.cornerActions
                         current: SettingsService.cornerTopRight
                         apply: function(v) { SettingsService.cornerTopRight = v }
+                    }
+                }
+            }
+
+            SectionTitle { text: "Bottom left" }
+            Group {
+                opacity: SettingsService.hotCornersEnabled ? 1 : 0.4
+                Item {
+                    width: col.width
+                    height: 46
+                    Segments {
+                        anchors.centerIn: parent
+                        options: panel.cornerActions
+                        current: SettingsService.cornerBottomLeft
+                        apply: function(v) { SettingsService.cornerBottomLeft = v }
+                    }
+                }
+            }
+
+            SectionTitle { text: "Bottom right" }
+            Group {
+                opacity: SettingsService.hotCornersEnabled ? 1 : 0.4
+                Item {
+                    width: col.width
+                    height: 46
+                    Segments {
+                        anchors.centerIn: parent
+                        options: panel.cornerActions
+                        current: SettingsService.cornerBottomRight
+                        apply: function(v) { SettingsService.cornerBottomRight = v }
                     }
                 }
             }
