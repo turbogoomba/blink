@@ -595,6 +595,8 @@ PanelWindow {
 
     // Concave corners where the dock meets the frame (they move with the dock)
     component Fillet: Canvas {
+        readonly property string paintKey: Tokens.themeName + Tokens.accent
+        onPaintKeyChanged: requestPaint()
         property real cx: 0
         property real cy: 0
         width: 14

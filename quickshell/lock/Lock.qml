@@ -135,6 +135,8 @@ echo "pkgs=$(pacman -Qq 2>/dev/null | wc -l)"
         readonly property color tint: value > 0.85 ? Tokens.red : value > 0.7 ? Tokens.orange : Tokens.accent
         spacing: 6
         Canvas {
+            readonly property string paintKey: Tokens.themeName + Tokens.accent
+            onPaintKeyChanged: requestPaint()
             anchors.horizontalCenter: parent.horizontalCenter
             width: 58
             height: 58
@@ -148,7 +150,7 @@ echo "pkgs=$(pacman -Qq 2>/dev/null | wc -l)"
                 const r = width / 2 - 4
                 ctx.lineWidth = 6
                 ctx.lineCap = "round"
-                ctx.strokeStyle = "rgba(255,255,255,0.1)"
+                ctx.strokeStyle = Tokens.ink(0.1).toString()
                 ctx.beginPath()
                 ctx.arc(width / 2, height / 2, r, 0, 2 * Math.PI)
                 ctx.stroke()
@@ -320,15 +322,14 @@ echo "pkgs=$(pacman -Qq 2>/dev/null | wc -l)"
                         width: parent.width
                         height: 92
                         visible: WeatherService.ready
-                        Image {
+                        LineIcon {
                             id: wIcon
                             anchors.left: parent.left
                             anchors.leftMargin: 18
                             anchors.verticalCenter: parent.verticalCenter
-                            width: 46
-                            height: 46
-                            sourceSize: Qt.size(92, 92)
-                            source: Quickshell.iconPath(WeatherService.icon, "weather-overcast")
+                            size: 46
+                            d: WeatherService.glyph
+                            tint: Tokens.textPrimary
                         }
                         Column {
                             anchors.left: wIcon.right

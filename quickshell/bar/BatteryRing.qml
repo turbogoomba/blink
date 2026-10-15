@@ -17,6 +17,8 @@ Item {
                                 : Tokens.green
 
     Canvas {
+        readonly property string paintKey: Tokens.themeName + Tokens.accent
+        onPaintKeyChanged: requestPaint()
         id: ring
         anchors.fill: parent
         property real level: root.level
@@ -30,7 +32,7 @@ Item {
             const r = width / 2 - root.lineWidth / 2 - 1
             c.lineWidth = root.lineWidth
             c.lineCap = "round"
-            c.strokeStyle = "rgba(255,255,255,0.15)"
+            c.strokeStyle = Tokens.ink(0.15).toString()
             c.beginPath()
             c.arc(width / 2, height / 2, r, 0, 2 * Math.PI)
             c.stroke()

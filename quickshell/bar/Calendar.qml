@@ -127,6 +127,8 @@ PanelWindow {
     }
 
     component Fillet: Canvas {
+        readonly property string paintKey: Tokens.themeName + Tokens.accent
+        onPaintKeyChanged: requestPaint()
         property real cx: cal.side ? 14 : 0
         property real cy: cal.side ? 0 : 14
         onCxChanged: requestPaint()

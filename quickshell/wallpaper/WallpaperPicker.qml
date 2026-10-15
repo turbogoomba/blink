@@ -107,6 +107,8 @@ Scope {
 
             // Myke overganger der panelet møter rammen
             component Fillet: Canvas {
+                readonly property string paintKey: Tokens.themeName + Tokens.accent
+                onPaintKeyChanged: requestPaint()
                 property bool rightSide: false
                 width: root.fillet
                 height: root.fillet

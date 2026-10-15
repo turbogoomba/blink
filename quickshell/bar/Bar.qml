@@ -78,6 +78,7 @@ PanelWindow {
         scale: biMouse.pressed ? Tokens.pressScale : 1
         Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
         property url iconSource: ""
+        property string glyph: ""          // SVG path; shown instead of iconSource when set
         property string text: ""
         property color textColor: Tokens.textPrimary
         signal clicked()
@@ -89,7 +90,15 @@ PanelWindow {
             id: biRow
             spacing: 5
 
+            LineIcon {
+                visible: bi.glyph !== ""
+                anchors.verticalCenter: parent.verticalCenter
+                d: bi.glyph
+                size: Tokens.barIcon
+                tint: bi.textColor
+            }
             Image {
+                visible: bi.glyph === ""
                 anchors.verticalCenter: parent.verticalCenter
                 width: Tokens.barIcon
                 height: Tokens.barIcon
@@ -142,6 +151,8 @@ PanelWindow {
             spacing: 5
 
             Canvas {
+                readonly property string paintKey: Tokens.themeName + Tokens.accent
+                onPaintKeyChanged: requestPaint()
                 id: ring
                 anchors.verticalCenter: parent.verticalCenter
                 width: 18
@@ -158,7 +169,7 @@ PanelWindow {
                     const r = width / 2 - 1.5
                     ctx.lineWidth = 2.5
                     ctx.lineCap = "round"
-                    ctx.strokeStyle = "rgba(255,255,255,0.15)"
+                    ctx.strokeStyle = Tokens.ink(0.15).toString()
                     ctx.beginPath()
                     ctx.arc(width / 2, height / 2, r, 0, 2 * Math.PI)
                     ctx.stroke()
@@ -305,7 +316,7 @@ PanelWindow {
                 id: weatherItem
                 visible: WeatherService.ready
                 anchors.verticalCenter: parent.verticalCenter
-                iconSource: Quickshell.iconPath(WeatherService.icon, "weather-overcast")
+                glyph: WeatherService.glyph
                 text: Math.round(WeatherService.temperature) + "°"
                 onClicked: {
                     ShellState.weatherAnchorX = weatherItem.mapToItem(null, weatherItem.width / 2, 0).x
@@ -470,6 +481,8 @@ PanelWindow {
 
                                 // Lightning bolt while charging
                                 Canvas {
+                                    readonly property string paintKey: Tokens.themeName + Tokens.accent
+                                    onPaintKeyChanged: requestPaint()
                                     anchors.centerIn: parent
                                     width: 8
                                     height: 11
@@ -542,6 +555,8 @@ PanelWindow {
     readonly property real filletSize: Math.max(0, Math.min(10, notch.height - Tokens.barHeight - notch.radius))
 
     component NotchFillet: Canvas {
+        readonly property string paintKey: Tokens.themeName + Tokens.accent
+        onPaintKeyChanged: requestPaint()
         property bool mirrored: false
         y: Tokens.barHeight - bar.hideOffset
         width: bar.filletSize

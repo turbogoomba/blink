@@ -94,6 +94,8 @@ PanelWindow {
 
     // ---------- Pieces ----------
     component Fillet: Canvas {
+        readonly property string paintKey: Tokens.themeName + Tokens.accent
+        onPaintKeyChanged: requestPaint()
         // Centre of the round hole (top bar: under the bar; side bar: above/below the sheet)
         property real cx: 0
         property real cy: 14

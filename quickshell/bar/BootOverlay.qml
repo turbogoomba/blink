@@ -36,6 +36,8 @@ Variants {
         }
 
         Canvas {
+            readonly property string paintKey: Tokens.themeName + Tokens.accent
+            onPaintKeyChanged: requestPaint()
             id: line
             anchors.fill: parent
             opacity: BootService.traceAlpha

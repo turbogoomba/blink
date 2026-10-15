@@ -151,6 +151,8 @@ PanelWindow {
         height: 44
 
         Canvas {
+            readonly property string paintKey: Tokens.themeName + Tokens.accent
+            onPaintKeyChanged: requestPaint()
             id: srRing
             anchors.horizontalCenter: parent.horizontalCenter
             y: 3
@@ -166,7 +168,7 @@ PanelWindow {
                 const r = width / 2 - 2
                 ctx.lineWidth = 2.5
                 ctx.lineCap = "round"
-                ctx.strokeStyle = "rgba(255,255,255,0.12)"
+                ctx.strokeStyle = Tokens.ink(0.12).toString()
                 ctx.beginPath()
                 ctx.arc(width / 2, height / 2, r, 0, 2 * Math.PI)
                 ctx.stroke()
@@ -352,12 +354,11 @@ PanelWindow {
                         id: weatherCol
                         anchors.centerIn: parent
                         spacing: 2
-                        Image {
+                        LineIcon {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            width: Tokens.barIcon
-                            height: Tokens.barIcon
-                            sourceSize: Qt.size(Tokens.barIcon * 2, Tokens.barIcon * 2)
-                            source: Quickshell.iconPath(WeatherService.icon, "weather-overcast")
+                            size: Tokens.barIcon
+                            d: WeatherService.glyph
+                            tint: Tokens.textPrimary
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter

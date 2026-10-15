@@ -80,6 +80,8 @@ Scope {
 
                 // A black square with a quarter circle cut out
                 component Corner: Canvas {
+                    readonly property string paintKey: Tokens.themeName + Tokens.accent
+                    onPaintKeyChanged: requestPaint()
                     property real cx: 0
                     property real cy: 0
                     width: frame.radius

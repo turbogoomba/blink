@@ -70,6 +70,8 @@ PanelWindow {
 
     // Concave corners above and below the pill, against the bar
     component Fillet: Canvas {
+        readonly property string paintKey: Tokens.themeName + Tokens.accent
+        onPaintKeyChanged: requestPaint()
         property real cy: 0
         width: 14
         height: 14

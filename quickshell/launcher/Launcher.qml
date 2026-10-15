@@ -152,6 +152,8 @@ PanelWindow {
 
     // Concave corners where the sheet meets the bar
     component Fillet: Canvas {
+        readonly property string paintKey: Tokens.themeName + Tokens.accent
+        onPaintKeyChanged: requestPaint()
         property bool mirrored: false
         onMirroredChanged: requestPaint()
         onYChanged: requestPaint()

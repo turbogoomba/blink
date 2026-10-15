@@ -108,6 +108,31 @@ Singleton {
     // Yr-symbol (f.eks. "partlycloudy_day") til et ikonnavn
     readonly property string icon: iconFor(symbol)
 
+    // The same, as a line icon (SVG path) for LineIcon, so it follows the theme's colors
+    readonly property string glyph: glyphFor(symbol)
+    readonly property var glyphs: ({
+        sun:     "M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4",
+        moon:    "M20 14A8 8 0 1 1 10 4a7 7 0 0 0 10 10z",
+        partly:  "M8 6V4M3.5 7.5L5 9M2 12h2M15.5 7a4.5 4.5 0 0 0-8.4 2.2M7 19h10a4 4 0 0 0 0-8 5 5 0 0 0-9.6 1.5A3.3 3.3 0 0 0 7 19z",
+        partlyN: "M10.5 3.5A4 4 0 0 0 15 9a4 4 0 0 1-4.5-5.5zM7 19h10a4 4 0 0 0 0-8 5 5 0 0 0-9.6 1.5A3.3 3.3 0 0 0 7 19z",
+        cloud:   "M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.5 3.5 0 0 0 7 18z",
+        rain:    "M7 15h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.5 3.5 0 0 0 7 15zM8 18l-1 3M12 18l-1 3M16 18l-1 3",
+        snow:    "M7 15h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.5 3.5 0 0 0 7 15zM8 19h.01M12 21h.01M16 19h.01",
+        thunder: "M7 15h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.5 3.5 0 0 0 7 15zM13 15l-3 4h4l-3 4",
+        fog:     "M4 9h16M6 13h12M5 17h14"
+    })
+    function glyphFor(s) {
+        s = s || ""
+        const night = s.endsWith("_night")
+        if (s.startsWith("clearsky") || s.startsWith("fair")) return night ? glyphs.moon : glyphs.sun
+        if (s.startsWith("partlycloudy")) return night ? glyphs.partlyN : glyphs.partly
+        if (s.startsWith("fog")) return glyphs.fog
+        if (s.includes("thunder")) return glyphs.thunder
+        if (s.includes("snow") || s.includes("sleet")) return glyphs.snow
+        if (s.includes("rain")) return glyphs.rain
+        return glyphs.cloud
+    }
+
     function iconFor(s) {
         s = s || ""
         const night = s.endsWith("_night")

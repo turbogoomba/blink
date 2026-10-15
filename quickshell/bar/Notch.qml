@@ -509,6 +509,8 @@ Rectangle {
         }
 
         Canvas {
+            readonly property string paintKey: Tokens.themeName + Tokens.accent
+            onPaintKeyChanged: requestPaint()
             anchors.fill: parent
             visible: eye.mood === "happy"
             onPaint: {
@@ -566,6 +568,8 @@ Rectangle {
         }
 
         Canvas {
+            readonly property string paintKey: Tokens.themeName + Tokens.accent
+            onPaintKeyChanged: requestPaint()
             anchors.horizontalCenter: eyes.horizontalCenter
             anchors.top: eyes.bottom
             anchors.topMargin: 1
@@ -621,6 +625,8 @@ Rectangle {
 
         // Green bolt next to the face when the charger is plugged in
         Canvas {
+            readonly property string paintKey: Tokens.themeName + Tokens.accent
+            onPaintKeyChanged: requestPaint()
             anchors.left: eyes.right
             anchors.leftMargin: 7
             anchors.verticalCenter: eyes.verticalCenter

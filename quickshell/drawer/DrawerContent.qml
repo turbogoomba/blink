@@ -25,6 +25,8 @@ Column {
 
     // Line graph with a soft fill under it
     component Sparkline: Canvas {
+        readonly property string paintKey: Tokens.themeName + Tokens.accent
+        onPaintKeyChanged: requestPaint()
         id: spark
         property var values: []
         property real maxValue: 1

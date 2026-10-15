@@ -50,6 +50,8 @@ PanelWindow {
 
     // ---------- Concave corners where it meets the bar and the top edge ----------
     component Fillet: Canvas {
+        readonly property string paintKey: Tokens.themeName + Tokens.accent
+        onPaintKeyChanged: requestPaint()
         width: 14
         height: 14
         visible: win.reveal > 0.01

@@ -396,6 +396,8 @@ PanelWindow {
 
     // Concave corners where the sheet meets the bar and the right edge
     component Fillet: Canvas {
+        readonly property string paintKey: Tokens.themeName + Tokens.accent
+        onPaintKeyChanged: requestPaint()
         // Centre of the round hole: (0, 14) under the top bar, (14, 0) next to the side bar
         property real cx: cc.side ? 14 : 0
         property real cy: cc.side ? 0 : 14

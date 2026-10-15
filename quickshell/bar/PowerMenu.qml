@@ -130,6 +130,8 @@ PanelWindow {
 
     // Concave corner where the sheet meets the frame. The hole is centred on (cx, cy).
     component Fillet: Canvas {
+        readonly property string paintKey: Tokens.themeName + Tokens.accent
+        onPaintKeyChanged: requestPaint()
         property real cx: 0
         property real cy: 0
         width: 14

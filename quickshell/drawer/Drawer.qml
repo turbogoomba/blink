@@ -88,6 +88,8 @@ PanelWindow {
 
     // Concave corner pieces (where the drawer or handle meets the frame)
     component Fillet: Canvas {
+        readonly property string paintKey: Tokens.themeName + Tokens.accent
+        onPaintKeyChanged: requestPaint()
         property bool below: false
         property real r: 14
         width: r

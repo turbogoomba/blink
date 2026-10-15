@@ -63,6 +63,8 @@ PanelWindow {
     }
 
     component Fillet: Canvas {
+        readonly property string paintKey: Tokens.themeName + Tokens.accent
+        onPaintKeyChanged: requestPaint()
         // Centre of the round hole (top bar: under the bar; side bar: above/below the sheet)
         property real cx: 0
         property real cy: 14
@@ -167,14 +169,14 @@ PanelWindow {
                 width: parent.width
                 height: 56
 
-                Image {
+                LineIcon {
                     id: bigIcon
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 44
-                    height: 44
-                    sourceSize: Qt.size(88, 88)
-                    source: Quickshell.iconPath(WeatherService.icon, "weather-overcast")
+                    size: 44
+                    d: WeatherService.glyph
+
+                    tint: Tokens.textPrimary
                 }
 
                 Text {
@@ -258,12 +260,11 @@ PanelWindow {
                                 font.pixelSize: Tokens.fontSmall
                                 font.features: { "tnum": 1 }
                             }
-                            Image {
+                            LineIcon {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                width: 20
-                                height: 20
-                                sourceSize: Qt.size(40, 40)
-                                source: Quickshell.iconPath(WeatherService.iconFor(parent.modelData.symbol), "weather-overcast")
+                                size: 20
+                                d: WeatherService.glyphFor(parent.modelData.symbol)
+                                tint: Tokens.textPrimary
                             }
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
@@ -307,14 +308,14 @@ PanelWindow {
                             font.weight: dayRow.index === 0 ? Font.DemiBold : Font.Normal
                         }
 
-                        Image {
+                        LineIcon {
                             id: dayIcon
                             anchors.left: dayName.right
                             anchors.verticalCenter: parent.verticalCenter
-                            width: 18
-                            height: 18
-                            sourceSize: Qt.size(36, 36)
-                            source: Quickshell.iconPath(WeatherService.iconFor(dayRow.modelData.symbol), "weather-overcast")
+                            size: 18
+                            d: WeatherService.glyphFor(dayRow.modelData.symbol)
+
+                            tint: Tokens.textPrimary
                         }
 
                         Text {

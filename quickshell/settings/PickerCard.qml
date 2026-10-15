@@ -75,6 +75,8 @@ Rectangle {
         border.color: Theme.Tokens.ink(0.25)
         Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
         Canvas {
+            readonly property string paintKey: Theme.Tokens.themeName + Theme.Tokens.accent
+            onPaintKeyChanged: requestPaint()
             anchors.centerIn: parent
             width: 12
             height: 12

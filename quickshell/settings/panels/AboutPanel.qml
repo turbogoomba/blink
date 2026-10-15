@@ -156,6 +156,8 @@ echo "pkgs=$(pacman -Qq 2>/dev/null | wc -l)"
         spacing: 8
 
         Canvas {
+            readonly property string paintKey: Theme.Tokens.themeName + Theme.Tokens.accent
+            onPaintKeyChanged: requestPaint()
             id: ring
             anchors.horizontalCenter: parent.horizontalCenter
             width: 84
@@ -170,7 +172,7 @@ echo "pkgs=$(pacman -Qq 2>/dev/null | wc -l)"
                 const r = width / 2 - 5
                 ctx.lineWidth = 7
                 ctx.lineCap = "round"
-                ctx.strokeStyle = "rgba(255,255,255,0.08)"
+                ctx.strokeStyle = Theme.Tokens.ink(0.08).toString()
                 ctx.beginPath()
                 ctx.arc(width / 2, height / 2, r, 0, 2 * Math.PI)
                 ctx.stroke()
