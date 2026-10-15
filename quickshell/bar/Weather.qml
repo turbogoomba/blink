@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
@@ -117,6 +118,15 @@ PanelWindow {
 
     Item {
         id: sheet
+        // Soft shadow, so it floats over what is under it
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Tokens.shadowColor
+            shadowBlur: Tokens.shadowBlur
+            blurMax: 32
+            shadowVerticalOffset: 2
+        }
         readonly property real fullWidth: 340
         readonly property real fullHeight: body.implicitHeight + 28
         // Top bar: grows down under its button. Side bar: slides out to the right next to its button.

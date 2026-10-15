@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
@@ -432,6 +433,15 @@ PanelWindow {
 
     Item {
         id: panel
+        // Soft shadow, so it floats over what is under it
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Tokens.shadowColor
+            shadowBlur: Tokens.shadowBlur
+            blurMax: 32
+            shadowVerticalOffset: 2
+        }
         // Flush against the frame/bar it grows out of
         x: cc.side ? SettingsService.sideWidth : cc.width - Tokens.frameT - width
         y: cc.side ? cc.height - Tokens.frameT - height : SettingsService.topInset

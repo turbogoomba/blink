@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
@@ -175,6 +176,15 @@ PanelWindow {
     // The sheet: starts as the notch and grows down out of it
     Item {
         id: box
+        // Soft shadow, so it floats over what is under it
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Tokens.shadowColor
+            shadowBlur: Tokens.shadowBlur
+            blurMax: 32
+            shadowVerticalOffset: 2
+        }
         readonly property real topPad: launcher.fromBottom ? 12 : SettingsService.topInset + 6
         readonly property real fullW: 640
         readonly property real startW: 200

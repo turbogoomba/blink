@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
@@ -629,6 +630,15 @@ PanelWindow {
 
     Item {
         id: body
+        // Soft shadow, so it floats over what is under it
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Tokens.shadowColor
+            shadowBlur: Tokens.shadowBlur
+            blurMax: 32
+            shadowVerticalOffset: 2
+        }
         // Hidden = pushed out past the frame; revealed = resting on the frame's inner edge.
         // The bounce past "revealed" stretches the dock instead of lifting it,
         // so its edge never leaves the frame.
