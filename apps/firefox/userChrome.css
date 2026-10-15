@@ -230,6 +230,18 @@
   transform: rotate(90deg);
 }
 
+/* When you close tabs Firefox keeps an empty space so the next close button
+   stays under the mouse. Drop it: the tabs and the + slide back right away */
+.closing-tabs-spacer {
+  display: none !important;
+  width: 0 !important;
+}
+.tabbrowser-tab[closing] {
+  max-width: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+
 /* Toolbar buttons: a small lift and accent on hover */
 #nav-bar .toolbarbutton-1 > .toolbarbutton-icon,
 #nav-bar .toolbarbutton-1 > .toolbarbutton-badge-stack {
