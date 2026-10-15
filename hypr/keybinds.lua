@@ -110,3 +110,4 @@ hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("qs -c blink ipc call wallpaper toggl
 local sw = "qs -c blink ipc call switcher "
 hl.bind("ALT + TAB", hl.dsp.exec_cmd(sw .. "next"))
 hl.bind("ALT + SHIFT + TAB", hl.dsp.exec_cmd(sw .. "prev"))
+hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ action = "toggle" }))

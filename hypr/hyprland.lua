@@ -58,3 +58,4 @@ hl.window_rule({
     center = true,
     size = { "(monitor_w*0.55)", "(monitor_h*0.6)" },
 })
+hl.window_rule({ match = { class = "steam_app_.*" }, fullscreen = true })

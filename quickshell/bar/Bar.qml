@@ -13,7 +13,41 @@ PanelWindow {
 
     readonly property int notchDrop: 14
     implicitHeight: 320
-    exclusiveZone: Tokens.barHeight
+    exclusiveZone: ShellState.gameMode ? 0 : Tokens.barHeight
+    readonly property bool fullscreenActive: ToplevelManager.activeToplevel?.fullscreen ?? false
+
+    // Game mode: the bar hides until the mouse comes near the top
+    readonly property bool popupOpen: ShellState.calendarOpen || ShellState.controlCenterOpen
+        || ShellState.soundOpen || ShellState.weatherOpen
+    readonly property bool hovering: edgeHover.hovered || barHover.hovered || notchHover.hovered
+    property bool revealed: true
+    property real hideOffset: revealed ? 0 : Tokens.barHeight + notchDrop + 4
+    Behavior on hideOffset { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
+
+    function updateReveal() {
+        if (!ShellState.gameMode || hovering || popupOpen) {
+            hideTimer.stop()
+            revealed = true
+        } else {
+            hideTimer.restart()
+        }
+    }
+    onHoveringChanged: updateReveal()
+    onPopupOpenChanged: updateReveal()
+    Component.onCompleted: updateReveal()
+    Connections {
+        target: ShellState
+        function onGameModeChanged() { bar.updateReveal() }
+    }
+    Timer { id: hideTimer; interval: 600; onTriggered: bar.revealed = false }
+
+    // Thin strip at the top edge that catches the mouse while the bar is hidden
+    Item {
+        id: edgeZone
+        anchors { top: parent.top; left: parent.left; right: parent.right }
+        height: ShellState.gameMode && !bar.fullscreenActive ? 3 : 0
+        HoverHandler { id: edgeHover }
+    }
     color: "transparent"
 
     // Batteri (bare hvis maskinen har det)
@@ -29,6 +63,7 @@ PanelWindow {
     mask: Region {
         item: barRect
         Region { item: notch }
+        Region { item: edgeZone }
     }
 
     SystemClock {
@@ -173,7 +208,7 @@ PanelWindow {
 
     Rectangle {
         id: barRect
-        anchors { top: parent.top; left: parent.left; right: parent.right }
+        anchors { top: parent.top; left: parent.left; right: parent.right; topMargin: -bar.hideOffset }
         height: Tokens.barHeight
         color: Tokens.barBg
 
@@ -599,7 +634,7 @@ PanelWindow {
 
     component NotchFillet: Canvas {
         property bool mirrored: false
-        y: Tokens.barHeight
+        y: Tokens.barHeight - bar.hideOffset
         width: bar.filletSize
         height: bar.filletSize
         visible: bar.filletSize >= 1
@@ -624,7 +659,8 @@ PanelWindow {
         id: notch
         onWidthChanged: ShellState.notchWidth = width
         anchors.horizontalCenter: parent.horizontalCenter
-        y: 0
+        y: -bar.hideOffset
+        HoverHandler { id: notchHover }
         baseHeight: Tokens.barHeight + bar.notchDrop
         // Startup: drops out of the bar
         transform: Scale {
