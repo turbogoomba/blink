@@ -28,11 +28,13 @@ PanelWindow {
 
     // 0 = hidden inside the frame, 1 = fully out
     property real reveal: open ? 1 : 0
+    // Same open/close motion as the other sheets (SoundMenu, Calendar, Weather)
     Behavior on reveal {
+        id: openBehavior   // targetValue = where it is going, read before the animation starts
         NumberAnimation {
-            duration: win.open ? Tokens.durSlow : Tokens.durNormal
-            easing.type: win.open ? Tokens.easeGrow : Tokens.easeShrink
-            easing.overshoot: 0.6
+            duration: openBehavior.targetValue > 0.5 ? 440 : 240
+            easing.type: openBehavior.targetValue > 0.5 ? Tokens.easeGrow : Tokens.easeShrink
+            easing.overshoot: Tokens.bounce
         }
     }
 
