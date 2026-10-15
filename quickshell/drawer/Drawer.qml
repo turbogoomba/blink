@@ -118,10 +118,11 @@ PanelWindow {
         visible: w > 0.5
 
         Rectangle {
-            x: drawer.onLeft ? -10 : 0
-            width: parent.width + 10
-            height: parent.height
-            radius: Tokens.radiusMd
+            anchors.fill: parent
+            topLeftRadius: drawer.onLeft ? 0 : Tokens.radiusMd
+            topRightRadius: drawer.onLeft ? Tokens.radiusMd : 0
+            bottomLeftRadius: drawer.onLeft ? 0 : Tokens.radiusMd
+            bottomRightRadius: drawer.onLeft ? Tokens.radiusMd : 0
             color: Tokens.barBg
         }
         Rectangle {

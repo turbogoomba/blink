@@ -143,11 +143,11 @@ PanelWindow {
 
         // Square where it joins the bar, round at the free corners
         Rectangle {
-            x: wx.side ? -20 : 0
-            y: wx.side ? 0 : -20
-            width: parent.width + (wx.side ? 20 : 0)
-            height: parent.height + (wx.side ? 0 : 20)
-            radius: Tokens.radiusXl
+            anchors.fill: parent
+            topLeftRadius: 0
+            topRightRadius: wx.side ? Tokens.radiusXl : 0
+            bottomLeftRadius: wx.side ? 0 : Tokens.radiusXl
+            bottomRightRadius: Tokens.radiusXl
             color: Tokens.barBg
         }
 

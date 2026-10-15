@@ -201,11 +201,11 @@ PanelWindow {
         Keys.onRightPressed: cal.shiftMonth(1)
 
         Rectangle {
-            x: cal.side ? -20 : 0
-            y: cal.side ? 0 : -20
-            width: parent.width + 20
-            height: parent.height + 20
-            radius: Tokens.radiusXl
+            anchors.fill: parent
+            topLeftRadius: 0
+            topRightRadius: cal.side ? Tokens.radiusXl : 0
+            bottomLeftRadius: cal.side ? 0 : Tokens.radiusXl
+            bottomRightRadius: 0
             color: Tokens.barBg
         }
 

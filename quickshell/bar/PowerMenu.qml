@@ -324,10 +324,11 @@ PanelWindow {
 
         // Black like the frame, square where it joins it, round at the free corner
         Rectangle {
-            x: win.fromLeft ? -30 : 0
-            width: parent.width + 30
-            height: parent.height + 30
-            radius: 22
+            anchors.fill: parent
+            topLeftRadius: win.fromLeft ? 0 : 22
+            topRightRadius: win.fromLeft ? 22 : 0
+            bottomLeftRadius: 0
+            bottomRightRadius: 0
             color: Tokens.barBg
         }
 

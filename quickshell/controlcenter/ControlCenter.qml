@@ -456,11 +456,11 @@ PanelWindow {
         // Same black as the bar and frame. Only the free corner is rounded
         // (bottom-left under the top bar, top-right next to the side bar).
         Rectangle {
-            x: cc.side ? -20 : 0
-            y: cc.side ? 0 : -20
-            width: parent.width + 20
-            height: parent.height + 20
-            radius: Tokens.radiusXl
+            anchors.fill: parent
+            topLeftRadius: 0
+            topRightRadius: cc.side ? Tokens.radiusXl : 0
+            bottomLeftRadius: cc.side ? 0 : Tokens.radiusXl
+            bottomRightRadius: 0
             color: Tokens.barBg
         }
 

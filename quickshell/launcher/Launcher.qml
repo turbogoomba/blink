@@ -200,10 +200,11 @@ PanelWindow {
 
         // Same black as the bar. The corners against the bar/frame hide, the free ones are round.
         Rectangle {
-            y: launcher.fromBottom ? 0 : -24
-            width: parent.width
-            height: parent.height + 24
-            radius: Tokens.radiusXl
+            anchors.fill: parent
+            topLeftRadius: launcher.fromBottom ? Tokens.radiusXl : 0
+            topRightRadius: launcher.fromBottom ? Tokens.radiusXl : 0
+            bottomLeftRadius: launcher.fromBottom ? 0 : Tokens.radiusXl
+            bottomRightRadius: launcher.fromBottom ? 0 : Tokens.radiusXl
             color: Tokens.barBg
         }
 

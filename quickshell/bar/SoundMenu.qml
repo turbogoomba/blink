@@ -274,11 +274,11 @@ PanelWindow {
 
         // Square where it joins the bar, round at the free corners
         Rectangle {
-            x: snd.side ? -20 : 0
-            y: snd.side ? 0 : -20
-            width: parent.width + (snd.side ? 20 : 0)
-            height: parent.height + (snd.side ? 0 : 20)
-            radius: Tokens.radiusXl
+            anchors.fill: parent
+            topLeftRadius: 0
+            topRightRadius: snd.side ? Tokens.radiusXl : 0
+            bottomLeftRadius: snd.side ? 0 : Tokens.radiusXl
+            bottomRightRadius: Tokens.radiusXl
             color: Tokens.barBg
         }
 
