@@ -5,9 +5,10 @@ import Quickshell.Hyprland
 import "../theme"
 
 // Workspace indicator. Each workspace shows a small icon for the app on it,
-// drawn in the accent color (from the wallpaper). The active one sits in an
-// accent circle that slides between workspaces with a "liquid" stretch.
-//   - number badge: more than one window
+// drawn in the accent color (from the wallpaper).
+// The active workspace grows into an accent pill that shows every app on it,
+// and slides between workspaces with a "liquid" stretch.
+//   - number badge: more than one window (inactive workspaces)
 //   - orange dot:   an app wants attention
 //   - small dot:    empty workspace
 // Set `vertical: true` for a bar on the side of the screen.
@@ -18,18 +19,13 @@ Rectangle {
     property bool vertical: false
     // Always show at least this many slots
     property int minCount: 5
+    // Most icons shown in the active pill before it shows "+N"
+    property int maxIcons: 4
 
-    readonly property int slot: 22
-    readonly property int gap: 3
-    readonly property int pad: 1
-
-    readonly property int count: ids.length
-    readonly property real length: pad * 2 + count * slot + Math.max(0, count - 1) * gap
-
-    width: vertical ? slot + pad * 2 : length
-    height: vertical ? length : slot + pad * 2
-    radius: slot / 2 + pad
-    color: Tokens.fillIdle
+    readonly property int slot: 20      // one workspace
+    readonly property int iconStep: 17  // each extra icon in the active pill
+    readonly property int gap: 6
+    readonly property int pad: 2
 
     // ---------- Data ----------
     readonly property var monitor: Hyprland.monitorFor(targetScreen)
@@ -48,9 +44,32 @@ Rectangle {
 
     readonly property int activeIndex: ids.indexOf(monitor?.activeWorkspace?.id ?? -1)
 
-    function windowsOn(id) {
-        return Hyprland.toplevels.values.filter(t => t.workspace?.id === id)
+    // Windows on each workspace, in the same order as ids
+    readonly property var winLists: ids.map(id => Hyprland.toplevels.values.filter(t => t.workspace?.id === id))
+
+    // Icons shown in the active pill (capped), and how long each slot is
+    function shownIcons(i) { return Math.min(winLists[i]?.length ?? 0, maxIcons) }
+    function hasMore(i) { return (winLists[i]?.length ?? 0) > maxIcons }
+    readonly property var sizes: ids.map((_, i) => {
+        if (i !== activeIndex) return slot
+        const n = Math.max(1, shownIcons(i)) + (hasMore(i) ? 1 : 0)
+        return slot + (n - 1) * iconStep
+    })
+    // Start of each slot along the bar
+    readonly property var offsets: {
+        const list = []
+        let at = pad
+        for (const s of sizes) { list.push(at); at += s + gap }
+        return list
     }
+    readonly property real length: sizes.reduce((sum, s) => sum + s, 0) + Math.max(0, ids.length - 1) * gap + pad * 2
+
+    width: vertical ? slot + pad * 2 : length
+    height: vertical ? length : slot + pad * 2
+    radius: slot / 2 + pad
+    color: Tokens.fillIdle
+    Behavior on width { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
+    Behavior on height { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
 
     function appOf(t) {
         return (t?.wayland?.appId ?? t?.lastIpcObject?.class ?? "").toLowerCase()
@@ -90,30 +109,43 @@ Rectangle {
         return glyphs.window
     }
 
-    // ---------- Liquid active circle ----------
-    function centerOf(i) { return pad + i * (slot + gap) + slot / 2 }
-    property int lastIndex: 0
 
-    function moveTo(i, animate) {
-        if (i < 0) return
-        const c = centerOf(i)
+
+    // ---------- Liquid active pill ----------
+    property int lastIndex: 0
+    property bool switchingMove: false
+
+    function moveTo(i, switching) {
+        if (i < 0 || offsets[i] === undefined) return
+        const start = offsets[i]
+        const end = start + sizes[i]
         const forward = i > lastIndex
-        startAnim.to = c - slot / 2
-        endAnim.to = c + slot / 2
-        // The leading edge moves first, the trailing edge catches up
-        startAnim.duration = forward ? 320 : 160
-        endAnim.duration = forward ? 160 : 320
-        lastIndex = i
-        if (animate) {
-            liquid.restart()
+        startAnim.to = start
+        endAnim.to = end
+        if (switching) {
+            // The leading edge moves first, the trailing edge catches up
+            startAnim.duration = forward ? 320 : 160
+            endAnim.duration = forward ? 160 : 320
         } else {
-            pill.a = startAnim.to
-            pill.b = endAnim.to
+            // Same workspace, it just grew or shrank (an app opened or closed)
+            startAnim.duration = Tokens.durNormal
+            endAnim.duration = Tokens.durNormal
         }
+        lastIndex = i
+        switchingMove = switching
+        liquid.restart()
     }
     onActiveIndexChanged: moveTo(activeIndex, true)
-    onCountChanged: moveTo(activeIndex, false)
-    Component.onCompleted: moveTo(activeIndex, false)
+    // Sizes change both when you switch (the pill grows) and when apps open or close.
+    // Keep the liquid timing if a switch is still running.
+    onOffsetsChanged: moveTo(activeIndex, activeIndex !== lastIndex || (liquid.running && switchingMove))
+    Component.onCompleted: {
+        lastIndex = activeIndex
+        if (activeIndex >= 0) {
+            pill.a = offsets[activeIndex]
+            pill.b = offsets[activeIndex] + sizes[activeIndex]
+        }
+    }
 
     Rectangle {
         id: pill
@@ -139,7 +171,7 @@ Rectangle {
         id: g
         property string d: ""
         property color tint: Tokens.accent
-        property real size: 13
+        property real size: 12
         width: size
         height: size
 
@@ -170,23 +202,29 @@ Rectangle {
             required property int modelData
             required property int index
 
-            readonly property var wins: root.windowsOn(modelData)
+            readonly property var wins: root.winLists[index] ?? []
             readonly property var main: wins.find(t => t.activated) ?? wins[0] ?? null
             readonly property bool active: index === root.activeIndex
             readonly property bool urgent: (root.existing.find(w => w.id === modelData)?.urgent ?? false)
                 || wins.some(t => t.urgent ?? false)
+            readonly property real size: root.sizes[index] ?? root.slot
 
-            x: root.vertical ? root.pad : root.pad + index * (root.slot + root.gap)
-            y: root.vertical ? root.pad + index * (root.slot + root.gap) : root.pad
-            width: root.slot
-            height: root.slot
+            x: root.vertical ? root.pad : (root.offsets[index] ?? 0)
+            y: root.vertical ? (root.offsets[index] ?? 0) : root.pad
+            width: root.vertical ? root.slot : size
+            height: root.vertical ? size : root.slot
+            Behavior on x { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
+            Behavior on y { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
+            Behavior on width { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
+            Behavior on height { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
+
             scale: wsMouse.pressed ? Tokens.pressScale : 1
             Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
             // Hover
             Rectangle {
                 anchors.fill: parent
-                radius: width / 2
+                radius: Math.min(width, height) / 2
                 color: Tokens.fillHover
                 opacity: wsMouse.containsMouse && !ws.active ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
@@ -203,21 +241,53 @@ Rectangle {
                 opacity: ws.active ? 1 : 0.6
             }
 
-            // App icon
+            // Inactive: one icon for the main app
             Glyph {
-                visible: ws.wins.length > 0
+                visible: ws.wins.length > 0 && !ws.active
                 anchors.centerIn: parent
                 d: root.glyphFor(root.appOf(ws.main))
-                tint: ws.active ? Tokens.onAccent : Tokens.accent
-                Behavior on tint { ColorAnimation { duration: Tokens.durNormal } }
+                tint: Tokens.accent
             }
 
-            // More than one window
+            // Active: every app on the workspace, side by side
+            Grid {
+                visible: ws.wins.length > 0 && ws.active
+                anchors.centerIn: parent
+                rows: root.vertical ? -1 : 1
+                columns: root.vertical ? 1 : -1
+                spacing: root.iconStep - 12
+                opacity: visible ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: Tokens.durNormal } }
+
+                Repeater {
+                    model: ws.wins.slice(0, root.maxIcons)
+                    delegate: Glyph {
+                        required property var modelData
+                        d: root.glyphFor(root.appOf(modelData))
+                        tint: Tokens.onAccent
+                    }
+                }
+
+                Text {
+                    visible: ws.wins.length > root.maxIcons
+                    width: 12
+                    height: 12
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    text: "+" + (ws.wins.length - root.maxIcons)
+                    color: Tokens.onAccent
+                    font.family: Tokens.fontFamily
+                    font.pixelSize: 9
+                    font.weight: Font.Bold
+                }
+            }
+
+            // More than one window (inactive only, the active pill shows them all)
             Rectangle {
-                visible: ws.wins.length > 1
+                visible: ws.wins.length > 1 && !ws.active
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                anchors.margins: -1
+                anchors.margins: -2
                 width: 10
                 height: 10
                 radius: 5
@@ -239,7 +309,7 @@ Rectangle {
                 visible: ws.urgent && !ws.active
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.margins: 1
+                anchors.margins: 0
                 width: 7
                 height: 7
                 radius: 3.5
