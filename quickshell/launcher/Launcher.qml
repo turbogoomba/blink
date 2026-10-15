@@ -219,8 +219,11 @@ PanelWindow {
         Column {
             id: content
             x: (box.width - box.fullW) / 2
-            // Growing up from the bottom, the content rides on the bottom edge
-            y: launcher.fromBottom ? box.height - box.fullH + box.topPad : box.topPad
+            // From the bottom the content sits on the bottom edge. Measured from the
+            // box's real (animated) height and the list's real height, so when the
+            // list gets shorter as you type, the search field stays put and the box
+            // shrinks down onto it, instead of the list sliding over the box.
+            y: launcher.fromBottom ? box.height - content.implicitHeight - Tokens.frameT - 8 : box.topPad
             width: box.fullW
             opacity: Math.max(0, Math.min(1, (launcher.reveal - 0.35) / 0.5))
             // From the bottom the whole list is flipped: search field at the bottom,
