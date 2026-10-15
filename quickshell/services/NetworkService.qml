@@ -19,6 +19,8 @@ Singleton {
     property string connectingSsid: "" // set while a connection attempt runs
     property string errorSsid: ""      // last attempt that failed, and why
     property string errorText: ""
+    // Details about the connected Wi-Fi: { ip, band, security, autoconnect }
+    property var details: ({ ip: "", band: "", security: "", autoconnect: true })
 
     Component.onCompleted: refreshStatus()
 
@@ -46,13 +48,37 @@ Singleton {
     // Networks that ask for a username and password (WPA2-Enterprise, like Eduroam).
     // PEAP with MSCHAPv2 is what Eduroam and most schools and offices use.
     // An old profile with the same name is replaced, so new details always win.
-    function connectEnterprise(targetSsid, user, password) {
+    //   opts: { method: "peap" | "ttls", domain: "oslomet.no", anonymous: "anonymous@oslomet.no", systemCa: true }
+    // The domain check and the system certificates make Eduroam trust the school's
+    // login server, which is often why it refuses to connect without them.
+    function connectEnterprise(targetSsid, user, password, opts) {
+        const o = opts ?? {}
+        const method = o.method === "ttls" ? "ttls" : "peap"
+        const extra = []
+        if (o.systemCa ?? true) extra.push("802-1x.ca-cert", "/etc/ssl/certs/ca-certificates.crt")
+        if (o.domain) extra.push("802-1x.domain-suffix-match", o.domain)
+        if (o.anonymous) extra.push("802-1x.anonymous-identity", o.anonymous)
         run(targetSsid, ["sh", "-c",
-            'nmcli connection delete id "$1" >/dev/null 2>&1; '
-            + 'nmcli connection add type wifi con-name "$1" ssid "$1" '
-            + 'wifi-sec.key-mgmt wpa-eap 802-1x.eap peap 802-1x.phase2-auth mschapv2 '
-            + '802-1x.identity "$2" 802-1x.password "$3" >/dev/null && nmcli connection up id "$1"',
-            "sh", targetSsid, user, password])
+            'ssid="$1"; user="$2"; pass="$3"; method="$4"; shift 4; '
+            + 'nmcli connection delete id "$ssid" >/dev/null 2>&1; '
+            + 'nmcli connection add type wifi con-name "$ssid" ssid "$ssid" '
+            + 'wifi-sec.key-mgmt wpa-eap 802-1x.eap "$method" 802-1x.phase2-auth mschapv2 '
+            + '802-1x.identity "$user" 802-1x.password "$pass" "$@" >/dev/null && nmcli connection up id "$ssid"',
+            "sh", targetSsid, user, password, method, ...extra])
+    }
+
+    function disconnect() {
+        if (ssid !== "") Quickshell.execDetached(["nmcli", "connection", "down", "id", ssid])
+    }
+
+    function forget(name) {
+        Quickshell.execDetached(["sh", "-c", 'nmcli connection delete id "$1"', "sh", name])
+        savedNames = savedNames.filter(n => n !== name)
+    }
+
+    function setAutoconnect(name, on) {
+        Quickshell.execDetached(["nmcli", "connection", "modify", "id", name, "connection.autoconnect", on ? "yes" : "no"])
+        details = Object.assign({}, details, { autoconnect: on })
     }
 
     function run(targetSsid, cmd) {
@@ -77,7 +103,11 @@ Singleton {
             "export LC_ALL=C; " +
             "echo \"RADIO:$(nmcli -t -f WIFI general)\"; " +
             "nmcli -t -f TYPE,STATE,CONNECTION device | sed 's/^/DEV:/'; " +
-            "nmcli -t -f IN-USE,SSID,SIGNAL device wifi list --rescan no | sed 's/^/WIFI:/'"]
+            "nmcli -t -f IN-USE,SSID,SIGNAL,FREQ,SECURITY device wifi list --rescan no | sed 's/^/WIFI:/'; " +
+            "for d in $(nmcli -t -f DEVICE,TYPE,STATE device | grep ':wifi:connected$' | cut -d: -f1); do " +
+            "echo \"IP:$(nmcli -g IP4.ADDRESS device show $d | head -1)\"; " +
+            "c=$(nmcli -g GENERAL.CONNECTION device show $d); " +
+            "echo \"AUTO:$(nmcli -g connection.autoconnect connection show id \"$c\")\"; done"]
         stdout: StdioCollector {
             onStreamFinished: {
                 let wifiOn = false
@@ -86,6 +116,10 @@ Singleton {
                 let sig = 0
                 let eth = false
                 let ethName = ""
+                let ip = ""
+                let band = ""
+                let security = ""
+                let auto = true
 
                 for (const line of text.split("\n")) {
                     if (line.startsWith("RADIO:")) {
@@ -109,7 +143,14 @@ Singleton {
                             conn = true
                             ss = p[1]
                             sig = parseInt(p[2]) || 0
+                            const mhz = parseInt(p[3]) || 0
+                            band = mhz >= 5900 ? "6 GHz" : mhz >= 4900 ? "5 GHz" : mhz > 0 ? "2.4 GHz" : ""
+                            security = (p.slice(4).join(":") || "").replace("--", "Open")
                         }
+                    } else if (line.startsWith("IP:")) {
+                        ip = line.slice(3).replace(/\/\d+$/, "").trim()
+                    } else if (line.startsWith("AUTO:")) {
+                        auto = line.slice(5).trim() !== "no"
                     }
                 }
 
@@ -119,6 +160,7 @@ Singleton {
                 root.signalStrength = sig
                 root.ethernetConnected = eth
                 root.ethernetName = ethName
+                root.details = { ip: ip, band: band, security: security, autoconnect: auto }
             }
         }
     }
