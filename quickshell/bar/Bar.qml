@@ -97,7 +97,8 @@ PanelWindow {
                 size: Tokens.barIcon
                 tint: bi.textColor
             }
-            Image {
+            TintIcon {
+                tint: bi.textColor
                 visible: bi.glyph === ""
                 anchors.verticalCenter: parent.verticalCenter
                 width: Tokens.barIcon
@@ -353,7 +354,7 @@ PanelWindow {
 
                 PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
 
-                Image {
+                TintIcon {
                     anchors.centerIn: parent
                     width: Tokens.barIcon
                     height: Tokens.barIcon

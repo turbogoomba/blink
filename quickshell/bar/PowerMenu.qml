@@ -169,12 +169,12 @@ PanelWindow {
             anchors.centerIn: parent
             spacing: 7
 
-            Image {
+            TintIcon {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: 20
                 height: 20
-                sourceSize: Qt.size(40, 40)
                 source: win.iconFile(tile.icon)
+                tint: tile.selected ? "white" : Tokens.textPrimary
             }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -261,12 +261,12 @@ PanelWindow {
                 onRunningChanged: if (!running) circle.opacity = 1
             }
 
-            Image {
+            TintIcon {
                 anchors.centerIn: parent
                 width: 18
                 height: 18
-                sourceSize: Qt.size(36, 36)
                 source: win.iconFile(pb.icon)
+                tint: pb.isArmed ? "white" : pb.danger ? Tokens.red : Tokens.textPrimary
             }
         }
 
@@ -414,12 +414,12 @@ PanelWindow {
                             radius: 16
                             color: IdleService.awake ? Tokens.accent : Tokens.fillHover
                             Behavior on color { ColorAnimation { duration: Tokens.durFast } }
-                            Image {
+                            TintIcon {
                                 anchors.centerIn: parent
                                 width: 16
                                 height: 16
-                                sourceSize: Qt.size(32, 32)
                                 source: win.iconFile("coffee")
+                                tint: IdleService.awake ? "white" : Tokens.textPrimary
                             }
                         }
 

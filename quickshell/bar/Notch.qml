@@ -292,11 +292,10 @@ Rectangle {
             anchors.centerIn: parent
             spacing: Tokens.spaceSm
 
-            Image {
+            TintIcon {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 18
                 height: 18
-                sourceSize: Qt.size(36, 36)
                 source: Quickshell.iconPath(pill.icon, "bluetooth")
             }
             Text {
@@ -334,11 +333,10 @@ Rectangle {
         width: size + 12
         height: size + 12
 
-        Image {
+        TintIcon {
             anchors.centerIn: parent
             width: btn.size
             height: btn.size
-            sourceSize: Qt.size(btn.size * 2, btn.size * 2)
             source: Quickshell.iconPath(btn.icon)
             opacity: btnMouse.pressed ? 0.6 : 1
         }
@@ -591,7 +589,7 @@ Rectangle {
         }
 
         // Active mode (moon / gamepad) to the left of the face
-        Image {
+        TintIcon {
             anchors.right: eyes.left
             anchors.rightMargin: 9
             anchors.verticalCenter: eyes.verticalCenter
@@ -1080,7 +1078,7 @@ Rectangle {
         readonly property real level: notch.btDevice?.battery ?? 0
         readonly property bool hasBattery: notch.btConnected && (notch.btDevice?.batteryAvailable ?? false)
 
-        Image {
+        TintIcon {
             id: btIcon
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter

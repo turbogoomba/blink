@@ -180,12 +180,12 @@ PanelWindow {
             NumberAnimation { target: ic; property: "scale"; to: 1; duration: Tokens.durNormal; easing.type: Tokens.easeGrow }
         }
 
-        Image {
+        TintIcon {
             anchors.centerIn: parent
             width: ic.size * 0.5
             height: ic.size * 0.5
-            sourceSize: Qt.size(width * 2, height * 2)
             source: ic.iconSource.toString() !== "" ? ic.iconSource : Quickshell.iconPath(ic.icon, ic.fallback)
+            tint: ic.active ? "white" : Tokens.textPrimary
         }
     }
 
@@ -285,7 +285,7 @@ PanelWindow {
             font.weight: Font.DemiBold
         }
 
-        Image {
+        TintIcon {
             id: scIcon
             anchors.left: parent.left
             anchors.leftMargin: Tokens.spaceLg

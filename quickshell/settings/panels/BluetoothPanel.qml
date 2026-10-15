@@ -93,7 +93,7 @@ Flickable {
                         }
                     }
 
-                    Image {
+                    Theme.TintIcon {
                         id: devIcon
                         anchors.left: parent.left
                         anchors.leftMargin: Theme.Tokens.spaceLg

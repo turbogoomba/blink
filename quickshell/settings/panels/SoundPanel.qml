@@ -36,7 +36,7 @@ Flickable {
         border.color: "transparent"
         border.width: 1
 
-        Image {
+        Theme.TintIcon {
             id: muteIcon
             scale: muteIconMouse.pressed ? Theme.Tokens.pressScaleIcon : 1
             Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
@@ -181,7 +181,7 @@ Flickable {
                         elide: Text.ElideRight
                     }
 
-                    Image {
+                    Theme.TintIcon {
                         id: check
                         anchors.right: parent.right
                         anchors.rightMargin: Theme.Tokens.spaceLg

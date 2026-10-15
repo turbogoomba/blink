@@ -153,7 +153,8 @@ PanelWindow {
             scale: muteMouse.pressed ? Tokens.pressScale : 1
             Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
-            Image {
+            TintIcon {
+                tinted: vr.icon === ""
                 anchors.centerIn: parent
                 width: vr.small ? 16 : 16
                 height: width
@@ -330,7 +331,7 @@ PanelWindow {
                         radius: Tokens.radiusMd
                         color: devMouse.containsMouse && snd.outputs.length > 1 ? Tokens.ink(0.08) : "transparent"
 
-                        Image {
+                        TintIcon {
                             id: devIcon
                             anchors.left: parent.left
                             anchors.leftMargin: Tokens.spaceSm
