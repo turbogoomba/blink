@@ -57,6 +57,7 @@ Singleton {
         function onThemeGtkChanged() { root.schedule() }
         function onThemeVesktopChanged() { root.schedule() }
         function onThemeSpotifyChanged() { root.schedule() }
+        function onThemeFirefoxChanged() { root.schedule() }
     }
     Component.onCompleted: schedule()
 
@@ -69,6 +70,7 @@ Singleton {
             SettingsService.themeGtk ? "1" : "0",
             SettingsService.themeVesktop ? "1" : "0",
             SettingsService.themeSpotify ? "1" : "0",
+            SettingsService.themeFirefox ? "1" : "0",
             Tokens.themeName,
             t.window, t.sidebar, t.surface, t.surfaceAlt, t.border, t.text, t.text2,
             hex(Tokens.accent), hex(Qt.lighter(Tokens.accent, 1.18)), hex(Tokens.onAccent),
@@ -79,8 +81,8 @@ Singleton {
     Process { id: writer }
 
     readonly property string script: `
-A=$1; K=$2; G=$3; V=$4; S=$5; NAME=$6; WIN=$7; SIDE=$8; SURF=$9; shift 9
-SURF2=$1; BORD=$2; TXT=$3; TXT2=$4; ACC=$5; ACCL=$6; ONACC=$7; LIGHT=$8
+A=$1; K=$2; G=$3; V=$4; S=$5; F=$6; NAME=$7; WIN=$8; SIDE=$9; shift 9
+SURF=$1; SURF2=$2; BORD=$3; TXT=$4; TXT2=$5; ACC=$6; ACCL=$7; ONACC=$8; LIGHT=$9
 
 # ---------- Kitty ----------
 if [ "$K" = 1 ]; then
@@ -146,6 +148,32 @@ if [ "$V" = 1 ] && [ -d "$HOME/.config/vesktop" ] && [ -f "$A/vesktop/MacRice.th
         -e "s|--mr-text-dim: #[0-9a-fA-F]*;|--mr-text-dim: $TXT2;|" \\
         -e "s|--mr-accent: #[0-9a-fA-F]*;|--mr-accent: $ACC;|" \\
         "$A/vesktop/MacRice.theme.css" > "$d/MacRice.theme.css.blink" && mv -f "$d/MacRice.theme.css.blink" "$d/MacRice.theme.css"
+fi
+
+# ---------- Firefox ----------
+# The profile used last; Firefox shows a new theme after a restart
+if [ "$F" = 1 ] && [ -f "$A/firefox/userChrome.css" ]; then
+    P=""
+    for base in "$HOME/.mozilla/firefox" "$HOME/.config/mozilla/firefox"; do
+        [ -d "$base" ] || continue
+        for d in $(ls -td "$base"/*/ 2>/dev/null); do
+            if [ -f "$d/prefs.js" ]; then P="\${d%/}"; break; fi
+        done
+        [ -n "$P" ] && break
+    done
+    if [ -n "$P" ]; then
+        mkdir -p "$P/chrome"
+        sed -e "s|--mr-bg: #[0-9a-fA-F]*;|--mr-bg: $WIN;|" \
+            -e "s|--mr-surface: #[0-9a-fA-F]*;|--mr-surface: $SURF;|" \
+            -e "s|--mr-surface-alt: #[0-9a-fA-F]*;|--mr-surface-alt: $SURF2;|" \
+            -e "s|--mr-border: #[0-9a-fA-F]*;|--mr-border: $BORD;|" \
+            -e "s|--mr-text: #[0-9a-fA-F]*;|--mr-text: $TXT;|" \
+            -e "s|--mr-text-dim: #[0-9a-fA-F]*;|--mr-text-dim: $TXT2;|" \
+            -e "s|--mr-accent: #[0-9a-fA-F]*;|--mr-accent: $ACC;|" \
+            "$A/firefox/userChrome.css" > "$P/chrome/userChrome.css.blink" && mv -f "$P/chrome/userChrome.css.blink" "$P/chrome/userChrome.css"
+        sed -e "s|#1c1c1e|$WIN|gI" -e "s|#2c2c2e|$SURF|gI" -e "s|#3a3a3c|$BORD|gI" -e "s|#e5e5e7|$TXT|gI" \
+            "$A/firefox/userContent.css" > "$P/chrome/userContent.css.blink" && mv -f "$P/chrome/userContent.css.blink" "$P/chrome/userContent.css"
+    fi
 fi
 
 # ---------- Spotify (Spicetify) ----------

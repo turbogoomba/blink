@@ -1,5 +1,7 @@
 /* ============================================
-   Blink — Firefox
+   Blink — Firefox (v2, calmer)
+   The colors below are replaced by Blink when you pick a theme
+   (Settings > Appearance). Restart Firefox to see a new theme.
    ============================================ */
 
 :root {
@@ -10,9 +12,9 @@
   --mr-text: #e5e5e7;
   --mr-text-dim: #98989d;
   --mr-accent: #5fa8d3;
-  --mr-radius: 8px;
+  --mr-radius: 9px;
 
-  /* Firefox sine egne fargevariabler */
+  /* Firefox's own color variables */
   --toolbar-bgcolor: var(--mr-bg) !important;
   --toolbar-color: var(--mr-text) !important;
   --lwt-accent-color: var(--mr-bg) !important;
@@ -33,13 +35,16 @@
   --sidebar-background-color: var(--mr-bg) !important;
   --chrome-content-separator-color: transparent !important;
   --tabs-border-color: transparent !important;
+  --toolbarbutton-border-radius: 8px !important;
+  --toolbarbutton-hover-background: color-mix(in srgb, var(--mr-text) 8%, transparent) !important;
+  --toolbarbutton-active-background: color-mix(in srgb, var(--mr-text) 14%, transparent) !important;
 }
 
 * {
   font-family: "IBM Plex Sans", sans-serif !important;
 }
 
-/* ---------- Én flat verktøylinje ---------- */
+/* ---------- One flat, quiet top ---------- */
 #navigator-toolbox {
   background: var(--mr-bg) !important;
   border-bottom: none !important;
@@ -49,26 +54,63 @@
 #PersonalToolbar {
   background: transparent !important;
   box-shadow: none !important;
+  border: none !important;
+}
+#nav-bar {
+  padding-block: 2px 6px !important;
 }
 
-/* Skjul vindusknapper (Hyprland trenger dem ikke) */
+/* Window buttons: Hyprland does not need them */
 .titlebar-spacer,
 .titlebar-buttonbox-container {
   display: none !important;
 }
 
-/* ---------- Faner som avrundede piller ---------- */
+/* ---------- Fewer buttons ---------- */
+/* Gone: home, sidebar, the list of all tabs, the extensions puzzle piece */
+#home-button,
+#sidebar-button,
+#alltabs-button,
+#unified-extensions-button,
+#firefox-view-button {
+  display: none !important;
+}
+/* Forward only when you can go forward */
+#forward-button[disabled] {
+  display: none !important;
+}
+/* Pinned extensions and the rest: smaller and quieter until you hover */
+#nav-bar .toolbarbutton-1 {
+  --toolbarbutton-inner-padding: 7px !important;
+}
+#nav-bar-customization-target > .webextension-browser-action,
+#downloads-button {
+  opacity: 0.55;
+  transition: opacity 150ms ease;
+}
+#nav-bar:hover #nav-bar-customization-target > .webextension-browser-action,
+#nav-bar:hover #downloads-button,
+#downloads-button[attention] {
+  opacity: 1;
+}
+
+/* ---------- Tabs: small soft pills ---------- */
+#tabbrowser-tabs {
+  --tab-min-height: 30px !important;
+  border-inline-start: none !important;
+}
 .tabbrowser-tab {
   padding-inline: 2px !important;
+  max-width: 200px !important;
 }
 .tab-background {
   border-radius: var(--mr-radius) !important;
-  margin-block: 5px !important;
+  margin-block: 4px !important;
   box-shadow: none !important;
   outline: none !important;
 }
 .tabbrowser-tab:not([selected]):hover .tab-background {
-  background-color: rgba(255, 255, 255, 0.05) !important;
+  background-color: color-mix(in srgb, var(--mr-text) 6%, transparent) !important;
 }
 .tab-background[selected] {
   background: var(--mr-surface) !important;
@@ -76,29 +118,72 @@
 .tab-label {
   font-size: 12px !important;
 }
-.tabbrowser-tab:not([selected]) .tab-label {
-  color: var(--mr-text-dim) !important;
+.tabbrowser-tab:not([selected]) .tab-label,
+.tabbrowser-tab:not([selected]) .tab-icon-image {
+  opacity: 0.6;
 }
-/* Lukkeknapp bare ved hover */
+/* Close button only on hover, no "x" on the others */
 .tabbrowser-tab:not(:hover) .tab-close-button {
-  opacity: 0 !important;
+  display: none !important;
+}
+/* No line under the active tab, no blue focus line */
+.tab-context-line,
+.tabbrowser-tab::after,
+.tabbrowser-tab::before {
+  display: none !important;
+}
+#tabs-newtab-button,
+#new-tab-button {
+  opacity: 0.55;
+}
+#tabs-newtab-button:hover,
+#new-tab-button:hover {
+  opacity: 1;
 }
 
-/* ---------- Adressefelt ---------- */
+/* ---------- Address bar: clean until you need it ---------- */
 #urlbar-background {
   border-radius: var(--mr-radius) !important;
   border: none !important;
+  box-shadow: none !important;
 }
 #urlbar[focused] #urlbar-background {
   outline: 2px solid var(--mr-accent) !important;
   outline-offset: -1px !important;
 }
-/* Midtstilt adresse som i Safari, venstrestilt når du skriver */
 #urlbar:not([focused]) #urlbar-input {
   text-align: center !important;
 }
+/* Shield, site info, translate, zoom, star, reader: hidden until you hover the bar */
+#tracking-protection-icon-container,
+#identity-permission-box,
+#translations-button,
+#urlbar-zoom-button,
+#star-button-box,
+#reader-mode-button,
+#picture-in-picture-button,
+#page-action-buttons > :not(#urlbar-go-button) {
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+#urlbar:hover #tracking-protection-icon-container,
+#urlbar:hover #identity-permission-box,
+#urlbar:hover #translations-button,
+#urlbar:hover #urlbar-zoom-button,
+#urlbar:hover #star-button-box,
+#urlbar:hover #reader-mode-button,
+#urlbar:hover #picture-in-picture-button,
+#urlbar:hover #page-action-buttons > *,
+#urlbar[focused] #page-action-buttons > * {
+  opacity: 1;
+}
+/* The padlock box: no grey background behind it */
+#identity-box > box,
+#identity-icon-box {
+  background: transparent !important;
+}
 
-/* ---------- Menyer ---------- */
+/* ---------- Menus ---------- */
 menupopup {
   --panel-background: var(--mr-surface) !important;
   --panel-color: var(--mr-text) !important;
@@ -115,11 +200,20 @@ menu[_moz-menuactive] {
   color: white !important;
 }
 
-/* ---------- Avrundet nettside med luft rundt ---------- */
+/* ---------- The page: rounded, no outline ---------- */
 #tabbrowser-tabpanels {
   background: var(--mr-bg) !important;
 }
 .browserStack > browser {
   border-radius: 10px !important;
   margin: 0 6px 6px !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+#tabbrowser-tabbox,
+#browser,
+.browserContainer {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }

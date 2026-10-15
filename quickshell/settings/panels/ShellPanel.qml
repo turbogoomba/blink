@@ -437,6 +437,14 @@ Flickable {
                     }
                 }
                 SettingRow {
+                    title: "Firefox"
+                    subtitle: "Toolbar, tabs and new tab page, after Firefox restarts"
+                    Toggle {
+                        checked: SettingsService.themeFirefox
+                        apply: function(v) { SettingsService.themeFirefox = v }
+                    }
+                }
+                SettingRow {
                     title: "Spotify"
                     subtitle: ThemeService.hasSpicetify ? "Through Spicetify. Press Ctrl+Shift+R in Spotify to see a new theme"
                                                         : "Needs Spicetify (yay -S spicetify-cli)"

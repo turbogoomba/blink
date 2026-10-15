@@ -93,6 +93,7 @@ Singleton {
     property alias themeGtk: adapter.themeGtk
     property alias themeVesktop: adapter.themeVesktop
     property alias themeSpotify: adapter.themeSpotify
+    property alias themeFirefox: adapter.themeFirefox
     onThemeChanged: Tokens.themeName = theme
     Component.onCompleted: Tokens.themeName = theme
 
@@ -152,6 +153,7 @@ Singleton {
             property bool themeGtk: true
             property bool themeVesktop: true
             property bool themeSpotify: false
+            property bool themeFirefox: true
             property bool nightLight: false
             property int nightTemp: 4000
             property string notifStyle: "notch"
