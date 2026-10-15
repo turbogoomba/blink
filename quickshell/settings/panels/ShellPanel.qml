@@ -438,7 +438,7 @@ Flickable {
                 }
                 SettingRow {
                     title: "Spotify"
-                    subtitle: ThemeService.hasSpicetify ? "Through Spicetify. Spotify restarts when the theme changes"
+                    subtitle: ThemeService.hasSpicetify ? "Through Spicetify. Press Ctrl+Shift+R in Spotify to see a new theme"
                                                         : "Needs Spicetify (yay -S spicetify-cli)"
                     divider: false
                     opacity: ThemeService.hasSpicetify ? 1 : 0.5

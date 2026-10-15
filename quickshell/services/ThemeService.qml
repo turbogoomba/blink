@@ -9,8 +9,8 @@ import "../theme"
 //   Kitty            ~/.config/kitty/blink-theme.conf (kitty.conf includes it last)
 //   GTK (Thunar ...) ~/.config/gtk-3.0 and gtk-4.0/gtk.css, plus light/dark preference
 //   Discord          ~/.config/vesktop/themes/MacRice.theme.css (Vesktop)
-//   Spotify          a "Blink" Spicetify theme (only re-applied when the colors change,
-//                    since Spicetify restarts Spotify)
+//   Spotify          a "Blink" Spicetify theme. Applied fully once; after that the colors
+//                    are swapped without closing Spotify (Ctrl+Shift+R in Spotify shows them)
 // Runs a moment after the theme or the accent changes, and once at startup.
 Singleton {
     id: root
@@ -177,12 +177,17 @@ misc               = $(n $BORD)
 EOF
     stamp="$HOME/.cache/blink/spotify-theme"
     now="$NAME $ACC"
-    if [ "$(cat "$stamp" 2>/dev/null)" != "$now" ]; then
+    if [ ! -f "$stamp" ]; then
+        # First time: a full apply (Spotify restarts this once)
         spicetify config current_theme Blink color_scheme Blink >/dev/null 2>&1
         spicetify apply >/dev/null 2>&1
-        mkdir -p "$(dirname "$stamp")"
-        echo "$now" > "$stamp"
+    elif [ "$(cat "$stamp" 2>/dev/null)" != "$now" ]; then
+        # After that: swap the colors in place, Spotify keeps playing.
+        # It shows them after a reload (Ctrl+Shift+R in Spotify) or the next start.
+        spicetify update >/dev/null 2>&1 || spicetify apply --no-restart >/dev/null 2>&1
     fi
+    mkdir -p "$(dirname "$stamp")"
+    echo "$now" > "$stamp"
 fi
 `
 }
