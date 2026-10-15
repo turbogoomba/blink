@@ -48,6 +48,11 @@ ShellRoot {
         active: SettingsService.sideBar
         BarUI.NotchPanel {}
     }
+    // Volume and brightness, sliding out of the side bar
+    LazyLoader {
+        active: SettingsService.sideBar
+        BarUI.SideOsd {}
+    }
 
     // Ramme rundt skjermen
     BarUI.Frame {}
