@@ -33,10 +33,8 @@ PanelWindow {
             easing.overshoot: Tokens.bounce
         }
     }
-    // 0 → 1 without the overshoot, for fades and the corners
-    readonly property real calm: Math.max(0, Math.min(1, reveal))
-    // The content fades in once the panel is about half out, and out first when it closes
-    readonly property real contentOpacity: Math.max(0, Math.min(1, (reveal - 0.4) / 0.45))
+    // The content fades in once the panel is partly out, and out first when it closes
+    readonly property real contentOpacity: Math.max(0, Math.min(1, (reveal - 0.3) / 0.5))
 
     // The size the panel grows to. Kept when it closes, so it shrinks from the
     // size it had instead of jumping to the small idle notch first.
@@ -79,18 +77,17 @@ PanelWindow {
         Component.onCompleted: requestPaint()
     }
     // Right of the notch, under the top edge
-    Fillet { x: holder.x + holder.width; y: win.topEdge; scale: win.calm; transformOrigin: Item.TopLeft }
+    Fillet { x: holder.x + holder.width; y: win.topEdge; opacity: Math.min(1, win.reveal * 4) }
     // Under the notch, next to the side bar
-    Fillet { x: win.leftEdge; y: win.topEdge + holder.height; scale: win.calm; transformOrigin: Item.TopLeft }
+    Fillet { x: win.leftEdge; y: win.topEdge + holder.height; opacity: Math.min(1, win.reveal * 4) }
 
-    // Grows out of the corner where the side bar meets the top edge, in both
-    // directions at once, like it is poured out of the bar
+    // Slides out of the side bar, like the other sheets
     Item {
         id: holder
         x: win.leftEdge
         y: win.topEdge
         width: win.panelW * win.reveal
-        height: Math.max(0, win.panelH * (0.35 + 0.65 * win.reveal))
+        height: win.panelH
         visible: win.reveal > 0.005
         clip: true
         // Soft shadow, so it floats over what is under it
@@ -112,9 +109,8 @@ PanelWindow {
 
         Item {
             id: box
-            // Stays against the bar even when the bounce overshoots
-            x: Math.min(0, holder.width - win.panelW)
-            y: Math.min(0, holder.height - win.panelH)
+            // Rides on the leading edge, so it slides out with the sheet
+            x: holder.width - win.panelW
             width: win.panelW
             height: win.panelH
             opacity: win.contentOpacity
