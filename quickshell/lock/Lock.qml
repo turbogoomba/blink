@@ -6,11 +6,13 @@ import Quickshell.Wayland
 import Quickshell.Widgets
 import Quickshell.Services.Pam
 import Quickshell.Services.Mpris
-import Quickshell.Services.UPower
 import "../services"
 import "../theme"
+import "../bar"
 
-// Blink lock screen (v2): same black frame, bar and notch as the desktop.
+// Blink lock screen (v3, Caelestia-style): blurred wallpaper inside the frame,
+// one big panel in the middle. Left: weather, CPU/RAM/GPU, system info.
+// Middle: big clock, date, picture and password. Right: music and next class.
 // Lock with:  qs -c blink ipc call lock lock   (hypridle does this)
 Scope {
     id: root
@@ -19,9 +21,9 @@ Scope {
     property bool failed: false
     property bool checking: false
     property string pending: ""
-    property int typing: 0          // bumps on every key press, wakes the face
 
     readonly property var player: Mpris.players.values.find(p => p.isPlaying) ?? Mpris.players.values[0] ?? null
+    readonly property bool hasMusic: player !== null && (player.trackTitle ?? "") !== ""
 
     function lock() {
         root.failed = false
@@ -38,6 +40,12 @@ Scope {
     IpcHandler {
         target: "lock"
         function lock(): void { root.lock() }
+    }
+
+    // Live GPU and temperatures while locked
+    onLockedChanged: {
+        SystemService.statsUsers += locked ? 1 : -1
+        if (locked) facts.running = true
     }
 
     // Password check. Uses a tiny PAM file next to this one (pam/password.conf).
@@ -63,9 +71,141 @@ Scope {
 
     Timer {
         id: failTimer
-        interval: 1800
+        interval: 2200
         onTriggered: root.failed = false
     }
+
+    // ---------- Who and what (read when it locks) ----------
+    property var info: ({})
+    Process {
+        id: facts
+        command: ["sh", "-c", `
+. /etc/os-release 2>/dev/null
+echo "os=\${NAME:-Linux}"
+echo "kernel=$(uname -r | cut -d- -f1)"
+echo "user=$USER"
+echo "host=$(cat /etc/hostname 2>/dev/null)"
+echo "name=$(getent passwd "$USER" | cut -d: -f5 | cut -d, -f1 | cut -d' ' -f1)"
+echo "pkgs=$(pacman -Qq 2>/dev/null | wc -l)"
+[ -r "$HOME/.face" ] && echo "face=$HOME/.face"
+`]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const out = {}
+                for (const l of text.split("\n")) {
+                    const i = l.indexOf("=")
+                    if (i > 0) out[l.slice(0, i)] = l.slice(i + 1).trim()
+                }
+                root.info = out
+            }
+        }
+    }
+
+    function soft(c, a) { return Qt.rgba(c.r, c.g, c.b, a) }
+
+    readonly property var icons: ({
+        lock:  "M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3",
+        arrow: "M5 12h14M13 6l6 6-6 6",
+        prev:  "M18 6l-8 6 8 6zM6 6v12",
+        next:  "M6 6l8 6-8 6zM18 6v12",
+        play:  "M7 5l12 7-12 7z",
+        pause: "M8 5v14M16 5v14",
+        note:  "M9 18V5l11-2v13M3 18a3 3 0 1 0 6 0a3 3 0 1 0 -6 0M14 16a3 3 0 1 0 6 0a3 3 0 1 0 -6 0",
+        school:"M3 21h18M5 21V9l7-5 7 5v12M10 21v-5h4v5"
+    })
+
+    // ================= Building blocks =================
+    component Card: Rectangle {
+        radius: 22
+        color: Qt.rgba(1, 1, 1, 0.06)
+    }
+
+    component Label: Text {
+        color: Tokens.textPrimary
+        font.family: Tokens.fontFamily
+        font.pixelSize: 13
+    }
+
+    component Ring: Column {
+        id: rg
+        property string label: ""
+        property real value: 0
+        property real shown: Math.max(0, Math.min(1, value))
+        Behavior on shown { NumberAnimation { duration: 700; easing.type: Tokens.easeMove } }
+        readonly property color tint: value > 0.85 ? Tokens.red : value > 0.7 ? Tokens.orange : Tokens.accent
+        spacing: 6
+        Canvas {
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: 58
+            height: 58
+            property real v: rg.shown
+            property color c: rg.tint
+            onVChanged: requestPaint()
+            onCChanged: requestPaint()
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.reset()
+                const r = width / 2 - 4
+                ctx.lineWidth = 6
+                ctx.lineCap = "round"
+                ctx.strokeStyle = "rgba(255,255,255,0.1)"
+                ctx.beginPath()
+                ctx.arc(width / 2, height / 2, r, 0, 2 * Math.PI)
+                ctx.stroke()
+                if (v > 0.003) {
+                    ctx.strokeStyle = c.toString()
+                    ctx.beginPath()
+                    ctx.arc(width / 2, height / 2, r, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * v)
+                    ctx.stroke()
+                }
+            }
+            Component.onCompleted: requestPaint()
+            Label {
+                anchors.centerIn: parent
+                text: Math.round(rg.shown * 100) + "%"
+                font.weight: Font.DemiBold
+                font.features: { "tnum": 1 }
+            }
+        }
+        Label {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: rg.label
+            color: Tokens.textSecondary
+            font.pixelSize: 11
+            font.weight: Font.DemiBold
+            font.letterSpacing: 0.6
+        }
+    }
+
+    // Round button with a line icon
+    component IconBtn: Rectangle {
+        id: ib
+        property string d: ""
+        property bool filled: false
+        property real size: 44
+        signal clicked()
+        width: size
+        height: size
+        radius: size / 2
+        color: filled ? Tokens.accent : ibMouse.containsMouse ? Tokens.fillHover : "transparent"
+        scale: ibMouse.pressed ? Tokens.pressScaleIcon : 1
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
+        LineIcon {
+            anchors.centerIn: parent
+            d: ib.d
+            size: ib.size * 0.42
+            stroke: 2.4
+            tint: ib.filled ? Tokens.onAccent : Tokens.textPrimary
+        }
+        MouseArea {
+            id: ibMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: ib.clicked()
+        }
+    }
+
 
     WlSessionLock {
         id: sessionLock
@@ -84,19 +224,8 @@ Scope {
                 onTriggered: surface.now = new Date()
             }
 
-            // Awake while typing, asleep after 4 s without keys
-            property bool awake: false
-            Timer {
-                id: sleepTimer
-                interval: 4000
-                onTriggered: surface.awake = false
-            }
             Connections {
                 target: root
-                function onTypingChanged() {
-                    surface.awake = true
-                    sleepTimer.restart()
-                }
                 function onFailedChanged() {
                     if (root.failed) {
                         input.text = ""
@@ -105,425 +234,537 @@ Scope {
                 }
             }
 
-            Item {
-                id: content
+            // Any click puts the cursor back in the password field
+            MouseArea {
                 anchors.fill: parent
-                opacity: 0
-                Component.onCompleted: fadeIn.start()
-                NumberAnimation { id: fadeIn; target: content; property: "opacity"; to: 1; duration: Tokens.durSlow; easing.type: Tokens.easeMove }
+                onClicked: input.forceActiveFocus()
+            }
 
-                // ================= Inner screen (inside the frame) =================
-                ClippingRectangle {
-                    id: inner
+            // ================= Blurred wallpaper inside the frame =================
+            ClippingRectangle {
+                id: inner
+                anchors.fill: parent
+                anchors.topMargin: SettingsService.topInset
+                anchors.leftMargin: SettingsService.leftInset
+                anchors.rightMargin: Tokens.frameT
+                anchors.bottomMargin: Tokens.frameT
+                radius: 20
+                color: "#101012"
+
+                Image {
+                    id: wall
                     anchors.fill: parent
-                    anchors.topMargin: Tokens.barHeight
-                    anchors.leftMargin: Tokens.frameT
-                    anchors.rightMargin: Tokens.frameT
-                    anchors.bottomMargin: Tokens.frameT
-                    radius: Tokens.radiusLg
-                    color: "#101012"
+                    source: WallpaperService.current ? "file://" + WallpaperService.current : ""
+                    fillMode: Image.PreserveAspectCrop
+                    asynchronous: true
+                    visible: false
+                }
+                MultiEffect {
+                    anchors.fill: parent
+                    source: wall
+                    blurEnabled: true
+                    blurMax: 64
+                    blur: 1.0
+                    autoPaddingEnabled: false
+                }
+                Rectangle {
+                    anchors.fill: parent
+                    color: "black"
+                    opacity: 0.35
+                }
+            }
 
-                    Image {
-                        id: wall
-                        anchors.fill: parent
-                        source: WallpaperService.current ? "file://" + WallpaperService.current : ""
-                        fillMode: Image.PreserveAspectCrop
-                        asynchronous: true
-                        visible: false
+            // ================= The panel =================
+            Rectangle {
+                id: panel
+                readonly property real fullW: Math.min(1200, inner.width - 80)
+                readonly property real fullH: Math.min(660, inner.height - 80)
+                width: fullW
+                height: fullH
+                x: inner.x + (inner.width - width) / 2
+                y: inner.y + (inner.height - height) / 2
+                radius: 32
+                color: Qt.rgba(0, 0, 0, 0.82)
+
+                // Grows in with a small bounce
+                opacity: 0
+                scale: 0.94
+                Component.onCompleted: openAnim.start()
+                ParallelAnimation {
+                    id: openAnim
+                    NumberAnimation { target: panel; property: "opacity"; to: 1; duration: Tokens.durSlow; easing.type: Tokens.easeMove }
+                    NumberAnimation { target: panel; property: "scale"; to: 1; duration: 460; easing.type: Tokens.easeGrow; easing.overshoot: Tokens.bounce }
+                }
+
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    shadowEnabled: true
+                    shadowColor: Tokens.shadowColor
+                    shadowBlur: 1.0
+                    blurMax: 48
+                    shadowVerticalOffset: 8
+                }
+
+                readonly property real sideW: Math.min(300, (width - 52) * 0.27)
+
+                // ---------- Left: weather, usage, system ----------
+                Column {
+                    id: leftCol
+                    x: 26
+                    y: 26
+                    width: panel.sideW
+                    height: panel.height - 52
+                    spacing: 16
+
+                    Card {
+                        width: parent.width
+                        height: 92
+                        visible: WeatherService.ready
+                        Image {
+                            id: wIcon
+                            anchors.left: parent.left
+                            anchors.leftMargin: 18
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 46
+                            height: 46
+                            sourceSize: Qt.size(92, 92)
+                            source: Quickshell.iconPath(WeatherService.icon, "weather-overcast")
+                        }
+                        Column {
+                            anchors.left: wIcon.right
+                            anchors.leftMargin: 14
+                            anchors.verticalCenter: parent.verticalCenter
+                            Label {
+                                text: Math.round(WeatherService.temperature) + "°"
+                                font.pixelSize: 32
+                                font.weight: Font.Medium
+                            }
+                            Label {
+                                text: WeatherService.description
+                                color: Tokens.textSecondary
+                            }
+                        }
                     }
 
-                    MultiEffect {
-                        anchors.fill: parent
-                        source: wall
-                        blurEnabled: true
-                        blurMax: 64
-                        blur: 1.0
-                        autoPaddingEnabled: false
+                    Card {
+                        width: parent.width
+                        height: 112
+                        Row {
+                            anchors.centerIn: parent
+                            spacing: (parent.width - 3 * 58) / 4
+                            Ring { label: "CPU"; value: SystemService.cpu }
+                            Ring { label: "RAM"; value: SystemService.ram }
+                            Ring { label: "GPU"; value: Math.max(0, SystemService.gpu); visible: SystemService.gpu >= 0 }
+                        }
                     }
 
-                    Rectangle {
-                        anchors.fill: parent
-                        color: "black"
-                        opacity: 0.3
-                    }
+                    Card {
+                        width: parent.width
+                        height: Math.max(150, leftCol.height - y)
+                        Column {
+                            x: 18
+                            y: 18
+                            width: parent.width - 36
+                            spacing: 10
 
-                    // ---------- Date + clock ----------
-                    Column {
+                            Row {
+                                spacing: 10
+                                Rectangle {
+                                    width: 30
+                                    height: 24
+                                    radius: 8
+                                    color: Tokens.barBg
+                                    border.width: 1
+                                    border.color: Qt.rgba(1, 1, 1, 0.1)
+                                    Row {
+                                        anchors.centerIn: parent
+                                        spacing: 6
+                                        Rectangle { width: 3; height: 7; radius: 1.5; color: Tokens.textPrimary }
+                                        Rectangle { width: 3; height: 7; radius: 1.5; color: Tokens.textPrimary }
+                                    }
+                                }
+                                Label {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: (root.info.user || "") + "@" + (root.info.host || "")
+                                    font.pixelSize: 14
+                                    font.weight: Font.DemiBold
+                                }
+                            }
+
+                            Repeater {
+                                model: [
+                                    { k: "OS", v: root.info.os || "" },
+                                    { k: "Kernel", v: root.info.kernel || "" },
+                                    { k: "Shell", v: "Blink" },
+                                    { k: "Uptime", v: SystemService.uptime > 0 ? SystemService.duration(SystemService.uptime) : "" },
+                                    { k: "Packages", v: root.info.pkgs || "" }
+                                ]
+                                delegate: Item {
+                                    required property var modelData
+                                    width: parent.width
+                                    height: 18
+                                    Label {
+                                        text: parent.modelData.k
+                                        color: Tokens.accent
+                                        font.weight: Font.Medium
+                                    }
+                                    Label {
+                                        anchors.right: parent.right
+                                        text: parent.modelData.v
+                                        color: "#c7c7cc"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ---------- Middle: clock, picture, password ----------
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 0
+
+                    Label {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.top: parent.top
-                        anchors.topMargin: parent.height * 0.1
-                        spacing: 2
+                        text: Qt.formatTime(surface.now, "HH")
+                        font.pixelSize: Math.min(150, panel.height * 0.22)
+                        font.weight: Font.DemiBold
+                        font.letterSpacing: -2
+                        lineHeight: 0.9
+                    }
+                    Label {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: Qt.formatTime(surface.now, "mm")
+                        color: Tokens.accent
+                        font.pixelSize: Math.min(150, panel.height * 0.22)
+                        font.weight: Font.Light
+                        font.letterSpacing: -2
+                        lineHeight: 0.9
+                    }
+                    Label {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        topPadding: 14
+                        text: Qt.formatDate(surface.now, "dddd, d MMMM")
+                        color: "#b8b8be"
+                        font.pixelSize: 17
+                    }
 
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: Qt.formatDate(surface.now, "dddd d MMMM")
-                            color: Qt.rgba(0.9, 0.9, 0.91, 0.8)
-                            font.family: Tokens.fontFamily
-                            font.pixelSize: Tokens.fontLarge
-                            font.weight: Font.Medium
+                    Item { width: 1; height: 30 }
+
+                    // Picture: ~/.face if you have one, else your initial
+                    ClippingRectangle {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: 72
+                        height: 72
+                        radius: 24
+                        color: Tokens.accent
+                        Label {
+                            anchors.centerIn: parent
+                            visible: face.status !== Image.Ready
+                            text: (root.info.name || root.info.user || "?").charAt(0).toUpperCase()
+                            color: Tokens.onAccent
+                            font.pixelSize: 30
+                            font.weight: Font.Bold
+                        }
+                        Image {
+                            id: face
+                            anchors.fill: parent
+                            source: root.info.face ? "file://" + root.info.face : ""
+                            fillMode: Image.PreserveAspectCrop
+                            asynchronous: true
+                        }
+                    }
+
+                    Item { width: 1; height: 14 }
+
+                    // Password field: dots instead of characters
+                    Rectangle {
+                        id: field
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: 320
+                        height: 50
+                        radius: 25
+                        color: Qt.rgba(1, 1, 1, 0.08)
+                        border.width: 1
+                        border.color: root.failed ? Tokens.red : root.soft(Tokens.accent, input.activeFocus ? 0.6 : 0.3)
+                        Behavior on border.color { ColorAnimation { duration: Tokens.durFast } }
+
+                        transform: Translate { id: shakeT }
+                        SequentialAnimation {
+                            id: shake
+                            NumberAnimation { target: shakeT; property: "x"; to: -12; duration: 50 }
+                            NumberAnimation { target: shakeT; property: "x"; to: 12; duration: 70 }
+                            NumberAnimation { target: shakeT; property: "x"; to: -8; duration: 60 }
+                            NumberAnimation { target: shakeT; property: "x"; to: 6; duration: 60 }
+                            NumberAnimation { target: shakeT; property: "x"; to: 0; duration: 50 }
                         }
 
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: Qt.formatTime(surface.now, "HH:mm")
-                            color: "#f2f2f4"
-                            font.family: Tokens.fontFamily
-                            font.pixelSize: 132
-                            font.weight: Font.Light
-                            font.letterSpacing: -3
+                        TextInput {
+                            id: input
+                            anchors.fill: parent
+                            opacity: 0
+                            focus: true
+                            echoMode: TextInput.Password
+                            enabled: !root.checking
+                            Component.onCompleted: forceActiveFocus()
+                            onAccepted: {
+                                root.submit(text)
+                                text = ""
+                            }
+                            Keys.onEscapePressed: text = ""
                         }
 
-                        // ---------- Now playing ----------
-                        Rectangle {
-                            visible: root.player !== null && (root.player.trackTitle ?? "") !== ""
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            width: 330
-                            height: 70
-                            radius: Tokens.radiusLg
-                            color: Tokens.fillIdle
-                            border.color: Qt.rgba(1, 1, 1, 0.06)
-                            border.width: 1
+                        Row {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 22
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 8
+                            Repeater {
+                                model: Math.min(14, input.text.length)
+                                Rectangle {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: 9
+                                    height: 9
+                                    radius: 4.5
+                                    color: Tokens.textPrimary
+                                }
+                            }
+                            // Blinking cursor
+                            Rectangle {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 2
+                                height: 20
+                                color: Tokens.accent
+                                visible: input.activeFocus && !root.checking
+                                SequentialAnimation on opacity {
+                                    loops: Animation.Infinite
+                                    NumberAnimation { to: 0; duration: 500 }
+                                    NumberAnimation { to: 1; duration: 500 }
+                                }
+                            }
+                        }
+
+                        IconBtn {
+                            anchors.right: parent.right
+                            anchors.rightMargin: 6
+                            anchors.verticalCenter: parent.verticalCenter
+                            size: 38
+                            filled: true
+                            d: root.icons.arrow
+                            opacity: input.text.length > 0 || root.checking ? 1 : 0.5
+                            onClicked: {
+                                root.submit(input.text)
+                                input.text = ""
+                            }
+                        }
+                    }
+
+                    Label {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        topPadding: 12
+                        text: root.checking ? "Checking..."
+                            : root.failed ? "Wrong password, try again"
+                            : "Type your password and press Enter"
+                        color: root.failed ? Tokens.red : Tokens.textSecondary
+                        font.pixelSize: 12
+                    }
+                }
+
+                // ---------- Right: music, next class ----------
+                Column {
+                    id: rightCol
+                    x: panel.width - 26 - width
+                    y: 26
+                    width: panel.sideW
+                    height: panel.height - 52
+                    spacing: 16
+
+                    Card {
+                        width: parent.width
+                        height: musicCol.implicitHeight + 36
+                        Column {
+                            id: musicCol
+                            x: 18
+                            y: 18
+                            width: parent.width - 36
+                            spacing: 14
 
                             ClippingRectangle {
-                                id: art
-                                anchors.left: parent.left
-                                anchors.leftMargin: Tokens.spaceMd
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: 46
-                                height: 46
-                                radius: Tokens.radiusMd
-                                color: Tokens.fillHover
-
+                                width: parent.width
+                                height: Math.min(150, parent.width * 0.55)
+                                radius: 16
+                                color: "#2c2550"
+                                LineIcon {
+                                    anchors.centerIn: parent
+                                    visible: art.status !== Image.Ready
+                                    d: root.icons.note
+                                    size: 40
+                                    tint: "#8e8aa8"
+                                }
                                 Image {
+                                    id: art
                                     anchors.fill: parent
                                     source: root.player?.trackArtUrl ?? ""
                                     fillMode: Image.PreserveAspectCrop
                                     asynchronous: true
                                 }
                             }
-
                             Column {
-                                anchors.left: art.right
-                                anchors.leftMargin: Tokens.spaceMd
-                                anchors.right: playBtn.left
-                                anchors.rightMargin: 10
-                                anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width
                                 spacing: 2
-
-                                Text {
+                                Label {
                                     width: parent.width
-                                    text: root.player?.trackTitle ?? ""
-                                    color: Tokens.textPrimary
-                                    font.family: Tokens.fontFamily
-                                    font.pixelSize: Tokens.fontBody
-                                    font.weight: Font.DemiBold
                                     elide: Text.ElideRight
+                                    text: root.hasMusic ? root.player.trackTitle : "Nothing playing"
+                                    font.pixelSize: 15
+                                    font.weight: Font.DemiBold
                                 }
-                                Text {
+                                Label {
                                     width: parent.width
+                                    elide: Text.ElideRight
+                                    visible: root.hasMusic
                                     text: root.player?.trackArtist ?? ""
                                     color: Tokens.textSecondary
-                                    font.family: Tokens.fontFamily
-                                    font.pixelSize: Tokens.fontSmall
-                                    elide: Text.ElideRight
                                 }
                             }
-
                             Rectangle {
-                                id: playBtn
-                                anchors.right: parent.right
-                                anchors.rightMargin: Tokens.spaceMd
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: 34
-                                height: 34
-                                radius: 17
-                                color: playMouse.containsMouse ? Tokens.fillStrong : Tokens.fillHover
-                                scale: playMouse.pressed ? Tokens.pressScale : 1
-                                Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
-
-                                Image {
-                                    anchors.centerIn: parent
-                                    width: 16
-                                    height: 16
-                                    sourceSize: Qt.size(32, 32)
-                                    source: Quickshell.iconPath(root.player?.isPlaying
-                                        ? "media-playback-pause-symbolic" : "media-playback-start-symbolic")
-                                }
-
-                                MouseArea {
-                                    id: playMouse
-                                    cursorShape: Qt.PointingHandCursor
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    onClicked: root.player?.togglePlaying()
-                                }
-                            }
-                        }
-                    }
-
-                    // ---------- Name + password ----------
-                    Column {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 64
-                        spacing: Tokens.spaceMd
-
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: "Herman"
-                            color: Tokens.textPrimary
-                            font.family: Tokens.fontFamily
-                            font.pixelSize: Tokens.fontBody
-                            font.weight: Font.DemiBold
-                        }
-
-                        Item {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            width: 250
-                            height: 40
-
-                            Rectangle {
-                                id: field
+                                visible: root.hasMusic && (root.player?.lengthSupported ?? false)
                                 width: parent.width
-                                height: parent.height
-                                radius: Tokens.radiusLg
-                                color: root.failed ? Qt.rgba(1, 0.41, 0.38, 0.14) : Qt.rgba(0, 0, 0, 0.45)
-                                border.width: 1
-                                border.color: root.failed ? Qt.rgba(1, 0.41, 0.38, 0.6)
-                                    : input.activeFocus ? Tokens.fillHover : Qt.rgba(1, 1, 1, 0.10)
-                                Behavior on color { ColorAnimation { duration: Tokens.durFast } }
-
-                                Image {
-                                    id: lockIcon
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: 14
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: 14
-                                    height: 14
-                                    sourceSize: Qt.size(28, 28)
-                                    opacity: 0.6
-                                    source: Quickshell.iconPath("system-lock-screen-symbolic", "changes-prevent-symbolic")
-                                }
-
-                                TextInput {
-                                    id: input
-                                    anchors.left: lockIcon.right
-                                    anchors.leftMargin: 10
-                                    anchors.right: go.left
-                                    anchors.rightMargin: Tokens.spaceSm
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    echoMode: TextInput.Password
-                                    passwordCharacter: "•"
-                                    color: Tokens.textPrimary
-                                    font.family: Tokens.fontFamily
-                                    font.pixelSize: Tokens.fontBody
-                                    clip: true
-                                    focus: true
-                                    enabled: !root.checking
-                                    Component.onCompleted: forceActiveFocus()
-                                    onTextChanged: root.typing++
-                                    onAccepted: root.submit(text)
-
-                                    Text {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        visible: input.text.length === 0
-                                        text: root.failed ? "Wrong password" : root.checking ? "Checking..." : "Password"
-                                        color: root.failed ? "#ff8a83" : Qt.rgba(0.9, 0.9, 0.91, 0.55)
-                                        font: input.font
-                                    }
-                                }
-
-                                Rectangle {
-                                    id: go
-                                    scale: goMouse.pressed ? Tokens.pressScaleIcon : 1
-                                    Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
-                                    anchors.right: parent.right
-                                    anchors.rightMargin: 5
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: 30
-                                    height: 30
-                                    radius: Tokens.radiusMd
-                                    color: goMouse.pressed ? Qt.darker(Tokens.accent, 1.15) : Tokens.accent
-                                    opacity: input.text.length > 0 ? 1 : 0.5
-                                    Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
-
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: "→"
-                                        color: "white"
-                                        font.pixelSize: Tokens.fontTitle
-                                        font.weight: Font.Bold
-                                    }
-
-                                    MouseArea {
-                                        id: goMouse
-                                        hoverEnabled: true
-                                        cursorShape: Qt.PointingHandCursor
-                                        anchors.fill: parent
-                                        onClicked: root.submit(input.text)
-                                    }
-                                }
-
-                                SequentialAnimation {
-                                    id: shake
-                                    NumberAnimation { target: field; property: "x"; to: -10; duration: 50 }
-                                    NumberAnimation { target: field; property: "x"; to: 10; duration: Tokens.durFast }
-                                    NumberAnimation { target: field; property: "x"; to: -6; duration: Tokens.durFast }
-                                    NumberAnimation { target: field; property: "x"; to: 6; duration: Tokens.durFast }
-                                    NumberAnimation { target: field; property: "x"; to: 0; duration: 50 }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // ================= Bar =================
-                Item {
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    height: Tokens.barHeight
-
-                    Row {
-                        anchors.left: parent.left
-                        anchors.leftMargin: Tokens.spaceLg
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: Tokens.spaceSm
-
-                        Image {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 13
-                            height: 13
-                            sourceSize: Qt.size(26, 26)
-                            opacity: 0.7
-                            source: Quickshell.iconPath("system-lock-screen-symbolic", "changes-prevent-symbolic")
-                        }
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: "Locked"
-                            color: Tokens.textSecondary
-                            font.family: Tokens.fontFamily
-                            font.pixelSize: Tokens.fontBody
-                        }
-                    }
-
-                    Row {
-                        anchors.right: parent.right
-                        anchors.rightMargin: Tokens.spaceLg
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: 14
-
-                        // Battery, same drawing as the bar
-                        Row {
-                            visible: UPower.displayDevice?.isLaptopBattery ?? false
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 1
-
-                            Rectangle {
-                                width: 24
-                                height: 11
-                                radius: 3
-                                color: "transparent"
-                                border.width: 1.5
-                                border.color: Tokens.textPrimary
-
-                                Rectangle {
-                                    x: 2.5
-                                    y: 2.5
-                                    height: parent.height - 5
-                                    width: (parent.width - 5) * (UPower.displayDevice?.percentage ?? 0)
-                                    radius: 1
-                                    color: !UPower.onBattery ? Tokens.green
-                                        : PowerProfiles.profile === PowerProfile.PowerSaver ? Tokens.orange
-                                        : (UPower.displayDevice?.percentage ?? 1) < 0.2 ? Tokens.red : Tokens.textPrimary
-                                }
-                            }
-                            Rectangle {
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: 2
                                 height: 4
-                                radius: 1
-                                color: Tokens.textPrimary
+                                radius: 2
+                                color: Qt.rgba(1, 1, 1, 0.12)
+                                Rectangle {
+                                    height: parent.height
+                                    radius: 2
+                                    color: Tokens.accent
+                                    width: (root.player?.length ?? 0) > 0
+                                        ? parent.width * Math.min(1, root.player.position / root.player.length) : 0
+                                }
+                                // Mpris does not push position updates
+                                Timer {
+                                    interval: 1000
+                                    repeat: true
+                                    running: root.locked && (root.player?.isPlaying ?? false)
+                                    onTriggered: root.player.positionChanged()
+                                }
+                            }
+                            Row {
+                                visible: root.hasMusic
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                spacing: 18
+                                IconBtn { anchors.verticalCenter: parent.verticalCenter; d: root.icons.prev; size: 38; onClicked: root.player.previous() }
+                                IconBtn {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    filled: true
+                                    d: (root.player?.isPlaying ?? false) ? root.icons.pause : root.icons.play
+                                    onClicked: root.player.togglePlaying()
+                                }
+                                IconBtn { anchors.verticalCenter: parent.verticalCenter; d: root.icons.next; size: 38; onClicked: root.player.next() }
                             }
                         }
-
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: Qt.formatTime(surface.now, "HH:mm")
-                            color: Tokens.textPrimary
-                            font.family: Tokens.fontFamily
-                            font.pixelSize: Tokens.fontBody
-                        }
-                    }
-                }
-
-                // ================= Notch with face =================
-                Item {
-                    id: notch
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-                    width: 190 + 28
-                    height: 58
-
-                    // Fillets where the notch meets the bar
-                    Canvas {
-                        x: 0
-                        y: Tokens.barHeight
-                        width: 14
-                        height: 14
-                        onPaint: {
-                            const c = getContext("2d")
-                            c.fillStyle = "#000"
-                            c.fillRect(0, 0, 14, 14)
-                            c.globalCompositeOperation = "destination-out"
-                            c.beginPath(); c.arc(0, 14, 14, 0, Math.PI * 2); c.fill()
-                        }
-                    }
-                    Canvas {
-                        x: parent.width - 14
-                        y: Tokens.barHeight
-                        width: 14
-                        height: 14
-                        onPaint: {
-                            const c = getContext("2d")
-                            c.fillStyle = "#000"
-                            c.fillRect(0, 0, 14, 14)
-                            c.globalCompositeOperation = "destination-out"
-                            c.beginPath(); c.arc(14, 14, 14, 0, Math.PI * 2); c.fill()
-                        }
                     }
 
-                    Rectangle {
-                        x: 14
-                        y: -20
-                        width: 190
-                        height: 78
-                        radius: Tokens.radiusXl
-                        color: "#000000"
-                    }
+                    // Next class
+                    Card {
+                        id: classCard
+                        width: parent.width
+                        height: Math.max(150, rightCol.height - y)
+                        readonly property var next: TimetableService.upcoming[0] ?? null
+                        readonly property var later: TimetableService.upcoming.slice(1, 3)
+                        Column {
+                            x: 18
+                            y: 18
+                            width: parent.width - 36
+                            spacing: 12
 
-                    // Eyes: asleep (lines), awake (open), wrong password (frown, red)
-                    Row {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.verticalCenterOffset: 4
-                        spacing: 18
+                            Label {
+                                text: "NEXT CLASS"
+                                color: Tokens.textSecondary
+                                font.pixelSize: 12
+                                font.weight: Font.DemiBold
+                                font.letterSpacing: 0.8
+                            }
 
-                        Repeater {
-                            model: 2
-                            delegate: Rectangle {
-                                required property int index
-                                readonly property bool open: surface.awake && !root.failed
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: open ? 9 : 12
-                                height: open ? 13 : (root.failed ? 4 : 3)
-                                radius: open ? 5 : 2
-                                color: root.failed ? "#ff8a83" : Tokens.textPrimary
-                                rotation: root.failed ? (index === 0 ? 18 : -18) : 0
-                                Behavior on width { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
-                                Behavior on height { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
-                                Behavior on rotation { NumberAnimation { duration: Tokens.durFast } }
-                                Behavior on color { ColorAnimation { duration: Tokens.durFast } }
+                            Rectangle {
+                                visible: classCard.next !== null
+                                width: parent.width
+                                height: classCol.implicitHeight + 28
+                                radius: 16
+                                color: root.soft(Tokens.accent, 0.12)
+                                border.width: 1
+                                border.color: root.soft(Tokens.accent, 0.4)
+                                Column {
+                                    id: classCol
+                                    x: 14
+                                    y: 14
+                                    width: parent.width - 28
+                                    spacing: 3
+                                    readonly property var e: classCard.next
+                                    Item {
+                                        width: parent.width
+                                        height: 24
+                                        Label {
+                                            id: classCode
+                                            text: classCol.e ? TimetableService.shortTitle(classCol.e) : ""
+                                            font.pixelSize: 18
+                                            font.weight: Font.DemiBold
+                                        }
+                                        Label {
+                                            anchors.right: parent.right
+                                            anchors.baseline: classCode.baseline
+                                            text: classCol.e ? TimetableService.whenText(classCol.e) : ""
+                                            color: Tokens.accent
+                                            font.weight: Font.DemiBold
+                                        }
+                                    }
+                                    Label {
+                                        width: parent.width
+                                        elide: Text.ElideRight
+                                        text: classCol.e ? (classCol.e.title || "").replace(TimetableService.shortTitle(classCol.e), "").trim() : ""
+                                        color: "#c7c7cc"
+                                    }
+                                    Label {
+                                        width: parent.width
+                                        elide: Text.ElideRight
+                                        text: classCol.e
+                                            ? Qt.formatDate(classCol.e.start, "ddd") + " " + TimetableService.timeText(classCol.e.start)
+                                              + (classCol.e.end ? " – " + TimetableService.timeText(classCol.e.end) : "")
+                                              + (classCol.e.location ? "  ·  " + classCol.e.location : "")
+                                            : ""
+                                        color: Tokens.textSecondary
+                                        font.pixelSize: 12
+                                    }
+                                }
+                            }
+
+                            Repeater {
+                                model: classCard.later
+                                delegate: Item {
+                                    required property var modelData
+                                    width: parent.width
+                                    height: 18
+                                    Label {
+                                        x: 4
+                                        text: TimetableService.shortTitle(parent.modelData)
+                                        color: "#c7c7cc"
+                                    }
+                                    Label {
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: 4
+                                        text: TimetableService.whenText(parent.modelData)
+                                        color: Tokens.textSecondary
+                                    }
+                                }
+                            }
+
+                            Label {
+                                visible: classCard.next === null
+                                width: parent.width
+                                wrapMode: Text.WordWrap
+                                text: TimetableService.enabled ? "No more classes coming up"
+                                    : "Add your timetable link in Settings > Notch to see your next class here"
+                                color: Tokens.textSecondary
                             }
                         }
                     }
