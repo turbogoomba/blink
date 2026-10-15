@@ -22,6 +22,8 @@ Singleton {
     property bool detailed: false
     // The side bar shows GPU usage too, so it keeps the extra stats running
     property bool barStats: false
+    // Pages that show the extra stats (Settings > About) count themselves in here
+    property int statsUsers: 0
     property real gpu: -1          // 0 til 1, -1 = unknown
     property real cpuTemp: -1      // °C
     property real gpuTemp: -1      // °C
@@ -93,7 +95,7 @@ Singleton {
                 parse(stat, mem)
             }
         }
-        if ((detailed || barStats) && !details.running) details.running = true
+        if ((detailed || barStats || statsUsers > 0) && !details.running) details.running = true
     }
 
     Process {

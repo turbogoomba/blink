@@ -26,7 +26,8 @@ FloatingWindow {
         corner:  "M5 3l14 7-6 2-2 6z",
         notch:   "M3 6h18v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4zM9 11v1M15 11v1",
         windows: "M3 5h8v14H3zM13 5h8v6h-8zM13 13h8v6h-8z",
-        search:  "M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14M20 20l-4-4"
+        search:  "M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14M20 20l-4-4",
+        info:    "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 11v5M12 8h.01"
     })
 
     // All pages, in sidebar order. `group` starts a new heading. ready = false shows "Coming soon".
@@ -38,7 +39,8 @@ FloatingWindow {
         { id: "notifications", group: "",            label: "Notifications", glyph: "bell",    sub: "How and where notifications show up",          source: "panels/ShellPanel.qml",     ready: true, page: "notifications" },
         { id: "corners",       group: "Desktop",     label: "Hot Corners",   glyph: "corner",  sub: "Actions in the corners of the screen",         source: "panels/ShellPanel.qml",     ready: true, page: "corners" },
         { id: "notch",         group: "",            label: "Notch",         glyph: "notch",   sub: "What the notch shows",                         source: "panels/ShellPanel.qml",     ready: true, page: "notch" },
-        { id: "hyprland",      group: "System",      label: "Windows",       glyph: "windows", sub: "How Hyprland places, spaces and animates windows", source: "panels/HyprlandPanel.qml",  ready: true }
+        { id: "hyprland",      group: "System",      label: "Windows",       glyph: "windows", sub: "How Hyprland places, spaces and animates windows", source: "panels/HyprlandPanel.qml",  ready: true },
+        { id: "about",         group: "",            label: "About",         glyph: "info",    sub: "This computer, and how hard it is working",   source: "panels/AboutPanel.qml",     ready: true }
     ]
     readonly property var current: panels.find(p => p.id === activePanel)
     function panelLabel(id) { return (panels.find(p => p.id === id) ?? { label: "" }).label }
@@ -46,6 +48,7 @@ FloatingWindow {
     // Search entries for the pages that are not built from HyprSettingsService.
     // Keep these in step with the titles on those pages.
     readonly property var shellIndex: [
+        { panel: "about", label: "About this computer", desc: "Processor, graphics, memory, storage and live usage", keys: "system info specs cpu gpu ram memory disk kernel version uptime hardware" },
         { panel: "wifi", label: "Wi-Fi", desc: "Turn Wi-Fi on or off and join a network", keys: "wireless internet network password eduroam username login school work" },
         { panel: "bluetooth", label: "Bluetooth", desc: "Turn Bluetooth on or off and pair devices", keys: "headphones devices pair" },
         { panel: "sound", label: "Output", desc: "Choose speakers or headphones and set the volume", keys: "volume audio speakers headphones" },
