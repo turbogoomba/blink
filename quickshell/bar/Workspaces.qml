@@ -22,9 +22,9 @@ Rectangle {
     // Most icons shown in the active pill before it shows "+N"
     property int maxIcons: 4
 
-    readonly property int slot: 20      // one workspace
-    readonly property int iconStep: 17  // each extra icon in the active pill
-    readonly property int gap: 6
+    readonly property int slot: 26      // one workspace (bar is Tokens.barHeight tall)
+    readonly property int iconStep: 21  // each extra icon in the active pill
+    readonly property int gap: 5
     readonly property int pad: 2
 
     // ---------- Data ----------
@@ -171,7 +171,7 @@ Rectangle {
         id: g
         property string d: ""
         property color tint: Tokens.accent
-        property real size: 12
+        property real size: 15
         width: size
         height: size
 
@@ -234,9 +234,9 @@ Rectangle {
             Rectangle {
                 visible: ws.wins.length === 0
                 anchors.centerIn: parent
-                width: 4
-                height: 4
-                radius: 2
+                width: 5
+                height: 5
+                radius: 2.5
                 color: ws.active ? Tokens.onAccent : Tokens.textSecondary
                 opacity: ws.active ? 1 : 0.6
             }
@@ -255,7 +255,7 @@ Rectangle {
                 anchors.centerIn: parent
                 rows: root.vertical ? -1 : 1
                 columns: root.vertical ? 1 : -1
-                spacing: root.iconStep - 12
+                spacing: root.iconStep - 15
                 opacity: visible ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: Tokens.durNormal } }
 
@@ -270,14 +270,14 @@ Rectangle {
 
                 Text {
                     visible: ws.wins.length > root.maxIcons
-                    width: 12
-                    height: 12
+                    width: 15
+                    height: 15
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                     text: "+" + (ws.wins.length - root.maxIcons)
                     color: Tokens.onAccent
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 9
+                    font.pixelSize: 11
                     font.weight: Font.Bold
                 }
             }
@@ -288,9 +288,9 @@ Rectangle {
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 anchors.margins: -2
-                width: 10
-                height: 10
-                radius: 5
+                width: 12
+                height: 12
+                radius: 6
                 color: Tokens.textPrimary
                 border.color: Tokens.barBg
                 border.width: 1
@@ -299,7 +299,7 @@ Rectangle {
                     text: ws.wins.length > 9 ? "+" : ws.wins.length
                     color: Tokens.barBg
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 7
+                    font.pixelSize: 8
                     font.weight: Font.Bold
                 }
             }
@@ -310,9 +310,9 @@ Rectangle {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.margins: 0
-                width: 7
-                height: 7
-                radius: 3.5
+                width: 8
+                height: 8
+                radius: 4
                 color: Tokens.orange
                 border.color: Tokens.barBg
                 border.width: 1

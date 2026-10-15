@@ -7,7 +7,10 @@ import Quickshell
 // so radii, spacing, fonts and motion stay the same everywhere.
 Singleton {
 	// ---------- Colors ----------
-	readonly property int barHeight: 28
+	readonly property int barHeight: 34
+	// Text and icons in the top bar
+	readonly property int barFont: 14
+	readonly property int barIcon: 18
 	readonly property color barBg: "#000000"
 	readonly property color bg: "#1c1c1e"
 	readonly property color surface: "#2c2c2e"

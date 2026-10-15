@@ -90,9 +90,9 @@ PanelWindow {
 
             Image {
                 anchors.verticalCenter: parent.verticalCenter
-                width: 15
-                height: 15
-                sourceSize: Qt.size(30, 30)
+                width: Tokens.barIcon
+                height: Tokens.barIcon
+                sourceSize: Qt.size(Tokens.barIcon * 2, Tokens.barIcon * 2)
                 source: bi.iconSource
                 opacity: biMouse.containsMouse ? 1 : 0.85
             }
@@ -101,7 +101,7 @@ PanelWindow {
                 text: bi.text
                 color: bi.textColor
                 font.family: Tokens.fontFamily
-                font.pixelSize: Tokens.fontBody
+                font.pixelSize: Tokens.barFont
                 font.weight: Font.Medium
                 font.features: { "tnum": 1 }
             }
@@ -133,7 +133,7 @@ PanelWindow {
             : value > 0.7 ? Tokens.orange : baseColor
 
         implicitWidth: rsRow.implicitWidth
-        implicitHeight: 16
+        implicitHeight: 18
 
         Row {
             id: rsRow
@@ -143,8 +143,8 @@ PanelWindow {
             Canvas {
                 id: ring
                 anchors.verticalCenter: parent.verticalCenter
-                width: 15
-                height: 15
+                width: 18
+                height: 18
 
                 property real v: rs.shown
                 property color c: rs.ringColor
@@ -275,7 +275,7 @@ PanelWindow {
                 text: ToplevelManager.activeToplevel?.title ?? ""
                 color: Tokens.textPrimary
                 font.family: Tokens.fontFamily
-                font.pixelSize: Tokens.fontBody
+                font.pixelSize: Tokens.barFont
                 font.weight: Font.Bold
                 elide: Text.ElideRight
             }
@@ -343,9 +343,9 @@ PanelWindow {
 
                 Image {
                     anchors.centerIn: parent
-                    width: 16
-                    height: 16
-                    sourceSize: Qt.size(32, 32)
+                    width: Tokens.barIcon
+                    height: Tokens.barIcon
+                    sourceSize: Qt.size(Tokens.barIcon * 2, Tokens.barIcon * 2)
                     opacity: ShellState.soundOpen || soundMouse.containsMouse ? 1 : 0.85
                     source: Quickshell.iconPath(
                           soundItem.muted || soundItem.vol === 0 ? "audio-volume-muted-symbolic"
@@ -392,6 +392,7 @@ PanelWindow {
                         anchors.verticalCenter: parent.verticalCenter
                         width: 15
                         height: 12
+                        scale: 1.2
                         opacity: ShellState.controlCenterOpen ? 1 : 0.85
 
                         Repeater {
@@ -428,7 +429,7 @@ PanelWindow {
                             text: Math.round(bar.batteryLevel * 100) + "%"
                             color: Tokens.textPrimary
                             font.family: Tokens.fontFamily
-                            font.pixelSize: Tokens.fontBody
+                            font.pixelSize: Tokens.barFont
                             font.weight: Font.Medium
                         }
 
@@ -436,6 +437,7 @@ PanelWindow {
                         Item {
                             id: batIcon
                             anchors.verticalCenter: parent.verticalCenter
+                            scale: 1.15
                             width: 24
                             height: 11
 
@@ -514,7 +516,7 @@ PanelWindow {
                         text: Qt.formatDateTime(clock.date, "ddd d. MMM  HH:mm")
                         color: Tokens.textPrimary
                         font.family: Tokens.fontFamily
-                        font.pixelSize: Tokens.fontBody
+                        font.pixelSize: Tokens.barFont
                         font.weight: Font.Medium
                     }
                 }
