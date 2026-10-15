@@ -25,8 +25,7 @@ PanelWindow {
     property int typingUid: -1
     onTypingUidChanged: NotificationService.pausePopups(typingUid >= 0 || sheetHover.hovered)
 
-    // The side bar has no notch, so cards are used there too
-    readonly property bool active: SettingsService.notifStyle === "corner" || SettingsService.sideBar
+    readonly property bool active: SettingsService.notifStyle === "corner"
     readonly property bool onLeft: SettingsService.notifCorner === "left"
     readonly property int frameT: 6
     readonly property int pad: Tokens.spaceMd

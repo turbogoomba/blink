@@ -16,6 +16,8 @@ Singleton {
     property real weatherAnchorX: 0
     property bool soundOpen: false
     property bool powerMenuOpen: false
+    // Bumped by the Blink face in the side bar to open/close the notch panel
+    property int notchToggleTick: 0
     property real soundAnchorX: 0
 
     // Bumped every time a screenshot is taken (the notch face reacts)

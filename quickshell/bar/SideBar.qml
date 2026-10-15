@@ -144,7 +144,7 @@ PanelWindow {
             anchors.horizontalCenter: parent.horizontalCenter
             spacing: 14
 
-            // Blink face (will open the notch panel; for now the Control Center)
+            // Blink face: opens the notch panel
             Rectangle {
                 id: face
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -176,7 +176,7 @@ PanelWindow {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: ShellState.controlCenterOpen = !ShellState.controlCenterOpen
+                    onClicked: ShellState.notchToggleTick++
                 }
             }
 
