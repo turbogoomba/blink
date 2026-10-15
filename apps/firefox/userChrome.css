@@ -222,12 +222,12 @@
 #tabs-newtab-button,
 #new-tab-button {
   opacity: 0.55;
-  transition: opacity 150ms ease, transform 200ms ease !important;
+  transition: opacity 150ms ease !important;
 }
 #tabs-newtab-button:hover,
 #new-tab-button:hover {
   opacity: 1;
-  transform: rotate(90deg);
+  fill: var(--mr-accent) !important;
 }
 
 /* When you close tabs Firefox keeps an empty space so the next close button
@@ -255,9 +255,6 @@
 #forward-button:hover,
 #reload-button:hover {
   fill: var(--mr-accent) !important;
-}
-#reload-button:hover .toolbarbutton-icon {
-  transform: rotate(-30deg);
 }
 
 /* ---------- Address bar: clean until you need it ---------- */
