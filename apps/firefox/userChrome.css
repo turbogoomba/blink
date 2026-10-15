@@ -131,14 +131,17 @@
   padding-inline: 8px !important;
   padding-block: 4px 2px !important;
 }
-#tabbrowser-tabs {
+#tabbrowser-tabs,
+#tabbrowser-tabs[orient="horizontal"] {
   --tab-min-height: 36px !important;
   --tab-min-width: 120px !important;
+  /* Wider tabs through Firefox's own variable: a fixed max-width on the tabs
+     would stop the closing animation, and the closed tab stays as a gap */
+  --tab-max-width: 260px !important;
   border-inline-start: none !important;
 }
 .tabbrowser-tab {
   padding-inline: 3px !important;
-  max-width: 260px !important;
 }
 .tab-content {
   padding-inline: 12px 8px !important;
@@ -230,16 +233,11 @@
   fill: var(--mr-accent) !important;
 }
 
-/* When you close tabs Firefox keeps an empty space so the next close button
-   stays under the mouse. Drop it: the tabs and the + slide back right away */
+/* When you close tabs Firefox can keep an empty space so the next close
+   button stays under the mouse. Drop it */
 .closing-tabs-spacer {
   display: none !important;
   width: 0 !important;
-}
-.tabbrowser-tab[closing] {
-  max-width: 0 !important;
-  min-width: 0 !important;
-  padding: 0 !important;
 }
 
 /* Toolbar buttons: a small lift and accent on hover */
