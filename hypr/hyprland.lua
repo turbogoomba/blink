@@ -63,7 +63,8 @@ hl.window_rule({ match = { class = "steam_app_.*" }, fullscreen = true })
 -- Blink Settings (a Quickshell window) always floats, centered
 hl.window_rule({
     name = "blink-settings-float",
-    match = { class = "^(org.quickshell)$", title = "^(Settings)$" },
+    -- The class depends on the Quickshell build (org.quickshell, dev.noctalia.noctalia-qs ...)
+    match = { class = ".*(quickshell|noctalia-qs).*", title = "^(Settings)$" },
     float = true,
     center = true,
     size = { 1040, 700 },
