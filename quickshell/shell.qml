@@ -43,6 +43,12 @@ ShellRoot {
     }
 
 
+    // The notch panel, opened from the face in the side bar
+    LazyLoader {
+        active: SettingsService.sideBar
+        BarUI.NotchPanel {}
+    }
+
     // Ramme rundt skjermen
     BarUI.Frame {}
     BarUI.BootOverlay {}

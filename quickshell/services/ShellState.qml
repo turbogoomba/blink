@@ -16,6 +16,8 @@ Singleton {
     property real weatherAnchorX: 0
     property bool soundOpen: false
     property bool powerMenuOpen: false
+    // Bumped by the Blink face in the side bar to open/close the notch panel
+    property int notchToggleTick: 0
     // Where the power menu comes from: "right" (frame, hot corner) or "left" (side bar button)
     property string powerMenuFrom: "right"
     property real soundAnchorX: 0
