@@ -22,6 +22,8 @@ PanelWindow {
     WlrLayershell.keyboardFocus: open ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     readonly property bool open: ShellState.soundOpen
+    // With the side bar the sheet slides out of the bar next to the button
+    readonly property bool side: SettingsService.sideBar
     property real reveal: open ? 1 : 0
     Behavior on reveal {
         id: openBehavior   // targetValue = where it is going, read before the animation starts
@@ -91,10 +93,14 @@ PanelWindow {
 
     // ---------- Pieces ----------
     component Fillet: Canvas {
-        property bool mirrored: false
-        y: SettingsService.topInset
+        // Centre of the round hole (top bar: under the bar; side bar: above/below the sheet)
+        property real cx: 0
+        property real cy: 14
+        onCxChanged: requestPaint()
+        onCyChanged: requestPaint()
         width: 14
         height: 14
+        visible: sheet.width > 1 && sheet.height > 1
         opacity: Math.min(1, snd.reveal * 4)
         onPaint: {
             const c = getContext("2d")
@@ -103,12 +109,22 @@ PanelWindow {
             c.fillRect(0, 0, 14, 14)
             c.globalCompositeOperation = "destination-out"
             c.beginPath()
-            c.arc(mirrored ? 14 : 0, 14, 14, 0, Math.PI * 2)
+            c.arc(cx, cy, 14, 0, Math.PI * 2)
             c.fill()
         }
     }
-    Fillet { x: sheet.x - 14 }
-    Fillet { x: sheet.x + sheet.width; mirrored: true }
+    // Top bar: left and right of the sheet, under the bar.
+    // Side bar: above and below the sheet, next to the bar.
+    Fillet {
+        x: snd.side ? SettingsService.sideWidth : sheet.x - 14
+        y: snd.side ? sheet.y - 14 : SettingsService.topInset
+        cx: snd.side ? 14 : 0; cy: snd.side ? 0 : 14
+    }
+    Fillet {
+        x: snd.side ? SettingsService.sideWidth : sheet.x + sheet.width
+        y: snd.side ? sheet.y + sheet.height : SettingsService.topInset
+        cx: 14; cy: 14
+    }
 
     // Icon (click = mute) + slider + percent
     component VolumeRow: Item {
@@ -232,19 +248,26 @@ PanelWindow {
     // ---------- Sheet ----------
     Item {
         id: sheet
-        width: 320
-        x: Math.max(6, Math.min(snd.width - width - 6, ShellState.soundAnchorX - width / 2))
-        y: SettingsService.topInset
+        readonly property real fullWidth: 320
         readonly property real fullHeight: body.implicitHeight + 28
-        height: fullHeight * Math.max(0, snd.reveal)
+        // Top bar: grows down under its button. Side bar: slides out to the right next to its button.
+        width: snd.side ? fullWidth * Math.max(0, snd.reveal) : fullWidth
+        height: snd.side ? fullHeight : fullHeight * Math.max(0, snd.reveal)
+        x: snd.side ? SettingsService.sideWidth
+            : Math.max(6, Math.min(snd.width - width - 6, ShellState.soundAnchorX - width / 2))
+        y: snd.side
+            ? Math.max(Tokens.frameT + 14, Math.min(snd.height - Tokens.frameT - 14 - fullHeight, ShellState.soundAnchorY - fullHeight / 2))
+            : SettingsService.topInset
         clip: true
         focus: true
         Keys.onEscapePressed: snd.close()
 
+        // Square where it joins the bar, round at the free corners
         Rectangle {
-            y: -20
-            width: parent.width
-            height: parent.height + 20
+            x: snd.side ? -20 : 0
+            y: snd.side ? 0 : -20
+            width: parent.width + (snd.side ? 20 : 0)
+            height: parent.height + (snd.side ? 0 : 20)
             radius: Tokens.radiusXl
             color: Tokens.barBg
         }
@@ -253,9 +276,10 @@ PanelWindow {
 
         Column {
             id: body
-            x: 16
+            // Slides in with the leading edge when it comes out of the side bar
+            x: snd.side ? sheet.width - sheet.fullWidth + 16 : 16
             y: 14
-            width: parent.width - 32
+            width: sheet.fullWidth - 32
             spacing: 10
             opacity: Math.max(0, Math.min(1, (snd.reveal - 0.3) / 0.5))
 

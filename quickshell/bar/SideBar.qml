@@ -81,6 +81,7 @@ PanelWindow {
         property real size: 18
         property string tip: ""
         signal clicked()
+        signal rightClicked()
         signal wheel(int delta)
 
         width: side.w
@@ -110,7 +111,8 @@ PanelWindow {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: ib.clicked()
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked: mouse => mouse.button === Qt.RightButton ? ib.rightClicked() : ib.clicked()
             onWheel: wheel => ib.wheel(wheel.angleDelta.y)
         }
     }
@@ -227,11 +229,69 @@ PanelWindow {
                 }
             }
 
-            // Sound: click to mute, scroll to change the volume
+            // Weather: icon over the temperature, click for the forecast
+            Item {
+                id: weatherBtn
+                visible: WeatherService.ready
+                width: parent.width
+                height: weatherCol.implicitHeight + 8
+                scale: weatherMouse.pressed ? Tokens.pressScale : 1
+                Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
+
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 38
+                    height: parent.height
+                    radius: Tokens.radiusMd
+                    color: Tokens.fillHover
+                    opacity: weatherMouse.containsMouse || ShellState.weatherOpen ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
+                }
+
+                Column {
+                    id: weatherCol
+                    anchors.centerIn: parent
+                    spacing: 2
+                    Image {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: Tokens.barIcon
+                        height: Tokens.barIcon
+                        sourceSize: Qt.size(Tokens.barIcon * 2, Tokens.barIcon * 2)
+                        source: Quickshell.iconPath(WeatherService.icon, "weather-overcast")
+                    }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: Math.round(WeatherService.temperature) + "°"
+                        color: Tokens.textPrimary
+                        font.family: Tokens.fontFamily
+                        font.pixelSize: Tokens.fontSmall
+                        font.weight: Font.Medium
+                    }
+                }
+
+                MouseArea {
+                    id: weatherMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        ShellState.weatherAnchorY = weatherBtn.mapToItem(null, 0, weatherBtn.height / 2).y
+                        ShellState.weatherOpen = !ShellState.weatherOpen
+                    }
+                }
+            }
+
+            // Sound: click for the sound menu, right-click to mute, scroll to change the volume
             IconButton {
+                id: soundBtn
                 d: (side.audio?.muted ?? false) ? side.icons.muted : side.icons.volume
-                tint: (side.audio?.muted ?? false) ? Tokens.textSecondary : Tokens.textPrimary
-                onClicked: if (side.audio) side.audio.muted = !side.audio.muted
+                tint: ShellState.soundOpen ? Tokens.accent
+                    : (side.audio?.muted ?? false) ? Tokens.textSecondary : Tokens.textPrimary
+                onClicked: {
+                    ShellState.soundAnchorY = soundBtn.mapToItem(null, 0, soundBtn.height / 2).y
+                    ShellState.soundOpen = !ShellState.soundOpen
+                }
+                onRightClicked: if (side.audio) side.audio.muted = !side.audio.muted
                 onWheel: delta => {
                     if (!side.audio) return
                     side.audio.volume = Math.max(0, Math.min(1, side.audio.volume + (delta > 0 ? 0.05 : -0.05)))

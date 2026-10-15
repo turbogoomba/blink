@@ -95,10 +95,14 @@ PanelWindow {
             if (ShellState.powerMenuOpen) {
                 ShellState.controlCenterOpen = false
                 ShellState.calendarOpen = false
+                ShellState.soundOpen = false
+                ShellState.weatherOpen = false
             }
         }
         function onControlCenterOpenChanged() { if (ShellState.controlCenterOpen) ShellState.powerMenuOpen = false }
         function onCalendarOpenChanged() { if (ShellState.calendarOpen) ShellState.powerMenuOpen = false }
+        function onSoundOpenChanged() { if (ShellState.soundOpen) ShellState.powerMenuOpen = false }
+        function onWeatherOpenChanged() { if (ShellState.weatherOpen) ShellState.powerMenuOpen = false }
     }
 
     IpcHandler {
