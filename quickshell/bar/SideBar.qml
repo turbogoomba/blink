@@ -144,7 +144,7 @@ PanelWindow {
             anchors.horizontalCenter: parent.horizontalCenter
             spacing: 14
 
-            // Blink face: opens the notch panel
+            // Blink face: opens the launcher (from the bottom)
             Rectangle {
                 id: face
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -176,7 +176,7 @@ PanelWindow {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: ShellState.notchToggleTick++
+                    onClicked: ShellState.launcherOpen = !ShellState.launcherOpen
                 }
             }
 

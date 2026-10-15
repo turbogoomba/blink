@@ -379,7 +379,10 @@ Flickable {
                     Segments {
                         options: [{ value: "top", label: "Top" }, { value: "left", label: "Left" }]
                         current: SettingsService.barPosition
-                        apply: function(v) { SettingsService.barPosition = v }
+                        apply: function(v) {
+                            SettingsService.barPosition = v
+                            SettingsService.dockEnabled = v !== "left"
+                        }
                     }
                 }
             }
@@ -480,6 +483,14 @@ Flickable {
 
             SectionTitle { text: "Dock" }
             Group {
+                SettingRow {
+                    title: "Show the dock"
+                    subtitle: "Off by default with the side bar, where the launcher comes up from the bottom"
+                    Toggle {
+                        checked: SettingsService.dockEnabled
+                        apply: function(v) { SettingsService.dockEnabled = v }
+                    }
+                }
                 SettingRow {
                     title: "Side drawer"
                     subtitle: "Graphs, favorite apps and folders on the edge opposite the dock"

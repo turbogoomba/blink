@@ -31,6 +31,8 @@ PanelWindow {
     visible: ShellState.launcherOpen || reveal > 0.01
 
     property int selected: 0
+    // With the side bar it grows up out of the bottom edge instead of down out of the notch
+    readonly property bool fromBottom: SettingsService.sideBar
 
     // Søkeresultater: navn som starter med søket først
     readonly property var results: {
@@ -129,7 +131,9 @@ PanelWindow {
     // Concave corners where the sheet meets the bar
     component Fillet: Canvas {
         property bool mirrored: false
-        y: SettingsService.topInset
+        onMirroredChanged: requestPaint()
+        onYChanged: requestPaint()
+        y: launcher.fromBottom ? launcher.height - Tokens.frameT - 14 : SettingsService.topInset
         width: 14
         height: 14
         opacity: Math.min(1, launcher.reveal * 4)
@@ -140,7 +144,7 @@ PanelWindow {
             c.fillRect(0, 0, 14, 14)
             c.globalCompositeOperation = "destination-out"
             c.beginPath()
-            c.arc(mirrored ? 14 : 0, 14, 14, 0, Math.PI * 2)
+            c.arc(mirrored ? 14 : 0, launcher.fromBottom ? 0 : 14, 14, 0, Math.PI * 2)
             c.fill()
         }
     }
@@ -150,22 +154,22 @@ PanelWindow {
     // The sheet: starts as the notch and grows down out of it
     Item {
         id: box
-        readonly property real topPad: SettingsService.topInset + 6
+        readonly property real topPad: launcher.fromBottom ? 12 : SettingsService.topInset + 6
         readonly property real fullW: 640
         readonly property real startW: 200
-        readonly property real startH: SettingsService.topInset + 8
-        property real fullH: topPad + content.implicitHeight + 8
+        readonly property real startH: launcher.fromBottom ? Tokens.frameT : SettingsService.topInset + 8
+        property real fullH: topPad + content.implicitHeight + (launcher.fromBottom ? Tokens.frameT + 8 : 8)
         Behavior on fullH { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
         anchors.horizontalCenter: parent.horizontalCenter
-        y: 0
+        y: launcher.fromBottom ? launcher.height - height : 0
         width: startW + (fullW - startW) * launcher.reveal
         height: startH + (fullH - startH) * Math.max(0, launcher.reveal)
         clip: true
 
-        // Same black as the bar. Top corners hide under the bar, bottom ones are round.
+        // Same black as the bar. The corners against the bar/frame hide, the free ones are round.
         Rectangle {
-            y: -24
+            y: launcher.fromBottom ? 0 : -24
             width: parent.width
             height: parent.height + 24
             radius: Tokens.radiusXl
@@ -181,7 +185,8 @@ PanelWindow {
         Column {
             id: content
             x: (box.width - box.fullW) / 2
-            y: box.topPad
+            // Growing up from the bottom, the content rides on the bottom edge
+            y: launcher.fromBottom ? box.height - box.fullH + box.topPad : box.topPad
             width: box.fullW
             opacity: Math.max(0, Math.min(1, (launcher.reveal - 0.35) / 0.5))
 

@@ -31,6 +31,7 @@ Singleton {
     property alias timetableUrl: adapter.timetableUrl
 
     // Dock
+    property alias dockEnabled: adapter.dockEnabled
     property alias dockSize: adapter.dockSize
     // "bottom", "left" or "right". The drawer goes on the other side.
     property alias drawerEnabled: adapter.drawerEnabled
@@ -123,6 +124,7 @@ Singleton {
             property int cornerDelay: 250
             property string notchRight: "auto"
             property string timetableUrl: ""
+            property bool dockEnabled: true
             property int dockSize: 60
             property bool drawerEnabled: true
             property bool bootAnimation: true

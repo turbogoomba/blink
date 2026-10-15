@@ -68,7 +68,43 @@ Scope {
                 WlrLayershell.namespace: "frame"
             }
 
-            // ---------- Avrundede innerhjørner ----------
+            // ---------- Rounded inner corners, above the windows ----------
+            PanelWindow {
+                id: cornersTop
+                screen: s.modelData
+                anchors { top: true; bottom: true; left: true; right: true }
+                exclusionMode: ExclusionMode.Ignore
+                color: "transparent"
+                mask: Region {}
+                WlrLayershell.namespace: "frame-corners"
+
+                // A black square with a quarter circle cut out
+                component Corner: Canvas {
+                    property real cx: 0
+                    property real cy: 0
+                    width: frame.radius
+                    height: frame.radius
+                    onWidthChanged: requestPaint()
+                    onPaint: {
+                        const c = getContext("2d")
+                        c.reset()
+                        c.fillStyle = frame.color.toString()
+                        c.fillRect(0, 0, width, height)
+                        c.globalCompositeOperation = "destination-out"
+                        c.beginPath()
+                        c.arc(cx, cy, width, 0, 2 * Math.PI)
+                        c.fill()
+                    }
+                    Component.onCompleted: requestPaint()
+                }
+
+                Corner { x: SettingsService.leftInset; y: SettingsService.topInset; cx: width; cy: height }
+                Corner { x: cornersTop.width - frame.thickness - width; y: SettingsService.topInset; cx: 0; cy: height }
+                Corner { x: SettingsService.leftInset; y: cornersTop.height - frame.thickness - height; cx: width; cy: 0 }
+                Corner { x: cornersTop.width - frame.thickness - width; y: cornersTop.height - frame.thickness - height; cx: 0; cy: 0 }
+            }
+
+            // ---------- Shadow along the inner edge (under the windows) ----------
             PanelWindow {
                 id: corners
                 screen: s.modelData
@@ -78,7 +114,7 @@ Scope {
                 mask: Region {}
                 // Under the windows, so the shadow only falls on the wallpaper
                 WlrLayershell.layer: WlrLayer.Bottom
-                WlrLayershell.namespace: "frame-corners"
+                WlrLayershell.namespace: "frame-shadow"
 
                 // The frame's inner edge: a black ring with rounded inner corners,
                 // with a soft shadow falling onto the wallpaper

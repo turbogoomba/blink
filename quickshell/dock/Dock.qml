@@ -26,7 +26,7 @@ PanelWindow {
     implicitHeight: horizontal ? 360 : 0
     implicitWidth: horizontal ? 0 : 360
     color: "transparent"
-    visible: !ShellState.focusMode
+    visible: SettingsService.dockEnabled && !ShellState.focusMode
 
     property int size: SettingsService.dockSize
     property bool revealed: false

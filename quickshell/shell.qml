@@ -41,11 +41,7 @@ ShellRoot {
             screen: modelData
         }
     }
-    // The notch, sliding out of the side bar (one, on the main screen)
-    LazyLoader {
-        active: SettingsService.sideBar
-        BarUI.NotchPanel {}
-    }
+
 
     // Ramme rundt skjermen
     BarUI.Frame {}

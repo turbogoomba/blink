@@ -18,8 +18,6 @@ Singleton {
     property bool powerMenuOpen: false
     // Where the power menu comes from: "right" (frame, hot corner) or "left" (side bar button)
     property string powerMenuFrom: "right"
-    // Bumped by the Blink face in the side bar to open/close the notch panel
-    property int notchToggleTick: 0
     property real soundAnchorX: 0
 
     // Bumped every time a screenshot is taken (the notch face reacts)
