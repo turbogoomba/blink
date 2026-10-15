@@ -24,6 +24,8 @@ PanelWindow {
 
     // ---------- Åpne/lukke ----------
     readonly property bool open: ShellState.controlCenterOpen
+    // With the side bar the sheet grows up out of the bar, bottom left
+    readonly property bool side: SettingsService.sideBar
     property real progress: open ? 1 : 0
     Behavior on progress { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeMove } }
     // Height of the sheet: grows out of the bar with a little bounce
@@ -393,6 +395,10 @@ PanelWindow {
 
     // Concave corners where the sheet meets the bar and the right edge
     component Fillet: Canvas {
+        // Centre of the round hole: (0, 14) under the top bar, (14, 0) next to the side bar
+        property real cx: cc.side ? 14 : 0
+        property real cy: cc.side ? 0 : 14
+        onCxChanged: requestPaint()
         width: 14
         height: 14
         opacity: Math.min(1, cc.reveal * 4)
@@ -403,30 +409,32 @@ PanelWindow {
             c.fillRect(0, 0, 14, 14)
             c.globalCompositeOperation = "destination-out"
             c.beginPath()
-            c.arc(0, 14, 14, 0, Math.PI * 2)
+            c.arc(cx, cy, 14, 0, Math.PI * 2)
             c.fill()
         }
     }
 
+    // Top bar: left of the sheet under the bar. Side bar: above the sheet, next to the bar.
     Fillet {
         id: filletTop
-        x: panel.x - 14
-        y: panel.y
+        x: cc.side ? panel.x : panel.x - 14
+        y: cc.side ? panel.y - 14 : panel.y
+        visible: panel.height > 1
     }
 
+    // Top bar: under the sheet, at the right edge. Side bar: right of the sheet, on the bottom edge.
     Fillet {
         id: filletSide
-        x: panel.x + panel.width - 14
-        y: panel.y + panel.height
+        x: cc.side ? panel.x + panel.width : panel.x + panel.width - 14
+        y: cc.side ? panel.y + panel.height - 14 : panel.y + panel.height
         visible: panel.height > 1
     }
 
     Item {
         id: panel
-        anchors.top: parent.top
-        anchors.right: parent.right
-        anchors.topMargin: SettingsService.topInset
-        anchors.rightMargin: 6   // the frame: the sheet must sit flush against it
+        // Flush against the frame/bar it grows out of
+        x: cc.side ? SettingsService.sideWidth : cc.width - Tokens.frameT - width
+        y: cc.side ? cc.height - Tokens.frameT - height : SettingsService.topInset
         width: 340
         readonly property real fullHeight: content.implicitHeight + 24
         height: fullHeight * Math.max(0, cc.reveal)
@@ -435,10 +443,11 @@ PanelWindow {
         focus: true
         Keys.onEscapePressed: cc.close()
 
-        // Same black as the bar and frame. Only the bottom-left corner is rounded.
+        // Same black as the bar and frame. Only the free corner is rounded
+        // (bottom-left under the top bar, top-right next to the side bar).
         Rectangle {
-            x: 0
-            y: -20
+            x: cc.side ? -20 : 0
+            y: cc.side ? 0 : -20
             width: parent.width + 20
             height: parent.height + 20
             radius: Tokens.radiusXl
@@ -450,7 +459,9 @@ PanelWindow {
 
         ColumnLayout {
             id: content
-            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 12 }
+            anchors { left: parent.left; right: parent.right; margins: 12 }
+            // Growing up from the bottom, the content rides on the bottom edge
+            y: cc.side ? panel.height - panel.fullHeight + 12 : 12
             spacing: Tokens.spaceMd
 
             // ---------- Tilkobling + fliser ----------

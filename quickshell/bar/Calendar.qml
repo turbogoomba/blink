@@ -21,6 +21,8 @@ PanelWindow {
     WlrLayershell.keyboardFocus: open ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     readonly property bool open: ShellState.calendarOpen
+    // With the side bar the sheet grows up out of the bar, bottom left
+    readonly property bool side: SettingsService.sideBar
     property real reveal: open ? 1 : 0
     Behavior on reveal {
         id: openBehavior   // targetValue = where it is going, read before the animation starts
@@ -124,6 +126,9 @@ PanelWindow {
     }
 
     component Fillet: Canvas {
+        property real cx: cal.side ? 14 : 0
+        property real cy: cal.side ? 0 : 14
+        onCxChanged: requestPaint()
         width: 14
         height: 14
         opacity: Math.min(1, cal.reveal * 4)
@@ -134,12 +139,16 @@ PanelWindow {
             c.fillRect(0, 0, 14, 14)
             c.globalCompositeOperation = "destination-out"
             c.beginPath()
-            c.arc(0, 14, 14, 0, Math.PI * 2)
+            c.arc(cx, cy, 14, 0, Math.PI * 2)
             c.fill()
         }
     }
-    Fillet { x: sheet.x - 14; y: sheet.y }
-    Fillet { x: sheet.x + sheet.width - 14; y: sheet.y + sheet.height; visible: sheet.height > 1 }
+    Fillet { x: cal.side ? sheet.x : sheet.x - 14; y: cal.side ? sheet.y - 14 : sheet.y; visible: sheet.height > 1 }
+    Fillet {
+        x: cal.side ? sheet.x + sheet.width : sheet.x + sheet.width - 14
+        y: cal.side ? sheet.y + sheet.height - 14 : sheet.y + sheet.height
+        visible: sheet.height > 1
+    }
 
     component NavButton: Rectangle {
         id: nb
@@ -169,10 +178,9 @@ PanelWindow {
 
     Item {
         id: sheet
-        anchors.top: parent.top
-        anchors.right: parent.right
-        anchors.topMargin: SettingsService.topInset
-        anchors.rightMargin: 6   // the frame: the sheet must sit flush against it
+        // Flush against the frame/bar it grows out of
+        x: cal.side ? SettingsService.sideWidth : cal.width - Tokens.frameT - width
+        y: cal.side ? cal.height - Tokens.frameT - height : SettingsService.topInset
         width: 300
         readonly property real fullHeight: body.implicitHeight + 28
         height: fullHeight * Math.max(0, cal.reveal)
@@ -183,8 +191,8 @@ PanelWindow {
         Keys.onRightPressed: cal.shiftMonth(1)
 
         Rectangle {
-            x: 0
-            y: -20
+            x: cal.side ? -20 : 0
+            y: cal.side ? 0 : -20
             width: parent.width + 20
             height: parent.height + 20
             radius: Tokens.radiusXl
@@ -196,7 +204,7 @@ PanelWindow {
         Column {
             id: body
             x: 16
-            y: 12
+            y: cal.side ? sheet.height - sheet.fullHeight + 12 : 12
             width: parent.width - 32
             spacing: Tokens.spaceMd
             opacity: Math.max(0, Math.min(1, (cal.reveal - 0.3) / 0.5))

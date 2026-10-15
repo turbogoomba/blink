@@ -25,7 +25,10 @@ Scope {
         else if (action === "wallpaper") callIpc("wallpaper")
         else if (action === "launcher") ShellState.launcherOpen = !ShellState.launcherOpen
         else if (action === "controlcenter") ShellState.controlCenterOpen = !ShellState.controlCenterOpen
-        else if (action === "power") ShellState.powerMenuOpen = !ShellState.powerMenuOpen
+        else if (action === "power") {
+            ShellState.powerMenuFrom = "right"
+            ShellState.powerMenuOpen = !ShellState.powerMenuOpen
+        }
     }
 
     component Corner: PanelWindow {

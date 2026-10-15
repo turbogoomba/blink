@@ -24,6 +24,9 @@ PanelWindow {
     WlrLayershell.namespace: "powermenu"
 
     readonly property bool open: ShellState.powerMenuOpen
+    // Out of the side bar (bottom left) or out of the right edge of the frame (bottom right).
+    // Only changes while closed, so it does not jump during the close animation.
+    property bool fromLeft: false
     readonly property int frameT: ShellState.gameMode ? 0 : Tokens.frameT
     readonly property int sheetW: 340
 
@@ -70,6 +73,7 @@ PanelWindow {
     function iconFile(name) { return Qt.resolvedUrl("../icons/" + name + ".svg") }
 
     onOpenChanged: {
+        if (open) fromLeft = SettingsService.sideBar && ShellState.powerMenuFrom === "left"
         armed = ""
         entered = false
         if (open) IdleService.update()
@@ -82,6 +86,19 @@ PanelWindow {
         id: leaveTimer
         interval: 350
         onTriggered: win.close()
+    }
+
+    // Only one of power menu / control center / calendar at a time
+    Connections {
+        target: ShellState
+        function onPowerMenuOpenChanged() {
+            if (ShellState.powerMenuOpen) {
+                ShellState.controlCenterOpen = false
+                ShellState.calendarOpen = false
+            }
+        }
+        function onControlCenterOpenChanged() { if (ShellState.controlCenterOpen) ShellState.powerMenuOpen = false }
+        function onCalendarOpenChanged() { if (ShellState.calendarOpen) ShellState.powerMenuOpen = false }
     }
 
     IpcHandler {
@@ -271,14 +288,16 @@ PanelWindow {
 
     // Above the sheet, where it meets the right edge of the frame
     Fillet {
-        cx: 0; cy: 0
-        x: win.width - win.frameT - 14
+        cx: win.fromLeft ? 14 : 0; cy: 0
+        onCxChanged: requestPaint()
+        x: win.fromLeft ? SettingsService.sideWidth : win.width - win.frameT - 14
         y: sheet.y - 14
     }
-    // Left of the sheet, where it meets the bottom edge of the frame
+    // Beside the sheet, where it meets the bottom edge of the frame
     Fillet {
-        cx: 0; cy: 0
-        x: sheet.x - 14
+        cx: win.fromLeft ? 14 : 0; cy: 0
+        onCxChanged: requestPaint()
+        x: win.fromLeft ? sheet.x + sheet.width : sheet.x - 14
         y: win.height - win.frameT - 14
     }
 
@@ -295,12 +314,13 @@ PanelWindow {
             shadowVerticalOffset: 2
         }
         height: content.implicitHeight + 2 * 18
-        x: win.width - win.frameT - width
+        x: win.fromLeft ? SettingsService.sideWidth : win.width - win.frameT - width
         y: win.height - win.frameT - height
         clip: true
 
         // Black like the frame, square where it joins it, round at the free corner
         Rectangle {
+            x: win.fromLeft ? -30 : 0
             width: parent.width + 30
             height: parent.height + 30
             radius: 22
@@ -319,10 +339,10 @@ PanelWindow {
             }
         }
 
-        // The content keeps its full width and slides in with the left edge
+        // The content keeps its full width and slides in with the leading edge
         Column {
             id: content
-            x: 20
+            x: win.fromLeft ? sheet.width - win.sheetW + 18 : 20
             y: 18
             width: win.sheetW - 38
             spacing: 14

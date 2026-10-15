@@ -221,7 +221,10 @@ PanelWindow {
                 visible: IdleService.awake
                 d: side.icons.coffee
                 tint: Tokens.accent
-                onClicked: ShellState.powerMenuOpen = !ShellState.powerMenuOpen
+                onClicked: {
+                    ShellState.powerMenuFrom = "left"
+                    ShellState.powerMenuOpen = !ShellState.powerMenuOpen
+                }
             }
 
             // Sound: click to mute, scroll to change the volume
@@ -280,25 +283,51 @@ PanelWindow {
                 }
             }
 
-            // Clock, hours over minutes
-            Column {
-                anchors.horizontalCenter: parent.horizontalCenter
-                topPadding: 6
-                bottomPadding: 4
+            // Clock, hours over minutes (click for the calendar)
+            Item {
+                width: parent.width
+                height: clockCol.implicitHeight
+                scale: clockMouse.pressed ? Tokens.pressScale : 1
+                Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
-                Repeater {
-                    model: [Qt.formatDateTime(clock.date, "HH"), Qt.formatDateTime(clock.date, "mm")]
-                    Text {
-                        required property string modelData
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: modelData
-                        color: Tokens.textPrimary
-                        font.family: Tokens.fontFamily
-                        font.pixelSize: Tokens.barFont + 1
-                        font.weight: Font.DemiBold
-                        font.features: { "tnum": 1 }
-                        lineHeight: 0.95
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 38
+                    height: parent.height
+                    radius: Tokens.radiusMd
+                    color: Tokens.fillHover
+                    opacity: clockMouse.containsMouse || ShellState.calendarOpen ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
+                }
+
+                Column {
+                    id: clockCol
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    topPadding: 6
+                    bottomPadding: 6
+
+                    Repeater {
+                        model: [Qt.formatDateTime(clock.date, "HH"), Qt.formatDateTime(clock.date, "mm")]
+                        Text {
+                            required property string modelData
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: modelData
+                            color: Tokens.textPrimary
+                            font.family: Tokens.fontFamily
+                            font.pixelSize: Tokens.barFont + 1
+                            font.weight: Font.DemiBold
+                            font.features: { "tnum": 1 }
+                            lineHeight: 0.95
+                        }
                     }
+                }
+
+                MouseArea {
+                    id: clockMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: ShellState.calendarOpen = !ShellState.calendarOpen
                 }
             }
 
@@ -328,7 +357,10 @@ PanelWindow {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: ShellState.powerMenuOpen = !ShellState.powerMenuOpen
+                    onClicked: {
+                    ShellState.powerMenuFrom = "left"
+                    ShellState.powerMenuOpen = !ShellState.powerMenuOpen
+                }
                 }
             }
         }
