@@ -42,7 +42,6 @@ PanelWindow {
         if (open) {
             StyleService.refresh()
             NetworkService.refreshStatus()
-            armed = ""
             modesOpen = false
             panel.forceActiveFocus()
         }
@@ -94,30 +93,11 @@ PanelWindow {
         return "audio-volume-high-symbolic"
     }
 
-    // ---------- Strøm ----------
-    property string armed: ""
-
     // The Modes tile unfolds a list (Do Not Disturb, Focus, Game Mode)
     property bool modesOpen: false
-    Timer {
-        id: armTimer
-        interval: 3000
-        onTriggered: cc.armed = ""
-    }
 
     function close() {
         ShellState.controlCenterOpen = false
-    }
-
-    function power(id, cmd, needsConfirm) {
-        if (needsConfirm && armed !== id) {
-            armed = id
-            armTimer.restart()
-            return
-        }
-        armed = ""
-        close()
-        Quickshell.execDetached(cmd)
     }
 
     // ============================================================
@@ -398,72 +378,6 @@ PanelWindow {
             font.family: Tokens.fontFamily
             font.pixelSize: Tokens.fontSmall
             font.features: { "tnum": 1 }
-        }
-    }
-
-    // Strømknapp: gir etter ved trykk, pulserer mens den venter på bekreftelse
-    component PowerButton: Item {
-        id: pb
-        scale: pbMouse.pressed ? Tokens.pressScale : 1
-        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
-        property string powerId: ""
-        property string icon: ""
-        property string label: ""
-        property var command: []
-        property bool confirm: true
-        readonly property bool isArmed: cc.armed === powerId
-
-        Layout.fillWidth: true
-        implicitHeight: 64
-
-        Rectangle {
-            id: pbCircle
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            width: 40
-            height: 40
-            radius: 20
-            color: pb.isArmed ? Tokens.red
-                 : pbMouse.containsMouse ? Tokens.fillStrong
-                 : Tokens.fillHover
-            scale: pbMouse.pressed ? 0.88 : 1
-            Behavior on color { ColorAnimation { duration: Tokens.durFast } }
-            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
-
-            SequentialAnimation {
-                running: pb.isArmed
-                loops: Animation.Infinite
-                NumberAnimation { target: pbCircle; property: "opacity"; to: 0.65; duration: Tokens.durSlow; easing.type: Easing.InOutSine }
-                NumberAnimation { target: pbCircle; property: "opacity"; to: 1; duration: Tokens.durSlow; easing.type: Easing.InOutSine }
-                onRunningChanged: if (!running) pbCircle.opacity = 1
-            }
-
-            Image {
-                anchors.centerIn: parent
-                width: 18
-                height: 18
-                sourceSize: Qt.size(36, 36)
-                source: cc.iconFile(pb.icon)
-            }
-        }
-
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: pbCircle.bottom
-            anchors.topMargin: Tokens.spaceSm
-            text: pb.isArmed ? "Confirm?" : pb.label
-            color: pb.isArmed ? Tokens.textPrimary : Tokens.textSecondary
-            font.family: Tokens.fontFamily
-            font.pixelSize: Tokens.fontSmall
-            font.weight: pb.isArmed ? Font.DemiBold : Font.Normal
-        }
-
-        MouseArea {
-            id: pbMouse
-            cursorShape: Qt.PointingHandCursor
-            anchors.fill: parent
-            hoverEnabled: true
-            onClicked: cc.power(pb.powerId, pb.command, pb.confirm)
         }
     }
 
@@ -1009,47 +923,6 @@ PanelWindow {
                                 onClicked: PowerProfiles.profile = prof.modelData.value
                             }
                         }
-                    }
-                }
-            }
-
-            // ---------- Strøm ----------
-            Card {
-                order: 6
-                Layout.fillWidth: true
-                implicitHeight: 84
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.topMargin: Tokens.spaceMd
-                    anchors.leftMargin: Tokens.spaceSm
-                    anchors.rightMargin: Tokens.spaceSm
-                    spacing: 0
-
-                    PowerButton {
-                        powerId: "sleep"
-                        icon: "sleep"
-                        label: "Sleep"
-                        command: ["systemctl", "suspend"]
-                        confirm: false
-                    }
-                    PowerButton {
-                        powerId: "logout"
-                        icon: "logout"
-                        label: "Log Out"
-                        command: ["hyprctl", "dispatch", "hl.dsp.exit()"]
-                    }
-                    PowerButton {
-                        powerId: "restart"
-                        icon: "restart"
-                        label: "Restart"
-                        command: ["systemctl", "reboot"]
-                    }
-                    PowerButton {
-                        powerId: "shutdown"
-                        icon: "power"
-                        label: "Shut Down"
-                        command: ["systemctl", "poweroff"]
                     }
                 }
             }
