@@ -51,6 +51,15 @@ PanelWindow {
             if (score >= 0) scored.push({ entry: e, score: score })
         }
 
+        // Blink's own things (Settings ...), ranked like apps
+        for (const b of builtins) {
+            const name = b.name.toLowerCase()
+            let score = -1
+            if (name.startsWith(q) || b.keys.some(k => k.startsWith(q))) score = 3
+            else if (name.includes(q) || b.keys.some(k => k.includes(q))) score = 2
+            if (score >= 0) scored.push({ entry: b, score: score })
+        }
+
         // Firefox bookmarks (just below apps with the same kind of match)
         for (const b of BookmarkService.items) {
             const title = b.title.toLowerCase()
@@ -72,6 +81,18 @@ PanelWindow {
         }
         return list
     }
+
+    // Things that are part of Blink itself, shown like apps
+    readonly property var builtins: [
+        {
+            name: "Settings",
+            genericName: "Blink settings",
+            icon: "preferences-system",
+            id: "blink-settings",
+            keys: ["blink", "settings", "preferences", "innstillinger", "wifi", "bluetooth", "sound", "bar", "dock"],
+            execute: () => ShellState.settingsOpen = true
+        }
+    ]
 
     // A website result that looks like an app entry to the rest of the launcher
     function webItem(title, subtitle, url) {

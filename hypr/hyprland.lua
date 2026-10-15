@@ -59,3 +59,12 @@ hl.window_rule({
     size = { "(monitor_w*0.55)", "(monitor_h*0.6)" },
 })
 hl.window_rule({ match = { class = "steam_app_.*" }, fullscreen = true })
+
+-- Blink Settings (a Quickshell window) always floats, centered
+hl.window_rule({
+    name = "blink-settings-float",
+    match = { class = "^(org.quickshell)$", title = "^(Settings)$" },
+    float = true,
+    center = true,
+    size = { 1040, 700 },
+})
