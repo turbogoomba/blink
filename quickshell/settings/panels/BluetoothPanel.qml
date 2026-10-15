@@ -23,8 +23,10 @@ Flickable {
         leftPadding: Theme.Tokens.spaceXs
         color: Theme.Tokens.textSecondary
         font.family: Theme.Tokens.fontFamily
-        font.pixelSize: Theme.Tokens.fontBody
-        font.weight: Font.Medium
+        font.pixelSize: 12
+        font.weight: Font.DemiBold
+        font.capitalization: Font.AllUppercase
+        font.letterSpacing: 0.7
     }
 
     // ---------- Liste over enheter ----------
@@ -35,8 +37,8 @@ Flickable {
 
         width: col.width
         height: dlCol.implicitHeight
-        radius: Theme.Tokens.radiusMd
-        color: Theme.Tokens.fillIdle
+        radius: 16
+        color: "#1e1e21"
         border.color: "transparent"
         border.width: 1
         visible: devices.length > 0
@@ -185,8 +187,8 @@ Flickable {
         Rectangle {
             width: parent.width
             height: 48
-            radius: Theme.Tokens.radiusMd
-            color: Theme.Tokens.fillIdle
+            radius: 16
+            color: "#1e1e21"
             border.color: "transparent"
             border.width: 1
 
@@ -208,18 +210,18 @@ Flickable {
                 anchors.right: parent.right
                 anchors.rightMargin: Theme.Tokens.spaceLg
                 anchors.verticalCenter: parent.verticalCenter
-                width: 38
-                height: 22
-                radius: 11
+                width: 44
+                height: 26
+                radius: 13
                 color: on ? Theme.Tokens.accent : Theme.Tokens.fillStrong
                 Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
 
                 Rectangle {
-                    width: 18
-                    height: 18
-                    radius: 9
-                    y: 2
-                    x: toggle.on ? toggle.width - width - 2 : 2
+                    width: 20
+                    height: 20
+                    radius: 10
+                    y: 3
+                    x: toggle.on ? toggle.width - width - 3 : 3
                     color: "white"
                     Behavior on x { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
                 }

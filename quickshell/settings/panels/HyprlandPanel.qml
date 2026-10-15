@@ -50,18 +50,51 @@ Flickable {
         leftPadding: Theme.Tokens.spaceXs
         color: Theme.Tokens.textSecondary
         font.family: Theme.Tokens.fontFamily
-        font.pixelSize: Theme.Tokens.fontSmall
+        font.pixelSize: 12
         font.weight: Font.DemiBold
         font.capitalization: Font.AllUppercase
-        font.letterSpacing: 0.6
+        font.letterSpacing: 0.7
     }
 
     Column {
         id: col
-        x: Theme.Tokens.spaceXl + 8
-        y: Theme.Tokens.spaceXl + 8
+        x: 32
+        y: 24
         width: panel.width - 2 * x
         spacing: Theme.Tokens.spaceMd
+
+        // Floating or tiling, the big choice first
+        Row {
+            id: modePick
+            width: parent.width
+            spacing: 14
+            readonly property real cardW: (width - spacing) / 2
+            Component.onCompleted: StyleService.refresh()
+
+            PickerCard {
+                width: modePick.cardW
+                previewHeight: 104
+                title: "Floating"
+                subtitle: "Move windows freely, like macOS"
+                selected: StyleService.mode === "floating"
+                onClicked: if (StyleService.mode !== "floating") StyleService.toggle()
+                Rectangle { anchors.fill: parent; color: "#3b3858" }
+                Rectangle { x: parent.width * 0.12; y: 14; width: parent.width * 0.48; height: 58; radius: 7; color: "#1c1c1e"; border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.08) }
+                Rectangle { x: parent.width * 0.4; y: 38; width: parent.width * 0.48; height: 54; radius: 7; color: "#2c2c2e"; border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.1) }
+            }
+            PickerCard {
+                width: modePick.cardW
+                previewHeight: 104
+                title: "Tiling"
+                subtitle: "Windows fill the screen side by side"
+                selected: StyleService.mode !== "floating"
+                onClicked: if (StyleService.mode === "floating") StyleService.toggle()
+                Rectangle { anchors.fill: parent; color: "#3b3858" }
+                Rectangle { x: 8; y: 8; width: (parent.width - 24) * 0.55; height: parent.height - 16; radius: 6; color: "#1c1c1e" }
+                Rectangle { x: 16 + (parent.width - 24) * 0.55; y: 8; width: (parent.width - 24) * 0.45; height: (parent.height - 24) / 2; radius: 6; color: "#2c2c2e" }
+                Rectangle { x: 16 + (parent.width - 24) * 0.55; y: 16 + (parent.height - 24) / 2; width: (parent.width - 24) * 0.45; height: (parent.height - 24) / 2; radius: 6; color: "#2c2c2e" }
+            }
+        }
 
         Column {
             width: parent.width
@@ -94,8 +127,8 @@ Flickable {
                 Rectangle {
                     width: parent.width
                     height: cardCol.implicitHeight
-                    radius: Theme.Tokens.radiusLg
-                    color: Theme.Tokens.fillIdle
+                    radius: 16
+                    color: "#1e1e21"
                     clip: true
 
                     Column {

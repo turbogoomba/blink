@@ -176,19 +176,19 @@ Item {
             visible: row.opt.type === "switch"
             anchors.verticalCenter: parent.verticalCenter
             readonly property bool checked: row.value === true
-            width: 38
-            height: 22
-            radius: 11
+            width: 44
+            height: 26
+            radius: 13
             color: checked ? Theme.Tokens.accent : Theme.Tokens.fillStrong
             Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
             scale: swMouse.pressed ? Theme.Tokens.pressScale : 1
             Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
             Rectangle {
-                width: 18
-                height: 18
-                radius: 9
-                y: 2
-                x: sw.checked ? sw.width - width - 2 : 2
+                width: 20
+                height: 20
+                radius: 10
+                y: 3
+                x: sw.checked ? sw.width - width - 3 : 3
                 color: "white"
                 Behavior on x { NumberAnimation { duration: Theme.Tokens.durNormal; easing.type: Theme.Tokens.easeMove } }
             }

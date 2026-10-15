@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Io
 import "../../services"
 import "../../theme" as Theme
+import ".."
 
 // One file for the shell's own settings pages.
 // Settings.qml sets `page` to: "desktop", "corners", "notch" or "notifications".
@@ -361,19 +362,51 @@ Flickable {
             spacing: Theme.Tokens.spaceMd
 
             SectionTitle { text: "Bar" }
-            Group {
-                SettingRow {
-                    title: "Position"
-                    subtitle: "Top bar with the notch, or a side bar on the left"
-                    divider: false
-                    Segments {
-                        options: [{ value: "top", label: "Top" }, { value: "left", label: "Left" }]
-                        current: SettingsService.barPosition
-                        apply: function(v) {
-                            SettingsService.barPosition = v
-                            SettingsService.dockEnabled = v !== "left"
-                        }
+            Row {
+                id: barPick
+                width: col.width
+                spacing: 14
+                readonly property real cardW: (width - spacing) / 2
+
+                PickerCard {
+                    width: barPick.cardW
+                    title: "Top bar"
+                    subtitle: "With the notch in the middle"
+                    selected: SettingsService.barPosition !== "left"
+                    onClicked: {
+                        SettingsService.barPosition = "top"
+                        SettingsService.dockEnabled = true
                     }
+                    // Screen with a bar on top and the notch
+                    Rectangle { x: 6; y: 22; width: parent.width - 12; height: parent.height - 28; radius: 9; color: "#3b3858" }
+                    Rectangle { x: parent.width / 2 - 34; y: 0; width: 68; height: 30; radius: 10; color: "#000000" }
+                    Rectangle { x: parent.width / 2 - 34; y: 0; width: 68; height: 16; color: "#000000" }
+                    Row {
+                        x: parent.width / 2 - 8; y: 12; spacing: 8
+                        Rectangle { width: 4; height: 7; radius: 2; color: Theme.Tokens.textPrimary }
+                        Rectangle { width: 4; height: 7; radius: 2; color: Theme.Tokens.textPrimary }
+                    }
+                    Rectangle { x: 14; y: 7; width: 40; height: 8; radius: 4; color: Theme.Tokens.accent }
+                    Rectangle { x: 22; y: 40; width: parent.width * 0.42; height: parent.height - 58; radius: 6; color: "#1c1c1e" }
+                    Rectangle { x: parent.width * 0.42 + 30; y: 40; width: parent.width * 0.58 - 52; height: parent.height - 58; radius: 6; color: "#2c2c2e" }
+                }
+
+                PickerCard {
+                    width: barPick.cardW
+                    title: "Side bar"
+                    subtitle: "Caelestia-style, on the left"
+                    selected: SettingsService.barPosition === "left"
+                    onClicked: {
+                        SettingsService.barPosition = "left"
+                        SettingsService.dockEnabled = false
+                    }
+                    // Screen with a bar on the left
+                    Rectangle { x: 26; y: 6; width: parent.width - 32; height: parent.height - 12; radius: 9; color: "#3b3858" }
+                    Rectangle { x: 6; y: 8; width: 14; height: 11; radius: 4; color: Qt.rgba(1, 1, 1, 0.18) }
+                    Rectangle { x: 9; y: 26; width: 8; height: 40; radius: 4; color: Theme.Tokens.accent }
+                    Rectangle { x: 7; y: parent.height - 46; width: 12; height: 36; radius: 6; color: Qt.rgba(1, 1, 1, 0.12) }
+                    Rectangle { x: 38; y: 18; width: parent.width * 0.42; height: parent.height - 36; radius: 6; color: "#1c1c1e" }
+                    Rectangle { x: parent.width * 0.42 + 46; y: 18; width: parent.width * 0.58 - 64; height: parent.height - 36; radius: 6; color: "#2c2c2e" }
                 }
             }
 

@@ -31,8 +31,8 @@ Flickable {
 
         width: col.width
         height: 52
-        radius: Theme.Tokens.radiusMd
-        color: Theme.Tokens.fillIdle
+        radius: 16
+        color: "#1e1e21"
         border.color: "transparent"
         border.width: 1
 
@@ -127,8 +127,8 @@ Flickable {
 
         width: col.width
         height: dlCol.implicitHeight
-        radius: Theme.Tokens.radiusMd
-        color: Theme.Tokens.fillIdle
+        radius: 16
+        color: "#1e1e21"
         border.color: "transparent"
         border.width: 1
         visible: devices.length > 0
