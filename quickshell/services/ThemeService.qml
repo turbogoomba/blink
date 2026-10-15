@@ -1,0 +1,188 @@
+pragma Singleton
+
+import QtQuick
+import Quickshell
+import Quickshell.Io
+import "../theme"
+
+// Gives the shell's theme to other apps, from the templates in blink/apps:
+//   Kitty            ~/.config/kitty/blink-theme.conf (kitty.conf includes it last)
+//   GTK (Thunar ...) ~/.config/gtk-3.0 and gtk-4.0/gtk.css, plus light/dark preference
+//   Discord          ~/.config/vesktop/themes/MacRice.theme.css (Vesktop)
+//   Spotify          a "Blink" Spicetify theme (only re-applied when the colors change,
+//                    since Spicetify restarts Spotify)
+// Runs a moment after the theme or the accent changes, and once at startup.
+Singleton {
+    id: root
+
+    readonly property string appsDir: Quickshell.shellDir + "/../apps"
+
+    // What is installed, for Settings
+    property bool hasSpicetify: false
+    property bool hasVesktop: false
+
+    Process {
+        id: probe
+        running: true
+        command: ["sh", "-c", "command -v spicetify >/dev/null && echo spicetify; [ -d \"$HOME/.config/vesktop\" ] && echo vesktop"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.hasSpicetify = text.indexOf("spicetify") >= 0
+                root.hasVesktop = text.indexOf("vesktop") >= 0
+            }
+        }
+    }
+
+    function hex(c) {
+        const v = (Math.round(c.r * 255) << 16) | (Math.round(c.g * 255) << 8) | Math.round(c.b * 255)
+        return "#" + (0x1000000 + v).toString(16).slice(1)
+    }
+
+    // Wait for things to settle (the accent changes a few times when the wallpaper does)
+    Timer {
+        id: soon
+        interval: 900
+        onTriggered: root.apply()
+    }
+    function schedule() { soon.restart() }
+
+    Connections {
+        target: Tokens
+        function onThemeNameChanged() { root.schedule() }
+        function onAccentChanged() { root.schedule() }
+    }
+    Connections {
+        target: SettingsService
+        function onThemeKittyChanged() { root.schedule() }
+        function onThemeGtkChanged() { root.schedule() }
+        function onThemeVesktopChanged() { root.schedule() }
+        function onThemeSpotifyChanged() { root.schedule() }
+    }
+    Component.onCompleted: schedule()
+
+    function apply() {
+        if (writer.running) { schedule(); return }
+        const t = Tokens.t
+        writer.command = ["sh", "-c", script, "sh",
+            root.appsDir,
+            SettingsService.themeKitty ? "1" : "0",
+            SettingsService.themeGtk ? "1" : "0",
+            SettingsService.themeVesktop ? "1" : "0",
+            SettingsService.themeSpotify ? "1" : "0",
+            Tokens.themeName,
+            t.window, t.sidebar, t.surface, t.surfaceAlt, t.border, t.text, t.text2,
+            hex(Tokens.accent), hex(Qt.lighter(Tokens.accent, 1.18)), hex(Tokens.onAccent),
+            t.light ? "1" : "0"]
+        writer.running = true
+    }
+
+    Process { id: writer }
+
+    readonly property string script: `
+A=$1; K=$2; G=$3; V=$4; S=$5; NAME=$6; WIN=$7; SIDE=$8; SURF=$9; shift 9
+SURF2=$1; BORD=$2; TXT=$3; TXT2=$4; ACC=$5; ACCL=$6; ONACC=$7; LIGHT=$8
+
+# ---------- Kitty ----------
+if [ "$K" = 1 ]; then
+    f="$HOME/.config/kitty/blink-theme.conf"
+    mkdir -p "$(dirname "$f")"
+    if [ "$NAME" = blink ]; then
+        echo "# Blink theme: pywal decides the colors" > "$f"
+    else
+        cat > "$f" <<EOF
+# Written by Blink (Settings > Appearance). Changes when you pick another theme.
+background $WIN
+foreground $TXT
+cursor $ACC
+cursor_text_color $WIN
+selection_background $ACC
+selection_foreground $ONACC
+url_color $ACC
+active_border_color $ACC
+inactive_border_color $BORD
+active_tab_background $ACC
+active_tab_foreground $ONACC
+inactive_tab_background $SURF2
+inactive_tab_foreground $TXT2
+tab_bar_background $SIDE
+color0 $SURF2
+color8 $BORD
+color7 $TXT2
+color15 $TXT
+color4 $ACC
+color12 $ACCL
+EOF
+    fi
+    pkill -USR1 -x kitty 2>/dev/null
+fi
+
+# ---------- GTK ----------
+if [ "$G" = 1 ] && [ -f "$A/gtk/gtk.css" ]; then
+    for v in gtk-3.0 gtk-4.0; do
+        d="$HOME/.config/$v"; mkdir -p "$d"
+        sed -e "s|^@define-color accent_color .*|@define-color accent_color $ACCL;|" \\
+            -e "s|^@define-color accent_bg_color .*|@define-color accent_bg_color $ACC;|" \\
+            -e "s|^@define-color accent_fg_color .*|@define-color accent_fg_color $ONACC;|" \\
+            -e "s|^@define-color \\(window\\|view\\)_bg_color .*|@define-color \\1_bg_color $WIN;|" \\
+            -e "s|^@define-color \\(window\\|view\\|headerbar\\|sidebar\\|card\\|popover\\|dialog\\)_fg_color .*|@define-color \\1_fg_color $TXT;|" \\
+            -e "s|^@define-color \\(headerbar\\|sidebar\\)_\\(bg\\|backdrop\\)_color .*|@define-color \\1_\\2_color $SURF2;|" \\
+            -e "s|^@define-color \\(card\\|popover\\|dialog\\)_bg_color .*|@define-color \\1_bg_color $SURF;|" \\
+            -e "s|^@define-color \\(headerbar_border_color\\|borders\\) .*|@define-color \\1 $BORD;|" \\
+            "$A/gtk/gtk.css" > "$d/gtk.css.blink" && mv -f "$d/gtk.css.blink" "$d/gtk.css"
+    done
+    if [ "$LIGHT" = 1 ]; then scheme=prefer-light; else scheme=prefer-dark; fi
+    gsettings set org.gnome.desktop.interface color-scheme "$scheme" 2>/dev/null
+fi
+
+# ---------- Discord (Vesktop) ----------
+if [ "$V" = 1 ] && [ -d "$HOME/.config/vesktop" ] && [ -f "$A/vesktop/MacRice.theme.css" ]; then
+    d="$HOME/.config/vesktop/themes"; mkdir -p "$d"
+    sed -e "s|--mr-bg: #[0-9a-fA-F]*;|--mr-bg: $WIN;|" \\
+        -e "s|--mr-bg-deep: #[0-9a-fA-F]*;|--mr-bg-deep: $SIDE;|" \\
+        -e "s|--mr-surface: #[0-9a-fA-F]*;|--mr-surface: $SURF2;|" \\
+        -e "s|--mr-surface-high: #[0-9a-fA-F]*;|--mr-surface-high: $SURF;|" \\
+        -e "s|--mr-border: #[0-9a-fA-F]*;|--mr-border: $BORD;|" \\
+        -e "s|--mr-text: #[0-9a-fA-F]*;|--mr-text: $TXT;|" \\
+        -e "s|--mr-text-dim: #[0-9a-fA-F]*;|--mr-text-dim: $TXT2;|" \\
+        -e "s|--mr-accent: #[0-9a-fA-F]*;|--mr-accent: $ACC;|" \\
+        "$A/vesktop/MacRice.theme.css" > "$d/MacRice.theme.css.blink" && mv -f "$d/MacRice.theme.css.blink" "$d/MacRice.theme.css"
+fi
+
+# ---------- Spotify (Spicetify) ----------
+if [ "$S" = 1 ] && command -v spicetify >/dev/null 2>&1; then
+    T="$(dirname "$(spicetify -c)")/Themes/Blink"
+    mkdir -p "$T"
+    cp -f "$A/spicetify/MacRice/user.css" "$T/user.css" 2>/dev/null
+    n() { echo "$1" | tr -d '#'; }
+    cat > "$T/color.ini" <<EOF
+[Blink]
+text               = $(n $TXT)
+subtext            = $(n $TXT2)
+main               = $(n $WIN)
+main-elevated      = $(n $SURF)
+highlight          = $(n $SURF)
+highlight-elevated = $(n $BORD)
+sidebar            = $(n $WIN)
+player             = $(n $WIN)
+card               = $(n $SURF2)
+shadow             = 000000
+selected-row       = $(n $TXT)
+button             = $(n $ACC)
+button-active      = $(n $ACCL)
+button-disabled    = $(n $BORD)
+tab-active         = $(n $SURF)
+notification       = $(n $ACC)
+notification-error = ff453a
+misc               = $(n $BORD)
+EOF
+    stamp="$HOME/.cache/blink/spotify-theme"
+    now="$NAME $ACC"
+    if [ "$(cat "$stamp" 2>/dev/null)" != "$now" ]; then
+        spicetify config current_theme Blink color_scheme Blink >/dev/null 2>&1
+        spicetify apply >/dev/null 2>&1
+        mkdir -p "$(dirname "$stamp")"
+        echo "$now" > "$stamp"
+    fi
+fi
+`
+}

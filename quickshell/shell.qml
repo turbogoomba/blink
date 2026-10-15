@@ -22,6 +22,7 @@ ShellRoot {
         ModeService.modes   // start the mode watcher
         AccentService.enabled   // start the wallpaper accent
         RecordService.recording // start the recorder (keys)
+        ThemeService.appsDir    // start giving the theme to other apps
     }
 
     // Bar på hver skjerm

@@ -88,6 +88,11 @@ Singleton {
 
     // Theme for the whole shell (Tokens.themes): blink, paper, fjord, dusk, forest, ember
     property alias theme: adapter.theme
+    // Apps that follow the theme (ThemeService writes their colors)
+    property alias themeKitty: adapter.themeKitty
+    property alias themeGtk: adapter.themeGtk
+    property alias themeVesktop: adapter.themeVesktop
+    property alias themeSpotify: adapter.themeSpotify
     onThemeChanged: Tokens.themeName = theme
     Component.onCompleted: Tokens.themeName = theme
 
@@ -143,6 +148,10 @@ Singleton {
             property bool accentFromWallpaper: true
             property string accentColor: ""
             property string theme: "blink"
+            property bool themeKitty: true
+            property bool themeGtk: true
+            property bool themeVesktop: true
+            property bool themeSpotify: false
             property bool nightLight: false
             property int nightTemp: 4000
             property string notifStyle: "notch"

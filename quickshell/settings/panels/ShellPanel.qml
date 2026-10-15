@@ -408,6 +408,47 @@ Flickable {
                 }
             }
 
+            SectionTitle { text: "Apps that follow the theme" }
+            Group {
+                SettingRow {
+                    title: "Kitty"
+                    subtitle: "Terminal colors. The Blink theme keeps your pywal colors"
+                    Toggle {
+                        checked: SettingsService.themeKitty
+                        apply: function(v) { SettingsService.themeKitty = v }
+                    }
+                }
+                SettingRow {
+                    title: "GTK apps"
+                    subtitle: "Thunar and other GTK apps, after they restart"
+                    Toggle {
+                        checked: SettingsService.themeGtk
+                        apply: function(v) { SettingsService.themeGtk = v }
+                    }
+                }
+                SettingRow {
+                    title: "Discord"
+                    subtitle: ThemeService.hasVesktop ? "Vesktop, with the Blink theme turned on in Vencord > Themes"
+                                                      : "Needs Vesktop (yay -S vesktop-bin)"
+                    opacity: ThemeService.hasVesktop ? 1 : 0.5
+                    Toggle {
+                        checked: SettingsService.themeVesktop
+                        apply: function(v) { SettingsService.themeVesktop = v }
+                    }
+                }
+                SettingRow {
+                    title: "Spotify"
+                    subtitle: ThemeService.hasSpicetify ? "Through Spicetify. Spotify restarts when the theme changes"
+                                                        : "Needs Spicetify (yay -S spicetify-cli)"
+                    divider: false
+                    opacity: ThemeService.hasSpicetify ? 1 : 0.5
+                    Toggle {
+                        checked: SettingsService.themeSpotify
+                        apply: function(v) { SettingsService.themeSpotify = v }
+                    }
+                }
+            }
+
             SectionTitle { text: "Bar" }
             Row {
                 id: barPick
