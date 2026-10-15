@@ -1428,8 +1428,19 @@ Rectangle {
             topPadding: Tokens.spaceMd       // a bit of air under the timetable
             bottomPadding: Tokens.spaceXs
             visible: notch.tab === "nook"
-                && notch.btBatteries.length + notch.dongleBatteries.length > 0
+                && notch.btBatteries.length + notch.dongleBatteries.length + HeadsetService.headsets.length > 0
 
+            // Dongle headsets (SteelSeries Arctis ...) via HeadsetControl
+            Repeater {
+                model: HeadsetService.headsets
+                delegate: DevicePill {
+                    required property var modelData
+                    icon: "audio-headset"
+                    label: modelData.name
+                    level: modelData.level
+                    levelText: modelData.charging ? "Charging" : ""
+                }
+            }
             Repeater {
                 model: notch.btBatteries
                 delegate: DevicePill {
