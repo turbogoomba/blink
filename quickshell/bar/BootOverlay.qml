@@ -31,7 +31,7 @@ Variants {
             width: win.width - 2 * win.frameT
             height: win.height - SettingsService.topInset - win.frameT
             radius: win.radius
-            color: "#000000"
+            color: Tokens.barBg
             opacity: BootService.cover
         }
 

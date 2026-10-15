@@ -16,9 +16,9 @@ Rectangle {
     readonly property color accent: Theme.Tokens.accent
     height: previewHeight + 82
     radius: 18
-    color: selected ? Qt.rgba(accent.r, accent.g, accent.b, 0.12) : "#1e1e21"
+    color: selected ? Qt.rgba(accent.r, accent.g, accent.b, 0.12) : Theme.Tokens.cardBg
     border.width: 2
-    border.color: selected ? accent : mouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+    border.color: selected ? accent : mouse.containsMouse ? Theme.Tokens.ink(0.12) : "transparent"
     scale: mouse.pressed ? Theme.Tokens.pressScale : 1
     Behavior on color { ColorAnimation { duration: Theme.Tokens.durNormal } }
     Behavior on border.color { ColorAnimation { duration: Theme.Tokens.durFast } }
@@ -31,7 +31,7 @@ Rectangle {
         width: parent.width - 28
         height: pc.previewHeight
         radius: 12
-        color: "#000000"
+        color: Theme.Tokens.barBg
         clip: true
     }
 
@@ -72,7 +72,7 @@ Rectangle {
         radius: 11
         color: pc.selected ? pc.accent : "transparent"
         border.width: pc.selected ? 0 : 1.5
-        border.color: Qt.rgba(1, 1, 1, 0.25)
+        border.color: Theme.Tokens.ink(0.25)
         Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
         Canvas {
             anchors.centerIn: parent

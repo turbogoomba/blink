@@ -17,8 +17,8 @@ Flickable {
     property bool detailsOpen: false
 
     readonly property color accent: Theme.Tokens.accent
-    readonly property color card: "#1e1e21"
-    readonly property color line: Qt.rgba(1, 1, 1, 0.05)
+    readonly property color card: Theme.Tokens.cardBg
+    readonly property color line: Theme.Tokens.ink(0.05)
     function soft(a) { return Qt.rgba(accent.r, accent.g, accent.b, a) }
 
     // One entry per name (the same network on several bands), strongest first
@@ -267,9 +267,9 @@ Flickable {
             width: fld.width
             height: 38
             radius: 10
-            color: Qt.rgba(1, 1, 1, 0.05)
+            color: Theme.Tokens.ink(0.05)
             border.width: 1
-            border.color: fld.error ? "#ff6961" : input.activeFocus ? panel.accent : Qt.rgba(1, 1, 1, 0.08)
+            border.color: fld.error ? "#ff6961" : input.activeFocus ? panel.accent : Theme.Tokens.ink(0.08)
             Behavior on border.color { ColorAnimation { duration: Theme.Tokens.durFast } }
 
             TextInput {
@@ -804,7 +804,7 @@ Flickable {
                             width: parent.width
                             height: 38
                             radius: 10
-                            color: Qt.rgba(1, 1, 1, 0.05)
+                            color: Theme.Tokens.ink(0.05)
                             Row {
                                 id: methodRow
                                 anchors.fill: parent

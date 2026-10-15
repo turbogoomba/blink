@@ -129,7 +129,7 @@ PanelWindow {
         width: side.w - 12
         height: islandCol.implicitHeight + 8
         radius: 14
-        color: Qt.rgba(1, 1, 1, 0.06)
+        color: Tokens.ink(0.06)
         Column {
             id: islandCol
             y: 4
@@ -427,7 +427,7 @@ PanelWindow {
                     height: 18
                     radius: 3
                     color: "transparent"
-                    border.color: Qt.rgba(1, 1, 1, 0.45)
+                    border.color: Tokens.ink(0.45)
                     border.width: 1.2
 
                     Rectangle {

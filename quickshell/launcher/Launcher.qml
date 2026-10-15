@@ -240,7 +240,7 @@ PanelWindow {
                     anchors.bottomMargin: Tokens.spaceXs
                     radius: Tokens.radiusLg
                     color: Tokens.fillIdle
-                    border.color: Qt.rgba(1, 1, 1, 0.06)
+                    border.color: Tokens.ink(0.06)
                     border.width: 1
                 }
 

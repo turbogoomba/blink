@@ -147,7 +147,7 @@ PanelWindow {
             width: vr.small ? 26 : 30
             height: width
             radius: width / 2
-            color: vr.muted ? Qt.rgba(1, 1, 1, 0.08) : Tokens.fillHover
+            color: vr.muted ? Tokens.ink(0.08) : Tokens.fillHover
             scale: muteMouse.pressed ? Tokens.pressScale : 1
             Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
@@ -307,7 +307,7 @@ PanelWindow {
                 height: mainCol.implicitHeight + 20
                 radius: Tokens.radiusLg
                 color: Tokens.fillIdle
-                border.color: Qt.rgba(1, 1, 1, 0.06)
+                border.color: Tokens.ink(0.06)
                 border.width: 1
 
                 Column {
@@ -326,7 +326,7 @@ PanelWindow {
                         width: parent.width
                         height: 30
                         radius: Tokens.radiusMd
-                        color: devMouse.containsMouse && snd.outputs.length > 1 ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+                        color: devMouse.containsMouse && snd.outputs.length > 1 ? Tokens.ink(0.08) : "transparent"
 
                         Image {
                             id: devIcon

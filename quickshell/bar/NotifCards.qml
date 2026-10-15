@@ -334,7 +334,7 @@ PanelWindow {
                                 maximumLineCount: slot.expanded ? 12 : 2
                                 elide: Text.ElideRight
                                 lineHeight: 1.15
-                                color: Qt.rgba(1, 1, 1, 0.78)
+                                color: Tokens.ink(0.78)
                                 font.family: Tokens.fontFamily
                                 font.pixelSize: Tokens.fontBody
                             }
@@ -482,7 +482,7 @@ PanelWindow {
             anchors.horizontalCenter: cardsCol.horizontalCenter
             spacing: 2
             Rectangle { anchors.horizontalCenter: parent.horizontalCenter; width: cardsCol.width - 20; height: 4; radius: 2; color: Tokens.fillIdle }
-            Rectangle { anchors.horizontalCenter: parent.horizontalCenter; width: cardsCol.width - 40; height: 3; radius: 1.5; color: Qt.rgba(1, 1, 1, 0.04) }
+            Rectangle { anchors.horizontalCenter: parent.horizontalCenter; width: cardsCol.width - 40; height: 3; radius: 1.5; color: Tokens.ink(0.04) }
         }
     }
 }

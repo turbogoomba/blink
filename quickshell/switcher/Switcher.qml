@@ -129,7 +129,7 @@ PanelWindow {
         height: 132
         radius: 26
         color: Tokens.barBg
-        border.color: Qt.rgba(1, 1, 1, 0.08)
+        border.color: Tokens.ink(0.08)
         border.width: 1
         opacity: sw.reveal
         scale: 0.94 + 0.06 * sw.reveal

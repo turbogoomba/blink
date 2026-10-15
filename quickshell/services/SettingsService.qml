@@ -83,6 +83,13 @@ Singleton {
 
     // Accent color from the wallpaper
     property alias accentFromWallpaper: adapter.accentFromWallpaper
+    // A fixed accent ("#rrggbb"), used when not matching the wallpaper. "" = the theme's own.
+    property alias accentColor: adapter.accentColor
+
+    // Theme for the whole shell (Tokens.themes): blink, paper, fjord, dusk, forest, ember
+    property alias theme: adapter.theme
+    onThemeChanged: Tokens.themeName = theme
+    Component.onCompleted: Tokens.themeName = theme
 
     // Notifications: "notch" (one at a time in the notch) or "corner" (cards out of the frame)
     property alias notifStyle: adapter.notifStyle
@@ -134,6 +141,8 @@ Singleton {
             property list<string> favApps: []
             property list<string> favFolders: []
             property bool accentFromWallpaper: true
+            property string accentColor: ""
+            property string theme: "blink"
             property bool nightLight: false
             property int nightTemp: 4000
             property string notifStyle: "notch"

@@ -10,7 +10,7 @@ FloatingWindow {
     title: "Settings"
     implicitWidth: 1040
     implicitHeight: 700
-    color: "#161618"
+    color: Theme.Tokens.windowBg
 
     property string activePanel: "wifi"
     property string query: ""
@@ -48,6 +48,7 @@ FloatingWindow {
     // Search entries for the pages that are not built from HyprSettingsService.
     // Keep these in step with the titles on those pages.
     readonly property var shellIndex: [
+        { panel: "desktop", label: "Theme", desc: "Blink, Paper, Fjord, Dusk, Forest or Ember for the whole shell", keys: "theme colors colours dark light mode paper fjord dusk forest ember" },
         { panel: "about", label: "About this computer", desc: "Processor, graphics, memory, storage and live usage", keys: "system info specs cpu gpu ram memory disk kernel version uptime hardware" },
         { panel: "wifi", label: "Wi-Fi", desc: "Turn Wi-Fi on or off and join a network", keys: "wireless internet network password eduroam username login school work" },
         { panel: "bluetooth", label: "Bluetooth", desc: "Turn Bluetooth on or off and pair devices", keys: "headphones devices pair" },
@@ -127,12 +128,12 @@ FloatingWindow {
         id: sidebar
         anchors { top: parent.top; bottom: parent.bottom; left: parent.left }
         width: 260
-        color: "#111113"
+        color: Theme.Tokens.sidebarBg
 
         Rectangle {
             anchors { top: parent.top; bottom: parent.bottom; right: parent.right }
             width: 1
-            color: Qt.rgba(1, 1, 1, 0.06)
+            color: Theme.Tokens.ink(0.06)
         }
 
         Flickable {
@@ -153,7 +154,7 @@ FloatingWindow {
                     width: parent.width
                     height: 60
                     radius: 14
-                    color: Qt.rgba(1, 1, 1, 0.04)
+                    color: Theme.Tokens.ink(0.04)
 
                     Rectangle {
                         id: avatar
@@ -201,7 +202,7 @@ FloatingWindow {
                     width: parent.width
                     height: 34
                     radius: 10
-                    color: Qt.rgba(1, 1, 1, 0.06)
+                    color: Theme.Tokens.ink(0.06)
                     border.width: searchInput.activeFocus ? 1 : 0
                     border.color: Theme.Tokens.accent
 
@@ -249,7 +250,7 @@ FloatingWindow {
                         width: hintText.implicitWidth + 12
                         height: 18
                         radius: 5
-                        color: hintMouse.containsMouse && searchInput.text !== "" ? Theme.Tokens.fillHover : Qt.rgba(1, 1, 1, 0.08)
+                        color: hintMouse.containsMouse && searchInput.text !== "" ? Theme.Tokens.fillHover : Theme.Tokens.ink(0.08)
                         Text {
                             id: hintText
                             anchors.centerIn: parent
@@ -291,7 +292,7 @@ FloatingWindow {
                             topPadding: 14
                             bottomPadding: 4
                             text: navEntry.modelData.group.toUpperCase()
-                            color: "#6e6e73"
+                            color: Theme.Tokens.textSecondary
                             font.family: Theme.Tokens.fontFamily
                             font.pixelSize: 11
                             font.weight: Font.DemiBold
@@ -318,7 +319,7 @@ FloatingWindow {
                                 width: 24
                                 height: 24
                                 radius: 7
-                                color: navEntry.selected ? Theme.Tokens.accent : Qt.rgba(1, 1, 1, 0.07)
+                                color: navEntry.selected ? Theme.Tokens.accent : Theme.Tokens.ink(0.07)
                                 Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
                                 LineIcon {
                                     anchors.centerIn: parent

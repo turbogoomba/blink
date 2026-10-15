@@ -45,7 +45,7 @@ Flickable {
         width: col.width
         height: inner.implicitHeight
         radius: 16
-        color: "#1e1e21"
+        color: Theme.Tokens.cardBg
         border.color: "transparent"
         border.width: 1
         clip: true
@@ -361,6 +361,53 @@ Flickable {
             width: col.width
             spacing: Theme.Tokens.spaceMd
 
+            SectionTitle { text: "Theme" }
+            Grid {
+                id: themeGrid
+                width: col.width
+                columns: 3
+                rowSpacing: 12
+                columnSpacing: 12
+                readonly property real cardW: (width - 2 * columnSpacing) / 3
+
+                Repeater {
+                    model: Theme.Tokens.themeOrder
+                    delegate: PickerCard {
+                        id: tc
+                        required property string modelData
+                        readonly property var p: Theme.Tokens.themes[modelData]
+                        width: themeGrid.cardW
+                        previewHeight: 84
+                        title: p.name
+                        subtitle: p.sub
+                        selected: SettingsService.theme === modelData
+                        onClicked: SettingsService.theme = modelData
+
+                        // A tiny desktop in this theme's colors
+                        Rectangle { anchors.fill: parent; color: tc.p.frame }
+                        Rectangle { x: 5; y: 14; width: parent.width - 10; height: parent.height - 19; radius: 6; color: tc.p.wall }
+                        Rectangle { x: 9; y: 4; width: 26; height: 6; radius: 3; color: tc.p.accent }
+                        Rectangle { x: parent.width / 2 - 16; y: 0; width: 32; height: 16; radius: 6; color: tc.p.frame }
+                        Rectangle { x: 14; y: 22; width: parent.width * 0.4; height: parent.height - 34; radius: 5; color: tc.p.surface }
+                        Rectangle {
+                            x: parent.width - width - 5
+                            y: 14
+                            width: parent.width * 0.38
+                            height: parent.height - 30
+                            bottomLeftRadius: 8
+                            color: tc.p.card
+                            Column {
+                                x: 7; y: 7
+                                spacing: 5
+                                Rectangle { width: 40; height: 6; radius: 3; color: tc.p.text }
+                                Rectangle { width: 26; height: 5; radius: 2.5; color: tc.p.text2 }
+                            }
+                            Rectangle { anchors.right: parent.right; anchors.bottom: parent.bottom; anchors.margins: 7; width: 18; height: 10; radius: 5; color: tc.p.accent }
+                        }
+                    }
+                }
+            }
+
             SectionTitle { text: "Bar" }
             Row {
                 id: barPick
@@ -379,16 +426,16 @@ Flickable {
                     }
                     // Screen with a bar on top and the notch
                     Rectangle { x: 6; y: 22; width: parent.width - 12; height: parent.height - 28; radius: 9; color: "#3b3858" }
-                    Rectangle { x: parent.width / 2 - 34; y: 0; width: 68; height: 30; radius: 10; color: "#000000" }
-                    Rectangle { x: parent.width / 2 - 34; y: 0; width: 68; height: 16; color: "#000000" }
+                    Rectangle { x: parent.width / 2 - 34; y: 0; width: 68; height: 30; radius: 10; color: Theme.Tokens.barBg }
+                    Rectangle { x: parent.width / 2 - 34; y: 0; width: 68; height: 16; color: Theme.Tokens.barBg }
                     Row {
                         x: parent.width / 2 - 8; y: 12; spacing: 8
                         Rectangle { width: 4; height: 7; radius: 2; color: Theme.Tokens.textPrimary }
                         Rectangle { width: 4; height: 7; radius: 2; color: Theme.Tokens.textPrimary }
                     }
                     Rectangle { x: 14; y: 7; width: 40; height: 8; radius: 4; color: Theme.Tokens.accent }
-                    Rectangle { x: 22; y: 40; width: parent.width * 0.42; height: parent.height - 58; radius: 6; color: "#1c1c1e" }
-                    Rectangle { x: parent.width * 0.42 + 30; y: 40; width: parent.width * 0.58 - 52; height: parent.height - 58; radius: 6; color: "#2c2c2e" }
+                    Rectangle { x: 22; y: 40; width: parent.width * 0.42; height: parent.height - 58; radius: 6; color: Theme.Tokens.bg }
+                    Rectangle { x: parent.width * 0.42 + 30; y: 40; width: parent.width * 0.58 - 52; height: parent.height - 58; radius: 6; color: Theme.Tokens.surface }
                 }
 
                 PickerCard {
@@ -402,11 +449,11 @@ Flickable {
                     }
                     // Screen with a bar on the left
                     Rectangle { x: 26; y: 6; width: parent.width - 32; height: parent.height - 12; radius: 9; color: "#3b3858" }
-                    Rectangle { x: 6; y: 8; width: 14; height: 11; radius: 4; color: Qt.rgba(1, 1, 1, 0.18) }
+                    Rectangle { x: 6; y: 8; width: 14; height: 11; radius: 4; color: Theme.Tokens.ink(0.18) }
                     Rectangle { x: 9; y: 26; width: 8; height: 40; radius: 4; color: Theme.Tokens.accent }
-                    Rectangle { x: 7; y: parent.height - 46; width: 12; height: 36; radius: 6; color: Qt.rgba(1, 1, 1, 0.12) }
-                    Rectangle { x: 38; y: 18; width: parent.width * 0.42; height: parent.height - 36; radius: 6; color: "#1c1c1e" }
-                    Rectangle { x: parent.width * 0.42 + 46; y: 18; width: parent.width * 0.58 - 64; height: parent.height - 36; radius: 6; color: "#2c2c2e" }
+                    Rectangle { x: 7; y: parent.height - 46; width: 12; height: 36; radius: 6; color: Theme.Tokens.ink(0.12) }
+                    Rectangle { x: 38; y: 18; width: parent.width * 0.42; height: parent.height - 36; radius: 6; color: Theme.Tokens.bg }
+                    Rectangle { x: parent.width * 0.42 + 46; y: 18; width: parent.width * 0.58 - 64; height: parent.height - 36; radius: 6; color: Theme.Tokens.surface }
                 }
             }
 
@@ -431,10 +478,48 @@ Flickable {
                 SettingRow {
                     title: "Match the wallpaper"
                     subtitle: "Pick the accent color from the current wallpaper"
-                    divider: false
                     Toggle {
                         checked: SettingsService.accentFromWallpaper
                         apply: function(v) { SettingsService.accentFromWallpaper = v }
+                    }
+                }
+                SettingRow {
+                    title: "Color"
+                    subtitle: SettingsService.accentFromWallpaper ? "Turn off Match the wallpaper to pick one" : "The theme's own, or one of these"
+                    divider: false
+                    opacity: SettingsService.accentFromWallpaper ? 0.4 : 1
+                    Row {
+                        spacing: 8
+                        Repeater {
+                            // "" = the theme's own accent
+                            model: ["", "#5fa8d3", "#bf5af2", "#ff6b9a", "#30d158", "#ffd60a", "#ff8a3d"]
+                            delegate: Rectangle {
+                                id: sw
+                                required property string modelData
+                                readonly property bool on: SettingsService.accentColor === modelData
+                                width: 24
+                                height: 24
+                                radius: 12
+                                color: modelData === "" ? Theme.Tokens.defaultAccent : modelData
+                                border.width: on ? 2 : 0
+                                border.color: Theme.Tokens.textPrimary
+                                // The theme's own: a small dot in the middle
+                                Rectangle {
+                                    visible: sw.modelData === ""
+                                    anchors.centerIn: parent
+                                    width: 8
+                                    height: 8
+                                    radius: 4
+                                    color: Theme.Tokens.onAccent
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    enabled: !SettingsService.accentFromWallpaper
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: SettingsService.accentColor = sw.modelData
+                                }
+                            }
+                        }
                     }
                 }
             }

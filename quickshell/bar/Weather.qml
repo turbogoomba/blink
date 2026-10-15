@@ -235,7 +235,7 @@ PanelWindow {
                 height: 86
                 radius: Tokens.radiusLg
                 color: Tokens.fillIdle
-                border.color: Qt.rgba(1, 1, 1, 0.06)
+                border.color: Tokens.ink(0.06)
                 border.width: 1
 
                 Row {
@@ -340,7 +340,7 @@ PanelWindow {
                             anchors.verticalCenter: parent.verticalCenter
                             height: 4
                             radius: 2
-                            color: Qt.rgba(1, 1, 1, 0.1)
+                            color: Tokens.ink(0.1)
 
                             Rectangle {
                                 x: rangeTrack.width * (dayRow.modelData.min - wx.weekMin) / dayRow.span

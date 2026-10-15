@@ -79,8 +79,8 @@ Flickable {
                 selected: StyleService.mode === "floating"
                 onClicked: if (StyleService.mode !== "floating") StyleService.toggle()
                 Rectangle { anchors.fill: parent; color: "#3b3858" }
-                Rectangle { x: parent.width * 0.12; y: 14; width: parent.width * 0.48; height: 58; radius: 7; color: "#1c1c1e"; border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.08) }
-                Rectangle { x: parent.width * 0.4; y: 38; width: parent.width * 0.48; height: 54; radius: 7; color: "#2c2c2e"; border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.1) }
+                Rectangle { x: parent.width * 0.12; y: 14; width: parent.width * 0.48; height: 58; radius: 7; color: Theme.Tokens.bg; border.width: 1; border.color: Theme.Tokens.ink(0.08) }
+                Rectangle { x: parent.width * 0.4; y: 38; width: parent.width * 0.48; height: 54; radius: 7; color: Theme.Tokens.surface; border.width: 1; border.color: Theme.Tokens.ink(0.1) }
             }
             PickerCard {
                 width: modePick.cardW
@@ -90,9 +90,9 @@ Flickable {
                 selected: StyleService.mode !== "floating"
                 onClicked: if (StyleService.mode === "floating") StyleService.toggle()
                 Rectangle { anchors.fill: parent; color: "#3b3858" }
-                Rectangle { x: 8; y: 8; width: (parent.width - 24) * 0.55; height: parent.height - 16; radius: 6; color: "#1c1c1e" }
-                Rectangle { x: 16 + (parent.width - 24) * 0.55; y: 8; width: (parent.width - 24) * 0.45; height: (parent.height - 24) / 2; radius: 6; color: "#2c2c2e" }
-                Rectangle { x: 16 + (parent.width - 24) * 0.55; y: 16 + (parent.height - 24) / 2; width: (parent.width - 24) * 0.45; height: (parent.height - 24) / 2; radius: 6; color: "#2c2c2e" }
+                Rectangle { x: 8; y: 8; width: (parent.width - 24) * 0.55; height: parent.height - 16; radius: 6; color: Theme.Tokens.bg }
+                Rectangle { x: 16 + (parent.width - 24) * 0.55; y: 8; width: (parent.width - 24) * 0.45; height: (parent.height - 24) / 2; radius: 6; color: Theme.Tokens.surface }
+                Rectangle { x: 16 + (parent.width - 24) * 0.55; y: 16 + (parent.height - 24) / 2; width: (parent.width - 24) * 0.45; height: (parent.height - 24) / 2; radius: 6; color: Theme.Tokens.surface }
             }
         }
 
@@ -128,7 +128,7 @@ Flickable {
                     width: parent.width
                     height: cardCol.implicitHeight
                     radius: 16
-                    color: "#1e1e21"
+                    color: Theme.Tokens.cardBg
                     clip: true
 
                     Column {

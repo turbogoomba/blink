@@ -454,7 +454,7 @@ PanelWindow {
                                 height: parent.height
                                 radius: 3
                                 color: "transparent"
-                                border.color: Qt.rgba(1, 1, 1, 0.45)
+                                border.color: Tokens.ink(0.45)
                                 border.width: 1
 
                                 Rectangle {
@@ -506,7 +506,7 @@ PanelWindow {
                                 width: 2
                                 height: 4
                                 radius: 1
-                                color: Qt.rgba(1, 1, 1, 0.45)
+                                color: Tokens.ink(0.45)
                             }
                         }
                     }

@@ -16,19 +16,53 @@ Singleton {
 	// Text and icons in the top bar
 	readonly property int barFont: 14
 	readonly property int barIcon: 18
-	readonly property color barBg: "#000000"
-	readonly property color bg: "#1c1c1e"
-	readonly property color surface: "#2c2c2e"
-	readonly property color surfaceAlt: "#242426"
-	readonly property color border: "#3a3a3c"
-	readonly property color textPrimary: "#e5e5e7"
-	readonly property color textSecondary: "#98989d"
-	// App windows (Settings): soft grey instead of the bar's black
-	readonly property color windowBg: "#1c1c1e"
-	readonly property color sidebarBg: "#161618"
-	// Accent: picked from the wallpaper by AccentService (falls back to the blue)
-	readonly property color defaultAccent: "#5fa8d3"
+
+	// ---------- Themes ----------
+	// Set from Settings > Appearance (SettingsService.theme writes it here).
+	property string themeName: "blink"
+	readonly property var themes: ({
+		blink:  { name: "Blink",  sub: "Black, accent from the wallpaper", light: false,
+		          frame: "#000000", window: "#1c1c1e", sidebar: "#111113", card: "#1e1e21", surface: "#2c2c2e", surfaceAlt: "#242426",
+		          border: "#3a3a3c", text: "#e5e5e7", text2: "#98989d", accent: "#5fa8d3", onAccent: "#d9000000", wall: "#3b3858" },
+		paper:  { name: "Paper",  sub: "Light and calm", light: true,
+		          frame: "#e8e8ee", window: "#f7f7fa", sidebar: "#ececf1", card: "#ffffff", surface: "#ffffff", surfaceAlt: "#f2f2f6",
+		          border: "#d6d6de", text: "#1c1c1e", text2: "#6e6e76", accent: "#2f7cf6", onAccent: "#ffffff", wall: "#c6d4e8" },
+		fjord:  { name: "Fjord",  sub: "Cold blue-grey", light: false,
+		          frame: "#1f2430", window: "#262c39", sidebar: "#1f2430", card: "#2e3545", surface: "#343c4d", surfaceAlt: "#2a3140",
+		          border: "#434c5e", text: "#e5e9f0", text2: "#9aa5b8", accent: "#88c0d0", onAccent: "#d9000000", wall: "#3b4a5e" },
+		dusk:   { name: "Dusk",   sub: "Purple evening, rose accent", light: false,
+		          frame: "#15121f", window: "#1c1729", sidebar: "#15121f", card: "#231d35", surface: "#2a2440", surfaceAlt: "#1f1a2e",
+		          border: "#3e3756", text: "#e0def4", text2: "#a19cb8", accent: "#eb9fb8", onAccent: "#d9000000", wall: "#3a2f52" },
+		forest: { name: "Forest", sub: "Deep green, sage accent", light: false,
+		          frame: "#0f1612", window: "#151e18", sidebar: "#0f1612", card: "#1b261f", surface: "#223028", surfaceAlt: "#18221c",
+		          border: "#33463a", text: "#dfe8e1", text2: "#94a89a", accent: "#8fc79a", onAccent: "#d9000000", wall: "#2c3f33" },
+		ember:  { name: "Ember",  sub: "Warm dark, orange accent", light: false,
+		          frame: "#120d0b", window: "#19120f", sidebar: "#120d0b", card: "#221a16", surface: "#2a201b", surfaceAlt: "#1d1613",
+		          border: "#46352e", text: "#f0e6df", text2: "#a8968c", accent: "#ff8a3d", onAccent: "#d9000000", wall: "#4a2c20" }
+	})
+	readonly property var themeOrder: ["blink", "paper", "fjord", "dusk", "forest", "ember"]
+	readonly property var t: themes[themeName] ?? themes.blink
+	readonly property bool light: t.light
+
+	// The bar, the frame and every sheet that grows out of them
+	readonly property color barBg: t.frame
+	readonly property color bg: t.window
+	readonly property color surface: t.surface
+	readonly property color surfaceAlt: t.surfaceAlt
+	readonly property color border: t.border
+	readonly property color textPrimary: t.text
+	readonly property color textSecondary: t.text2
+	// App windows (Settings)
+	readonly property color windowBg: t.window
+	readonly property color sidebarBg: t.sidebar
+	// Cards inside windows and sheets
+	readonly property color cardBg: t.card
+	// Accent: the theme's, or picked from the wallpaper by AccentService
+	readonly property color defaultAccent: t.accent
 	property color accent: defaultAccent
+
+	// A see-through tint that works on the theme: white on dark, black on light
+	function ink(a) { return light ? Qt.rgba(0, 0, 0, a) : Qt.rgba(1, 1, 1, a) }
 
 	// Status colors
 	readonly property color red: "#ff453a"
@@ -38,13 +72,13 @@ Singleton {
 
 	// ---------- Interaction ----------
 	// White fills on dark surfaces: resting, hovered, strong (pressed or highlighted)
-	readonly property color fillIdle: Qt.rgba(1, 1, 1, 0.07)
-	readonly property color fillHover: Qt.rgba(1, 1, 1, 0.12)
-	readonly property color fillStrong: Qt.rgba(1, 1, 1, 0.20)
+	readonly property color fillIdle: ink(0.07)
+	readonly property color fillHover: ink(0.12)
+	readonly property color fillStrong: ink(0.20)
 	// Scale while pressed: normal controls, small icon targets
 	// Thin lines between rows, and text that sits on the accent color
-	readonly property color divider: Qt.rgba(1, 1, 1, 0.08)
-	readonly property color onAccent: Qt.rgba(0, 0, 0, 0.85)
+	readonly property color divider: ink(0.08)
+	readonly property color onAccent: t.onAccent
 	readonly property real pressScale: 0.96
 	readonly property real pressScaleIcon: 0.88
 

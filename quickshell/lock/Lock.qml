@@ -117,7 +117,7 @@ echo "pkgs=$(pacman -Qq 2>/dev/null | wc -l)"
     // ================= Building blocks =================
     component Card: Rectangle {
         radius: 22
-        color: Qt.rgba(1, 1, 1, 0.06)
+        color: Tokens.ink(0.06)
     }
 
     component Label: Text {
@@ -213,7 +213,7 @@ echo "pkgs=$(pacman -Qq 2>/dev/null | wc -l)"
 
         WlSessionLockSurface {
             id: surface
-            color: "#000000"
+            color: Tokens.barBg
 
             property date now: new Date()
             Timer {
@@ -375,7 +375,7 @@ echo "pkgs=$(pacman -Qq 2>/dev/null | wc -l)"
                                     radius: 8
                                     color: Tokens.barBg
                                     border.width: 1
-                                    border.color: Qt.rgba(1, 1, 1, 0.1)
+                                    border.color: Tokens.ink(0.1)
                                     Row {
                                         anchors.centerIn: parent
                                         spacing: 6
@@ -411,7 +411,7 @@ echo "pkgs=$(pacman -Qq 2>/dev/null | wc -l)"
                                     Label {
                                         anchors.right: parent.right
                                         text: parent.modelData.v
-                                        color: "#c7c7cc"
+                                        color: Tokens.textSecondary
                                     }
                                 }
                             }
@@ -446,7 +446,7 @@ echo "pkgs=$(pacman -Qq 2>/dev/null | wc -l)"
                         anchors.horizontalCenter: parent.horizontalCenter
                         topPadding: 14
                         text: Qt.formatDate(surface.now, "dddd, d MMMM")
-                        color: "#b8b8be"
+                        color: Tokens.textSecondary
                         font.pixelSize: 17
                     }
 
@@ -485,7 +485,7 @@ echo "pkgs=$(pacman -Qq 2>/dev/null | wc -l)"
                         width: 320
                         height: 50
                         radius: 25
-                        color: Qt.rgba(1, 1, 1, 0.08)
+                        color: Tokens.ink(0.08)
                         border.width: 1
                         border.color: root.failed ? Tokens.red : root.soft(Tokens.accent, input.activeFocus ? 0.6 : 0.3)
                         Behavior on border.color { ColorAnimation { duration: Tokens.durFast } }
@@ -633,7 +633,7 @@ echo "pkgs=$(pacman -Qq 2>/dev/null | wc -l)"
                                 width: parent.width
                                 height: 4
                                 radius: 2
-                                color: Qt.rgba(1, 1, 1, 0.12)
+                                color: Tokens.ink(0.12)
                                 Rectangle {
                                     height: parent.height
                                     radius: 2
@@ -722,7 +722,7 @@ echo "pkgs=$(pacman -Qq 2>/dev/null | wc -l)"
                                         width: parent.width
                                         elide: Text.ElideRight
                                         text: classCol.e ? (classCol.e.title || "").replace(TimetableService.shortTitle(classCol.e), "").trim() : ""
-                                        color: "#c7c7cc"
+                                        color: Tokens.textSecondary
                                     }
                                     Label {
                                         width: parent.width
@@ -747,7 +747,7 @@ echo "pkgs=$(pacman -Qq 2>/dev/null | wc -l)"
                                     Label {
                                         x: 4
                                         text: TimetableService.shortTitle(parent.modelData)
-                                        color: "#c7c7cc"
+                                        color: Tokens.textSecondary
                                     }
                                     Label {
                                         anchors.right: parent.right

@@ -79,7 +79,7 @@ Column {
         height: 96
         radius: Tokens.radiusMd
         color: Tokens.fillIdle
-        border.color: Qt.rgba(1, 1, 1, 0.06)
+        border.color: Tokens.ink(0.06)
         border.width: 1
 
         Column {
@@ -111,7 +111,7 @@ Column {
                 Text {
                     id: valueText
                     text: card.value
-                    color: "#f2f2f4"
+                    color: Tokens.textPrimary
                     font.family: Tokens.fontFamily
                     font.pixelSize: 17
                     font.weight: Font.DemiBold
@@ -154,7 +154,7 @@ Column {
             width: 46
             height: 46
             radius: Tokens.radiusMd
-            color: tile.dashed ? "transparent" : tileMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : Tokens.fillIdle
+            color: tile.dashed ? "transparent" : tileMouse.containsMouse ? Tokens.ink(0.14) : Tokens.fillIdle
             border.width: tile.dashed ? 1.5 : 0
             border.color: Tokens.border
             scale: tileMouse.pressed ? 0.92 : 1
@@ -283,7 +283,7 @@ Column {
             width: parent.width
             height: 6
             radius: 3
-            color: Qt.rgba(1, 1, 1, 0.1)
+            color: Tokens.ink(0.1)
             Rectangle {
                 width: parent.width * (SystemService.diskTotal > 0 ? SystemService.diskUsed / SystemService.diskTotal : 0)
                 height: parent.height

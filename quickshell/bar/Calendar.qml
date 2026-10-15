@@ -353,7 +353,7 @@ PanelWindow {
                                     radius: 14
                                     color: dayCell.modelData.isToday ? Tokens.accent
                                          : dayCell.modelData.isSelected ? Tokens.fillHover
-                                         : dayMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08)
+                                         : dayMouse.containsMouse ? Tokens.ink(0.08)
                                          : "transparent"
                                     Behavior on color { ColorAnimation { duration: Tokens.durFast } }
                                 }
@@ -363,7 +363,7 @@ PanelWindow {
                                     text: dayCell.modelData.day
                                     color: dayCell.modelData.isToday ? "white"
                                          : dayCell.modelData.inMonth ? Tokens.textPrimary
-                                         : Qt.rgba(1, 1, 1, 0.25)
+                                         : Tokens.ink(0.25)
                                     font.family: Tokens.fontFamily
                                     font.pixelSize: Tokens.fontBody
                                     font.weight: dayCell.modelData.isToday ? Font.DemiBold : Font.Normal
@@ -400,7 +400,7 @@ PanelWindow {
                 visible: TimetableService.enabled
                 width: parent.width
                 height: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Tokens.ink(0.08)
             }
 
             Column {

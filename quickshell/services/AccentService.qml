@@ -21,12 +21,23 @@ Singleton {
     }
 
     onEnabledChanged: update()
+    readonly property string fixed: SettingsService.accentColor
+    onFixedChanged: update()
+    // A new theme brings its own accent (unless the wallpaper decides)
+    Connections {
+        target: Tokens
+        function onThemeNameChanged() { root.update() }
+    }
+
+    function fallback() {
+        Tokens.accent = root.fixed !== "" ? root.fixed : Tokens.defaultAccent
+    }
 
     // Choose the most colorful, not too dark or bright color, then tune it
     // so white text stays readable on it.
     function update() {
         if (!enabled) {
-            Tokens.accent = Tokens.defaultAccent
+            fallback()
             return
         }
         const colors = quant.colors ?? []
@@ -40,7 +51,7 @@ Singleton {
             if (score > bestScore) { bestScore = score; best = c }
         }
         if (!best || best.hslSaturation < 0.15) {
-            Tokens.accent = Tokens.defaultAccent
+            fallback()
             return
         }
         const h = Math.max(0, best.hslHue)

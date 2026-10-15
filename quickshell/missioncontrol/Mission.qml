@@ -143,7 +143,7 @@ Scope {
                         color: dropHover ? Qt.rgba(0.37, 0.66, 0.83, 0.35)
                              : pillMouse.containsMouse ? Tokens.fillHover
                              : Tokens.fillIdle
-                        border.color: active || dropHover ? Tokens.accent : Qt.rgba(1, 1, 1, 0.1)
+                        border.color: active || dropHover ? Tokens.accent : Tokens.ink(0.1)
                         border.width: active || dropHover ? 2 : 1
 
                         Row {
@@ -191,8 +191,8 @@ Scope {
                     width: 84
                     height: 84
                     radius: Tokens.radiusMd
-                    color: plusMouse.containsMouse ? Tokens.fillHover : Qt.rgba(1, 1, 1, 0.05)
-                    border.color: Qt.rgba(1, 1, 1, 0.1)
+                    color: plusMouse.containsMouse ? Tokens.fillHover : Tokens.ink(0.05)
+                    border.color: Tokens.ink(0.1)
                     border.width: 1
 
                     Text {

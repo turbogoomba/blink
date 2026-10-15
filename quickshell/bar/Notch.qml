@@ -365,7 +365,7 @@ Rectangle {
         height: 26
         radius: 13
         color: selected ? Tokens.surface
-             : tbMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.06)
+             : tbMouse.containsMouse ? Tokens.ink(0.06)
              : "transparent"
 
         Row {
@@ -819,7 +819,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             height: 6
             radius: 3
-            color: Qt.rgba(1, 1, 1, 0.15)
+            color: Tokens.ink(0.15)
 
             Rectangle {
                 width: parent.width * (OsdService.muted ? 0 : OsdService.value)
@@ -1610,7 +1610,7 @@ Rectangle {
                     width: list.width
                     height: 52
                     radius: Tokens.radiusMd
-                    color: entryMouse.containsMouse ? Tokens.surface : Qt.rgba(1, 1, 1, 0.04)
+                    color: entryMouse.containsMouse ? Tokens.surface : Tokens.ink(0.04)
 
                     Image {
                         id: entryIcon

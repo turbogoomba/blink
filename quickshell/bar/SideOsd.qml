@@ -143,7 +143,7 @@ PanelWindow {
                 anchors.bottomMargin: 12
                 width: 16
                 radius: 8
-                color: Qt.rgba(1, 1, 1, 0.1)
+                color: Tokens.ink(0.1)
 
                 Rectangle {
                     anchors.bottom: parent.bottom

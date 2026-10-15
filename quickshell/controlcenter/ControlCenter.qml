@@ -117,7 +117,7 @@ PanelWindow {
         height: 26
         radius: 13
         color: on ? Tokens.accent
-             : sbMouse.containsMouse ? Tokens.fillHover : Qt.rgba(1, 1, 1, 0.08)
+             : sbMouse.containsMouse ? Tokens.fillHover : Tokens.ink(0.08)
         scale: sbMouse.pressed ? Tokens.pressScale : 1
         Behavior on color { ColorAnimation { duration: Tokens.durFast } }
         Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
@@ -145,8 +145,8 @@ PanelWindow {
         readonly property real appear: cc.stagger(order)
 
         radius: Tokens.radiusLg
-        color: cardHover.hovered ? Qt.rgba(1, 1, 1, 0.10) : Tokens.fillIdle
-        border.color: Qt.rgba(1, 1, 1, 0.06)
+        color: cardHover.hovered ? Tokens.ink(0.10) : Tokens.fillIdle
+        border.color: Tokens.ink(0.06)
         border.width: 1
         opacity: appear
         transform: Translate { y: (1 - card.appear) * 14 }
@@ -207,7 +207,7 @@ PanelWindow {
         Rectangle {
             anchors.fill: parent
             radius: Tokens.radiusMd
-            color: Qt.rgba(1, 1, 1, 0.06)
+            color: Tokens.ink(0.06)
             opacity: trMouse.containsMouse ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
         }
@@ -324,7 +324,7 @@ PanelWindow {
                 width: parent.width
                 height: sc.active ? 10 : 6
                 radius: height / 2
-                color: Qt.rgba(1, 1, 1, 0.15)
+                color: Tokens.ink(0.15)
                 Behavior on height { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
                 // Fyllet
@@ -632,7 +632,7 @@ PanelWindow {
                             Rectangle {
                                 anchors.fill: parent
                                 radius: Tokens.radiusMd
-                                color: Qt.rgba(1, 1, 1, 0.06)
+                                color: Tokens.ink(0.06)
                                 opacity: mrowMouse.containsMouse ? 1 : 0
                                 Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
                             }
@@ -826,7 +826,7 @@ PanelWindow {
                         height: parent.height
                         radius: Tokens.radiusSm
                         color: "transparent"
-                        border.color: Qt.rgba(1, 1, 1, 0.45)
+                        border.color: Tokens.ink(0.45)
                         border.width: 1.2
 
                         Rectangle {
@@ -848,7 +848,7 @@ PanelWindow {
                         width: 2.5
                         height: 6
                         radius: 1.25
-                        color: Qt.rgba(1, 1, 1, 0.45)
+                        color: Tokens.ink(0.45)
                     }
                 }
 
@@ -921,7 +921,7 @@ PanelWindow {
                             radius: Tokens.radiusMd
                             opacity: usable ? 1 : 0.4
                             color: selected ? Tokens.accent
-                                 : profMouse.containsMouse ? Tokens.fillHover : Qt.rgba(1, 1, 1, 0.06)
+                                 : profMouse.containsMouse ? Tokens.fillHover : Tokens.ink(0.06)
                             scale: profMouse.pressed ? Tokens.pressScale : 1
                             Behavior on color { ColorAnimation { duration: Tokens.durFast } }
                             Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }

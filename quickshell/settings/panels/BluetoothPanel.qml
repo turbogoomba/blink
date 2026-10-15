@@ -38,7 +38,7 @@ Flickable {
         width: col.width
         height: dlCol.implicitHeight
         radius: 16
-        color: "#1e1e21"
+        color: Theme.Tokens.cardBg
         border.color: "transparent"
         border.width: 1
         visible: devices.length > 0
@@ -188,7 +188,7 @@ Flickable {
             width: parent.width
             height: 48
             radius: 16
-            color: "#1e1e21"
+            color: Theme.Tokens.cardBg
             border.color: "transparent"
             border.width: 1
 
