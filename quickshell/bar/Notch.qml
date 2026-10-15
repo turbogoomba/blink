@@ -166,6 +166,7 @@ Rectangle {
     // Springy morph, like the Dynamic Island. The side bar's notch panel turns it
     // off while it slides in and out, so the two animations do not fight.
     property bool animateSize: true
+    property bool fadeContent: true
     Behavior on width  { enabled: notch.animateSize; NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow; easing.overshoot: Tokens.bounce } }
     Behavior on height { enabled: notch.animateSize; NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow; easing.overshoot: Tokens.bounce } }
     Behavior on radius { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
@@ -1140,7 +1141,19 @@ Rectangle {
         spacing: 14
         opacity: notch.open ? 1 : 0
         enabled: notch.open
-        Behavior on opacity { NumberAnimation { duration: Tokens.durFast } }
+        // Waits for the notch to grow, then fades in; goes first when it closes.
+        // The side bar's notch panel fades the whole panel itself (fadeContent: false).
+        Behavior on opacity {
+            id: openFade
+            enabled: notch.fadeContent
+            SequentialAnimation {
+                PauseAnimation { duration: openFade.targetValue > 0.5 ? Tokens.contentDelay : 0 }
+                NumberAnimation {
+                    duration: openFade.targetValue > 0.5 ? Tokens.contentIn : Tokens.contentOut
+                    easing.type: Tokens.easeMove
+                }
+            }
+        }
 
         // ---------- Faner + uke ----------
         Item {

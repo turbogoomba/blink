@@ -116,7 +116,7 @@ PanelWindow {
     Rectangle {
         id: panel
         // Soft shadow, so it floats over what is under it
-        layer.enabled: true
+        layer.enabled: Tokens.menuShadow
         layer.effect: MultiEffect {
             shadowEnabled: true
             shadowColor: Tokens.shadowColor

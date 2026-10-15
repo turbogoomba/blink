@@ -99,7 +99,7 @@ PanelWindow {
         height: win.sheetH
         clip: true
 
-        layer.enabled: true
+        layer.enabled: Tokens.menuShadow
         layer.effect: MultiEffect {
             shadowEnabled: true
             shadowColor: Tokens.shadowColor

@@ -110,6 +110,11 @@ Singleton {
 	readonly property int durSlow: 320    // morphs (the notch changing shape)
 	readonly property int durOpen: 440    // sheets and menus growing out of the frame
 	readonly property int durClose: 240   // ... and going back in (closing is quicker)
+	readonly property bool menuShadow: false
+	readonly property bool frameShadow: false
+	readonly property int contentDelay: 180
+	readonly property int contentIn: 260
+	readonly property int contentOut: 90
 	readonly property int easeMove: Easing.OutCubic   // fades and movement
 	readonly property int easeGrow: Easing.OutBack    // things growing out of the frame/notch, press bounce
 	readonly property int easeShrink: Easing.InCubic  // things closing

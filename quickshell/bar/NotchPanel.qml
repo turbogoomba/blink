@@ -33,8 +33,20 @@ PanelWindow {
             easing.overshoot: Tokens.bounce
         }
     }
-    // The content fades in once the panel is partly out, and out first when it closes
-    readonly property real contentOpacity: Math.max(0, Math.min(1, (reveal - 0.3) / 0.5))
+    // The content waits until the sheet is mostly out, then fades and rises in.
+    // Closing: it goes first, quickly, before the sheet slides back.
+    property real contentIn: win.active ? 1 : 0
+    Behavior on contentIn {
+        id: contentBehavior
+        SequentialAnimation {
+            PauseAnimation { duration: contentBehavior.targetValue > 0.5 ? Tokens.contentDelay : 0 }
+            NumberAnimation {
+                duration: contentBehavior.targetValue > 0.5 ? Tokens.contentIn : Tokens.contentOut
+                easing.type: Tokens.easeMove
+            }
+        }
+    }
+
 
     // The size the panel grows to. Kept when it closes, so it shrinks from the
     // size it had instead of jumping to the small idle notch first.
@@ -91,7 +103,7 @@ PanelWindow {
         visible: win.reveal > 0.005
         clip: true
         // Soft shadow, so it floats over what is under it
-        layer.enabled: true
+        layer.enabled: Tokens.menuShadow
         layer.effect: MultiEffect {
             shadowEnabled: true
             shadowColor: Tokens.shadowColor
@@ -109,11 +121,13 @@ PanelWindow {
 
         Item {
             id: box
-            // Rides on the leading edge, so it slides out with the sheet
-            x: holder.width - win.panelW
+            // Stays in place (it does not ride on the edge out of the bar);
+            // it only drifts the last bit as it fades in
+            x: 0
             width: win.panelW
             height: win.panelH
-            opacity: win.contentOpacity
+            opacity: win.contentIn
+            transform: Translate { x: -(1 - win.contentIn) * 14 }
 
             Notch {
                 id: notch
@@ -121,6 +135,7 @@ PanelWindow {
                 lookTarget: NaN
                 // No morph of its own while the panel slides; tab changes inside still morph
                 animateSize: win.reveal > 0.98
+                fadeContent: false
                 color: "transparent"
             }
 

@@ -139,6 +139,7 @@ Scope {
                 }
 
                 MultiEffect {
+                    visible: Tokens.frameShadow
                     source: ringSource
                     anchors.fill: ringSource
                     shadowEnabled: true

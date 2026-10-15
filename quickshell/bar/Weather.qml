@@ -21,6 +21,20 @@ PanelWindow {
     WlrLayershell.keyboardFocus: open ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     readonly property bool open: ShellState.weatherOpen
+    // The content waits until the sheet is mostly out, then fades and rises in.
+    // Closing: it goes first, quickly, before the sheet slides back.
+    property real contentIn: wx.open ? 1 : 0
+    Behavior on contentIn {
+        id: contentBehavior
+        SequentialAnimation {
+            PauseAnimation { duration: contentBehavior.targetValue > 0.5 ? Tokens.contentDelay : 0 }
+            NumberAnimation {
+                duration: contentBehavior.targetValue > 0.5 ? Tokens.contentIn : Tokens.contentOut
+                easing.type: Tokens.easeMove
+            }
+        }
+    }
+
     // With the side bar the sheet slides out of the bar next to the button
     readonly property bool side: SettingsService.sideBar
     property real reveal: open ? 1 : 0
@@ -121,7 +135,7 @@ PanelWindow {
     Item {
         id: sheet
         // Soft shadow, so it floats over what is under it
-        layer.enabled: true
+        layer.enabled: Tokens.menuShadow
         layer.effect: MultiEffect {
             shadowEnabled: true
             shadowColor: Tokens.shadowColor
@@ -157,12 +171,17 @@ PanelWindow {
 
         Column {
             id: body
-            // Slides in with the leading edge when it comes out of the side bar
-            x: wx.side ? sheet.width - sheet.fullWidth + 16 : 16
+            // Stays in place inside the sheet (it does not ride on the edge
+            // out of the bar); it only drifts the last bit as it fades in
+            x: 16
             y: 14
             width: sheet.fullWidth - 32
             spacing: Tokens.spaceLg
-            opacity: Math.max(0, Math.min(1, (wx.reveal - 0.3) / 0.5))
+            opacity: wx.contentIn
+            transform: Translate {
+                x: wx.side ? -(1 - wx.contentIn) * 14 : 0
+                y: wx.side ? 0 : (1 - wx.contentIn) * 8
+            }
 
             // ---------- Now ----------
             Item {
