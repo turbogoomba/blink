@@ -6,7 +6,7 @@ import "../../theme" as Theme
 import ".."
 
 // One file for the shell's own settings pages.
-// Settings.qml sets `page` to: "desktop", "corners", "notch" or "notifications".
+// Settings.qml sets `page` to: "desktop", "corners", "notch", "notifications" or "controlcenter".
 Flickable {
     id: panel
     property string page: "desktop"
@@ -343,6 +343,39 @@ Flickable {
                 color: Theme.Tokens.textSecondary
                 font: input.font
             }
+        }
+    }
+
+    // Small round arrow for moving a row up or down
+    component MoveButton: Rectangle {
+        id: mb
+        property bool up: true
+        property bool usable: true
+        property var apply: function() {}
+
+        width: 26
+        height: 26
+        radius: 13
+        opacity: usable ? 1 : 0.3
+        color: mbMouse.containsMouse && usable ? Theme.Tokens.fillStrong : Theme.Tokens.fillIdle
+        scale: mbMouse.pressed && usable ? Theme.Tokens.pressScaleIcon : 1
+        Behavior on color { ColorAnimation { duration: Theme.Tokens.durFast } }
+        Behavior on scale { NumberAnimation { duration: Theme.Tokens.durFast; easing.type: Theme.Tokens.easeMove } }
+
+        Text {
+            anchors.centerIn: parent
+            text: "›"
+            rotation: mb.up ? -90 : 90
+            color: Theme.Tokens.textPrimary
+            font.pixelSize: Theme.Tokens.fontBody
+        }
+        MouseArea {
+            id: mbMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            enabled: mb.usable
+            cursorShape: Qt.PointingHandCursor
+            onClicked: mb.apply()
         }
     }
 
@@ -917,6 +950,117 @@ Flickable {
                     PushButton {
                         text: "Clear"
                         apply: function() { NotificationService.clearAll() }
+                    }
+                }
+            }
+        }
+
+        // ---------- Control Center ----------
+        Column {
+            visible: panel.page === "controlcenter"
+            width: col.width
+            spacing: Theme.Tokens.spaceMd
+
+            Group {
+                SettingRow {
+                    title: "Preview"
+                    subtitle: "Open the Control Center to see your changes"
+                    divider: false
+                    PushButton {
+                        text: "Show"
+                        apply: function() { ShellState.controlCenterOpen = true }
+                    }
+                }
+            }
+
+            SectionTitle { text: "Sections" }
+            Group {
+                Repeater {
+                    model: SettingsService.ccOrder
+
+                    delegate: SettingRow {
+                        id: secRow
+                        required property string modelData
+                        required property int index
+                        readonly property var info: SettingsService.ccSectionInfo.find(s => s.id === modelData) ?? { label: modelData, hint: "" }
+                        readonly property bool on: SettingsService.ccShown(modelData)
+
+                        title: info.label
+                        subtitle: info.hint
+                        divider: index < SettingsService.ccOrder.length - 1
+                        opacity: on ? 1 : 0.55
+
+                        Row {
+                            spacing: Theme.Tokens.spaceSm
+                            MoveButton {
+                                anchors.verticalCenter: parent.verticalCenter
+                                up: true
+                                usable: secRow.index > 0
+                                apply: function() { SettingsService.ccMove(secRow.modelData, -1) }
+                            }
+                            MoveButton {
+                                anchors.verticalCenter: parent.verticalCenter
+                                up: false
+                                usable: secRow.index < SettingsService.ccOrder.length - 1
+                                apply: function() { SettingsService.ccMove(secRow.modelData, 1) }
+                            }
+                            Item { width: Theme.Tokens.spaceSm; height: 1 }
+                            Toggle {
+                                anchors.verticalCenter: parent.verticalCenter
+                                checked: secRow.on
+                                apply: function(v) { SettingsService.ccSetShown(secRow.modelData, v) }
+                            }
+                        }
+                    }
+                }
+            }
+
+            SectionTitle { text: "Toggles" }
+            Group {
+                Repeater {
+                    model: SettingsService.ccTileInfo
+
+                    delegate: SettingRow {
+                        id: tileRow
+                        required property var modelData
+                        required property int index
+
+                        title: modelData.label
+                        subtitle: modelData.id === "nightshift" && !NightLightService.available ? "Not available on this computer"
+                            : (modelData.hint ?? "")
+                        divider: index < SettingsService.ccTileInfo.length - 1
+                        opacity: SettingsService.ccShown("connections") ? 1 : 0.4
+
+                        Toggle {
+                            checked: SettingsService.ccShown(tileRow.modelData.id)
+                            apply: function(v) { SettingsService.ccSetShown(tileRow.modelData.id, v) }
+                        }
+                    }
+                }
+            }
+
+            SectionTitle { text: "Look" }
+            Group {
+                SettingRow {
+                    title: "Width"
+                    subtitle: "How wide the Control Center is"
+                    Segments {
+                        options: [
+                            { value: "compact", label: "Compact" },
+                            { value: "normal",  label: "Normal" },
+                            { value: "wide",    label: "Wide" }
+                        ]
+                        current: SettingsService.ccWidth
+                        apply: function(v) { SettingsService.ccWidth = v }
+                    }
+                }
+                SettingRow {
+                    title: "Reset"
+                    subtitle: "Back to the original order, with everything shown"
+                    divider: false
+                    PushButton {
+                        text: "Reset"
+                        apply: function() { SettingsService.ccReset() }
                     }
                 }
             }

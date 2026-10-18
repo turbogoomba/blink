@@ -96,6 +96,18 @@ PanelWindow {
         return "audio-volume-high-symbolic"
     }
 
+    // Which sections and tiles to show is set in Settings > Control Center
+    function tileShown(id) {
+        return SettingsService.ccShown(id) && (id !== "nightshift" || NightLightService.available)
+    }
+    function available(id) {
+        if (id === "display") return BrightnessService.available
+        if (id === "battery") return hasBattery
+        if (id === "connections")
+            return ["wifi", "bluetooth", "airplane", "modes", "windows", "nightshift"].some(t => tileShown(t))
+        return true
+    }
+
     // The Modes tile unfolds a list (Do Not Disturb, Focus, Game Mode)
     property bool modesOpen: false
 
@@ -447,7 +459,8 @@ PanelWindow {
         // Flush against the frame/bar it grows out of
         x: cc.side ? SettingsService.sideWidth : cc.width - Tokens.frameT - width
         y: cc.side ? cc.height - Tokens.frameT - height : SettingsService.topInset
-        width: 340
+        width: ({ compact: 300, normal: 340, wide: 400 })[SettingsService.ccWidth] ?? 340
+        Behavior on width { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
         readonly property real fullHeight: content.implicitHeight + 24
         height: fullHeight * Math.max(0, cc.reveal)
         clip: true
@@ -476,6 +489,32 @@ PanelWindow {
             y: cc.side ? panel.height - panel.fullHeight + 12 : 12
             spacing: Tokens.spaceMd
 
+            Repeater {
+                model: SettingsService.ccOrder.filter(id => SettingsService.ccShown(id) && cc.available(id))
+
+                delegate: Loader {
+                    required property string modelData
+                    Layout.fillWidth: true
+                    sourceComponent: ({
+                        connections: connectionsSection,
+                        record: recordSection,
+                        display: displaySection,
+                        sound: soundSection,
+                        battery: batterySection
+                    })[modelData] ?? null
+                }
+            }
+        }
+    }
+
+    // ============================================================
+    // SECTIONS (order and visibility come from Settings > Control Center)
+    // ============================================================
+
+    Component {
+        id: connectionsSection
+        ColumnLayout {
+            spacing: Tokens.spaceMd
             // ---------- Tilkobling + fliser ----------
             RowLayout {
                 Layout.fillWidth: true
@@ -483,11 +522,14 @@ PanelWindow {
 
                 Card {
                     order: 0
+                    visible: cc.tileShown("wifi") || cc.tileShown("bluetooth") || cc.tileShown("airplane")
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     Layout.preferredWidth: 1
+                    implicitHeight: leftCol.implicitHeight + 2 * Tokens.spaceSm
 
                     ColumnLayout {
+                        id: leftCol
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
@@ -495,6 +537,7 @@ PanelWindow {
                         spacing: Tokens.spaceXs
 
                         ToggleRow {
+                            visible: cc.tileShown("wifi")
                             Layout.fillWidth: true
                             icon: "network-wireless-symbolic"
                             fallback: "network-wireless"
@@ -508,6 +551,7 @@ PanelWindow {
                         }
 
                         ToggleRow {
+                            visible: cc.tileShown("bluetooth")
                             Layout.fillWidth: true
                             icon: "bluetooth-active-symbolic"
                             fallback: "bluetooth"
@@ -521,9 +565,10 @@ PanelWindow {
                                 if (cc.btAdapter)
                                     cc.btAdapter.enabled = !cc.btAdapter.enabled
                             }
-                          }
+                        }
 
                         ToggleRow {
+                            visible: cc.tileShown("airplane")
                             Layout.fillWidth: true
                             readonly property bool airplane: !NetworkService.wifiEnabled && !(cc.btAdapter?.enabled ?? false)
                             icon: "airplane-mode-symbolic"
@@ -541,12 +586,14 @@ PanelWindow {
                 }
 
                 ColumnLayout {
+                    visible: cc.tileShown("modes") || cc.tileShown("windows") || cc.tileShown("nightshift")
                     Layout.fillWidth: true
                     Layout.preferredWidth: 1
                     spacing: Tokens.spaceMd
 
                     Card {
                         order: 1
+                        visible: cc.tileShown("modes")
                         Layout.fillWidth: true
                         implicitHeight: 47
 
@@ -565,6 +612,7 @@ PanelWindow {
 
                     Card {
                         order: 2
+                        visible: cc.tileShown("windows")
                         Layout.fillWidth: true
                         implicitHeight: 47
 
@@ -583,7 +631,7 @@ PanelWindow {
                         order: 2
                         Layout.fillWidth: true
                         implicitHeight: 47
-                        visible: NightLightService.available
+                        visible: cc.tileShown("nightshift")
 
                         ToggleRow {
                             anchors.fill: parent
@@ -604,7 +652,7 @@ PanelWindow {
                 id: modesCard
                 order: 1
                 Layout.fillWidth: true
-                implicitHeight: cc.modesOpen ? modesCol.implicitHeight + 12 : 0
+                implicitHeight: cc.modesOpen && cc.tileShown("modes") ? modesCol.implicitHeight + 12 : 0
                 visible: implicitHeight > 0.5
                 clip: true
                 Behavior on implicitHeight { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeMove } }
@@ -700,251 +748,261 @@ PanelWindow {
                     }
                 }
             }
+        }
+    }
 
-            // ---------- Screen recording ----------
-            Card {
-                order: 2
-                Layout.fillWidth: true
-                implicitHeight: 52
+    Component {
+        id: recordSection
+        // ---------- Screen recording ----------
+        Card {
+            order: 2
+            Layout.fillWidth: true
+            implicitHeight: 52
 
-                ToggleRow {
-                    anchors.left: parent.left
-                    anchors.right: recButtons.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.margins: Tokens.spaceXs
-                    icon: "media-record-symbolic"
-                    fallback: "media-record"
-                    title: "Screen Recording"
-                    subtitle: RecordService.recording ? "Recording · " + RecordService.elapsed
-                        : RecordService.compressing ? "Shrinking for Discord..."
-                        : (RecordService.withAudio ? "With sound" : "No sound")
-                          + (RecordService.forDiscord ? " · under 20 MB" : "")
-                    active: RecordService.recording
+            ToggleRow {
+                anchors.left: parent.left
+                anchors.right: recButtons.left
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: Tokens.spaceXs
+                icon: "media-record-symbolic"
+                fallback: "media-record"
+                title: "Screen Recording"
+                subtitle: RecordService.recording ? "Recording · " + RecordService.elapsed
+                    : RecordService.compressing ? "Shrinking for Discord..."
+                    : (RecordService.withAudio ? "With sound" : "No sound")
+                      + (RecordService.forDiscord ? " · under 20 MB" : "")
+                active: RecordService.recording
+                onClicked: {
+                    if (RecordService.recording) {
+                        RecordService.stop()
+                    } else {
+                        cc.close()
+                        startDelay.mode = "screen"
+                        startDelay.restart()
+                    }
+                }
+            }
+
+            // Wait for the panel to slide away so it is not in the video
+            Timer {
+                id: startDelay
+                property string mode: "screen"
+                interval: 400
+                onTriggered: RecordService.start(mode)
+            }
+
+            Row {
+                id: recButtons
+                anchors.right: parent.right
+                anchors.rightMargin: Tokens.spaceMd
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: Tokens.spaceSm
+                visible: !RecordService.recording
+
+                SmallButton {
+                    label: "Sound"
+                    on: RecordService.withAudio
+                    onClicked: RecordService.withAudio = !RecordService.withAudio
+                }
+                SmallButton {
+                    label: "Discord"
+                    on: RecordService.forDiscord
+                    onClicked: RecordService.forDiscord = !RecordService.forDiscord
+                }
+                SmallButton {
+                    label: "Area"
                     onClicked: {
-                        if (RecordService.recording) {
-                            RecordService.stop()
-                        } else {
-                            cc.close()
-                            startDelay.mode = "screen"
-                            startDelay.restart()
-                        }
+                        cc.close()
+                        startDelay.mode = "area"
+                        startDelay.restart()
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: displaySection
+        // ---------- Lysstyrke ----------
+        SliderCard {
+            order: 3
+            title: "Display"
+            icon: "display-brightness-symbolic"
+            value: BrightnessService.value
+            onMoved: v => BrightnessService.set(v)
+        }
+    }
+
+    Component {
+        id: soundSection
+        // ---------- Lyd ----------
+        SliderCard {
+            order: 4
+            title: "Sound"
+            icon: cc.volumeIcon(cc.audio?.volume ?? 0, cc.audio?.muted ?? false)
+            value: cc.audio?.muted ? 0 : (cc.audio?.volume ?? 0)
+            onMoved: v => {
+                if (!cc.audio) return
+                cc.audio.muted = false
+                cc.audio.volume = v
+            }
+            onIconClicked: if (cc.audio) cc.audio.muted = !cc.audio.muted
+        }
+    }
+
+    Component {
+        id: batterySection
+        // ---------- Batteri ----------
+        Card {
+            order: 5
+            Layout.fillWidth: true
+            implicitHeight: 64 + 40
+
+            // Top part: battery, status and percentage
+            Item {
+                id: batTop
+                anchors.top: parent.top
+                width: parent.width
+                height: 64
+            }
+
+            // Samme liggende batteri som i baren, bare større
+            Item {
+                id: bigBattery
+                anchors.left: parent.left
+                anchors.leftMargin: Tokens.spaceLg
+                anchors.verticalCenter: batTop.verticalCenter
+                width: 36
+                height: 17
+
+                readonly property color fillColor:
+                      cc.charging ? Tokens.green
+                    : PowerProfiles.profile === PowerProfile.PowerSaver ? Tokens.orange
+                    : cc.batteryLevel < 0.2 ? Tokens.red
+                    : Tokens.textPrimary
+
+                Rectangle {
+                    id: bigBody
+                    width: 32
+                    height: parent.height
+                    radius: Tokens.radiusSm
+                    color: "transparent"
+                    border.color: Tokens.ink(0.45)
+                    border.width: 1.2
+
+                    Rectangle {
+                        x: 2.5
+                        y: 2.5
+                        width: Math.max(3, (parent.width - 5) * cc.batteryLevel)
+                        height: parent.height - 5
+                        radius: 2.5
+                        color: bigBattery.fillColor
+                        Behavior on width { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeMove } }
+                        Behavior on color { ColorAnimation { duration: Tokens.durNormal } }
                     }
                 }
 
-                // Wait for the panel to slide away so it is not in the video
-                Timer {
-                    id: startDelay
-                    property string mode: "screen"
-                    interval: 400
-                    onTriggered: RecordService.start(mode)
-                }
-
-                Row {
-                    id: recButtons
-                    anchors.right: parent.right
-                    anchors.rightMargin: Tokens.spaceMd
+                Rectangle {
+                    anchors.left: bigBody.right
+                    anchors.leftMargin: 1.5
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: Tokens.spaceSm
-                    visible: !RecordService.recording
-
-                    SmallButton {
-                        label: "Sound"
-                        on: RecordService.withAudio
-                        onClicked: RecordService.withAudio = !RecordService.withAudio
-                    }
-                    SmallButton {
-                        label: "Discord"
-                        on: RecordService.forDiscord
-                        onClicked: RecordService.forDiscord = !RecordService.forDiscord
-                    }
-                    SmallButton {
-                        label: "Area"
-                        onClicked: {
-                            cc.close()
-                            startDelay.mode = "area"
-                            startDelay.restart()
-                        }
-                    }
+                    width: 2.5
+                    height: 6
+                    radius: 1.25
+                    color: Tokens.ink(0.45)
                 }
             }
 
-            // ---------- Lysstyrke ----------
-            SliderCard {
-                order: 3
-                visible: BrightnessService.available
-                title: "Display"
-                icon: "display-brightness-symbolic"
-                value: BrightnessService.value
-                onMoved: v => BrightnessService.set(v)
-            }
-
-            // ---------- Lyd ----------
-            SliderCard {
-                order: 4
-                title: "Sound"
-                icon: cc.volumeIcon(cc.audio?.volume ?? 0, cc.audio?.muted ?? false)
-                value: cc.audio?.muted ? 0 : (cc.audio?.volume ?? 0)
-                onMoved: v => {
-                    if (!cc.audio) return
-                    cc.audio.muted = false
-                    cc.audio.volume = v
-                }
-                onIconClicked: if (cc.audio) cc.audio.muted = !cc.audio.muted
-            }
-
-            // ---------- Batteri ----------
-            Card {
-                order: 5
-                Layout.fillWidth: true
-                implicitHeight: 64 + 40
-                visible: cc.hasBattery
-
-                // Top part: battery, status and percentage
-                Item {
-                    id: batTop
-                    anchors.top: parent.top
-                    width: parent.width
-                    height: 64
-                }
-
-                // Samme liggende batteri som i baren, bare større
-                Item {
-                    id: bigBattery
-                    anchors.left: parent.left
-                    anchors.leftMargin: Tokens.spaceLg
-                    anchors.verticalCenter: batTop.verticalCenter
-                    width: 36
-                    height: 17
-
-                    readonly property color fillColor:
-                          cc.charging ? Tokens.green
-                        : PowerProfiles.profile === PowerProfile.PowerSaver ? Tokens.orange
-                        : cc.batteryLevel < 0.2 ? Tokens.red
-                        : Tokens.textPrimary
-
-                    Rectangle {
-                        id: bigBody
-                        width: 32
-                        height: parent.height
-                        radius: Tokens.radiusSm
-                        color: "transparent"
-                        border.color: Tokens.ink(0.45)
-                        border.width: 1.2
-
-                        Rectangle {
-                            x: 2.5
-                            y: 2.5
-                            width: Math.max(3, (parent.width - 5) * cc.batteryLevel)
-                            height: parent.height - 5
-                            radius: 2.5
-                            color: bigBattery.fillColor
-                            Behavior on width { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeMove } }
-                            Behavior on color { ColorAnimation { duration: Tokens.durNormal } }
-                        }
-                    }
-
-                    Rectangle {
-                        anchors.left: bigBody.right
-                        anchors.leftMargin: 1.5
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 2.5
-                        height: 6
-                        radius: 1.25
-                        color: Tokens.ink(0.45)
-                    }
-                }
-
-                Column {
-                    anchors.left: bigBattery.right
-                    anchors.leftMargin: Tokens.spaceLg
-                    anchors.right: bigPct.left
-                    anchors.rightMargin: Tokens.spaceMd
-                    anchors.verticalCenter: batTop.verticalCenter
-                    spacing: 1
-
-                    Text {
-                        text: "Battery"
-                        color: Tokens.textPrimary
-                        font.family: Tokens.fontFamily
-                        font.pixelSize: Tokens.fontBody
-                        font.weight: Font.DemiBold
-                    }
-                    Text {
-                        width: parent.width
-                        text: cc.batteryStatus
-                        color: cc.charging ? Tokens.green : Tokens.textSecondary
-                        font.family: Tokens.fontFamily
-                        font.pixelSize: Tokens.fontSmall
-                        elide: Text.ElideRight
-                    }
-                }
+            Column {
+                anchors.left: bigBattery.right
+                anchors.leftMargin: Tokens.spaceLg
+                anchors.right: bigPct.left
+                anchors.rightMargin: Tokens.spaceMd
+                anchors.verticalCenter: batTop.verticalCenter
+                spacing: 1
 
                 Text {
-                    id: bigPct
-                    anchors.right: parent.right
-                    anchors.rightMargin: Tokens.spaceLg
-                    anchors.verticalCenter: batTop.verticalCenter
-                    text: Math.round(cc.batteryLevel * 100) + "%"
+                    text: "Battery"
                     color: Tokens.textPrimary
                     font.family: Tokens.fontFamily
-                    font.pixelSize: 18
+                    font.pixelSize: Tokens.fontBody
                     font.weight: Font.DemiBold
-                    font.features: { "tnum": 1 }
                 }
+                Text {
+                    width: parent.width
+                    text: cc.batteryStatus
+                    color: cc.charging ? Tokens.green : Tokens.textSecondary
+                    font.family: Tokens.fontFamily
+                    font.pixelSize: Tokens.fontSmall
+                    elide: Text.ElideRight
+                }
+            }
 
-                // Power mode (needs power-profiles-daemon)
-                Row {
-                    id: profiles
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    anchors.margins: Tokens.spaceMd
-                    height: 28
-                    spacing: Tokens.spaceSm
+            Text {
+                id: bigPct
+                anchors.right: parent.right
+                anchors.rightMargin: Tokens.spaceLg
+                anchors.verticalCenter: batTop.verticalCenter
+                text: Math.round(cc.batteryLevel * 100) + "%"
+                color: Tokens.textPrimary
+                font.family: Tokens.fontFamily
+                font.pixelSize: 18
+                font.weight: Font.DemiBold
+                font.features: { "tnum": 1 }
+            }
 
-                    readonly property var options: [
-                        { label: "Saver", value: PowerProfile.PowerSaver },
-                        { label: "Balanced", value: PowerProfile.Balanced },
-                        { label: "Performance", value: PowerProfile.Performance }
-                    ]
+            // Power mode (needs power-profiles-daemon)
+            Row {
+                id: profiles
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.margins: Tokens.spaceMd
+                height: 28
+                spacing: Tokens.spaceSm
 
-                    Repeater {
-                        model: profiles.options
+                readonly property var options: [
+                    { label: "Saver", value: PowerProfile.PowerSaver },
+                    { label: "Balanced", value: PowerProfile.Balanced },
+                    { label: "Performance", value: PowerProfile.Performance }
+                ]
 
-                        Rectangle {
-                            id: prof
-                            required property var modelData
-                            readonly property bool selected: PowerProfiles.profile === modelData.value
-                            readonly property bool usable: modelData.value !== PowerProfile.Performance
-                                || PowerProfiles.hasPerformanceProfile
+                Repeater {
+                    model: profiles.options
 
-                            width: (profiles.width - profiles.spacing * 2) / 3
-                            height: profiles.height
-                            radius: Tokens.radiusMd
-                            opacity: usable ? 1 : 0.4
-                            color: selected ? Tokens.accent
-                                 : profMouse.containsMouse ? Tokens.fillHover : Tokens.ink(0.06)
-                            scale: profMouse.pressed ? Tokens.pressScale : 1
-                            Behavior on color { ColorAnimation { duration: Tokens.durFast } }
-                            Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
+                    Rectangle {
+                        id: prof
+                        required property var modelData
+                        readonly property bool selected: PowerProfiles.profile === modelData.value
+                        readonly property bool usable: modelData.value !== PowerProfile.Performance
+                            || PowerProfiles.hasPerformanceProfile
 
-                            Text {
-                                anchors.centerIn: parent
-                                text: prof.modelData.label
-                                color: prof.selected ? "white" : Tokens.textPrimary
-                                font.family: Tokens.fontFamily
-                                font.pixelSize: Tokens.fontSmall
-                                font.weight: prof.selected ? Font.DemiBold : Font.Normal
-                            }
+                        width: (profiles.width - profiles.spacing * 2) / 3
+                        height: profiles.height
+                        radius: Tokens.radiusMd
+                        opacity: usable ? 1 : 0.4
+                        color: selected ? Tokens.accent
+                             : profMouse.containsMouse ? Tokens.fillHover : Tokens.ink(0.06)
+                        scale: profMouse.pressed ? Tokens.pressScale : 1
+                        Behavior on color { ColorAnimation { duration: Tokens.durFast } }
+                        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
-                            MouseArea {
-                                id: profMouse
-                                cursorShape: Qt.PointingHandCursor
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                enabled: prof.usable
-                                onClicked: PowerProfiles.profile = prof.modelData.value
-                            }
+                        Text {
+                            anchors.centerIn: parent
+                            text: prof.modelData.label
+                            color: prof.selected ? "white" : Tokens.textPrimary
+                            font.family: Tokens.fontFamily
+                            font.pixelSize: Tokens.fontSmall
+                            font.weight: prof.selected ? Font.DemiBold : Font.Normal
+                        }
+
+                        MouseArea {
+                            id: profMouse
+                            cursorShape: Qt.PointingHandCursor
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            enabled: prof.usable
+                            onClicked: PowerProfiles.profile = prof.modelData.value
                         }
                     }
                 }
