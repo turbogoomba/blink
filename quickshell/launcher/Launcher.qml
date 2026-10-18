@@ -42,6 +42,8 @@ PanelWindow {
         const scored = []
         for (const e of DesktopEntries.applications.values) {
             if (e.noDisplay) continue
+            // WhatsApp has its own Blink entry below, so skip the app's own
+            if (WhatsAppService.isWhatsApp(e.id) || WhatsAppService.isWhatsApp(e.name)) continue
             if ((SettingsService.launcherHidden ?? []).indexOf(e.name) >= 0) continue
             const name = (e.name ?? "").toLowerCase()
             const generic = (e.genericName ?? "").toLowerCase()
@@ -94,6 +96,14 @@ PanelWindow {
             id: "blink-settings",
             keys: ["blink", "settings", "preferences", "innstillinger", "wifi", "bluetooth", "sound", "bar", "dock"],
             execute: () => ShellState.settingsOpen = true
+        },
+        {
+            name: "WhatsApp",
+            genericName: WhatsAppService.running ? "Show or hide" : "Start",
+            icon: "whatsapp",
+            id: "blink-whatsapp",
+            keys: ["whatsapp", "wa", "chat", "melding", "meldinger"],
+            execute: () => WhatsAppService.toggle()
         }
     ]
 

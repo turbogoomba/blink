@@ -13,6 +13,8 @@ hl.env("QS_ICON_THEME", "Papirus-Dark")
 hl.on("hyprland.start", function()
     hl.exec_cmd("sh -c 'dbus-update-activation-environment --systemd --all; systemctl --user start blink.service hypridle.service'")
     hl.exec_cmd("awww-daemon")
+    -- WhatsApp starts hidden in special:whatsapp, so notifications always work
+    hl.exec_cmd("flatpak run com.rtosta.zapzap")
 end)
 
 ---- INPUT (felles) ----
@@ -68,4 +70,14 @@ hl.window_rule({
     float = true,
     center = true,
     size = { 1040, 700 },
+})
+
+-- WhatsApp lives in its own hidden special workspace. SUPER+A or "whatsapp" in the launcher shows it.
+hl.window_rule({
+    name = "whatsapp-hidden",
+    match = { class = ".*([Zz]ap[Zz]ap|whatsapp).*" },
+    workspace = "special:whatsapp silent",
+    float = true,
+    center = true,
+    size = { "(monitor_w*0.5)", "(monitor_h*0.7)" },
 })

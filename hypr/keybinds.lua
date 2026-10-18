@@ -18,6 +18,7 @@ hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd(qs .. "record toggle"))  -- s
 hl.bind("F6", hl.dsp.exec_cmd(qs .. "screenshot region"))
 hl.bind("SHIFT + Print", hl.dsp.exec_cmd(qs .. "screenshot screen"))
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("hyprpicker -a"))
+hl.bind(mainMod .. " + A", hl.dsp.exec_cmd(qs .. "whatsapp toggle"))  -- show/hide WhatsApp
 
 ------------------------
 ---- WINDOW CONTROL ----

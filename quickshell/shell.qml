@@ -23,6 +23,7 @@ ShellRoot {
         AccentService.enabled   // start the wallpaper accent
         RecordService.recording // start the recorder (keys)
         ThemeService.appsDir    // start giving the theme to other apps
+        WhatsAppService.running // start the WhatsApp toggle (keys)
     }
 
     // Bar på hver skjerm
