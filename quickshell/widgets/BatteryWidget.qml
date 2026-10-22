@@ -92,6 +92,9 @@ PanelWindow {
         Text {
             visible: w.devices.length === 0
             anchors.centerIn: parent
+            width: parent.width - 32
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WordWrap
             text: "No devices with a battery"
             color: Tokens.textSecondary
             font.family: Tokens.fontFamily
