@@ -34,6 +34,9 @@ Singleton {
     property alias widgetTimetable: adapter.widgetTimetable
     property alias widgetX: adapter.widgetX
     property alias widgetY: adapter.widgetY
+    property alias widgetBattery: adapter.widgetBattery
+    property alias batWidgetX: adapter.batWidgetX
+    property alias batWidgetY: adapter.batWidgetY
 
     // Dock
     property alias dockEnabled: adapter.dockEnabled
@@ -215,6 +218,9 @@ Singleton {
             property bool widgetTimetable: true
             property int widgetX: -1
             property int widgetY: -1
+            property bool widgetBattery: true
+            property int batWidgetX: -1
+            property int batWidgetY: -1
             property bool dockEnabled: true
             property var launcherHidden: ["System Settings", "KDE System Settings", "Thunar Preferences", "Volume Control"]
             property int dockSize: 64

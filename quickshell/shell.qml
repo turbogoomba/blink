@@ -36,6 +36,13 @@ ShellRoot {
         }
     }
 
+    LazyLoader {
+        active: SettingsService.widgetBattery && !ShellState.focusMode
+        WidgetsUI.BatteryWidget {
+            screen: Quickshell.screens[0]
+        }
+    }
+
     // Bar på hver skjerm
     Variants {
         model: SettingsService.sideBar ? [] : Quickshell.screens

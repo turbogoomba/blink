@@ -298,6 +298,7 @@ PanelWindow {
         onCxChanged: requestPaint()
         x: win.fromLeft ? SettingsService.sideWidth : win.width - win.frameT - 14
         y: sheet.y - 14
+        visible: Tokens.attached
     }
     // Beside the sheet, where it meets the bottom edge of the frame
     Fillet {
@@ -305,6 +306,7 @@ PanelWindow {
         onCxChanged: requestPaint()
         x: win.fromLeft ? sheet.x + sheet.width : sheet.x - 14
         y: win.height - win.frameT - 14
+        visible: Tokens.attached
     }
 
     Item {
@@ -320,19 +322,21 @@ PanelWindow {
             shadowVerticalOffset: 2
         }
         height: content.implicitHeight + 2 * 18
-        x: win.fromLeft ? SettingsService.sideWidth : win.width - win.frameT - width
-        y: win.height - win.frameT - height
+        // (glass: floating a little away from the edges)
+        x: win.fromLeft ? SettingsService.sideWidth + Tokens.gap : win.width - win.frameT - width - (Tokens.glass ? Tokens.gap - win.frameT + 6 : 0)
+        y: win.height - win.frameT - height - (Tokens.glass ? Tokens.gap - win.frameT + 6 : 0)
         clip: true
 
         // Black like the frame, square where it joins it, round at the free corner
         Rectangle {
             anchors.fill: parent
-            topLeftRadius: win.fromLeft ? 0 : 22
-            topRightRadius: win.fromLeft ? 22 : 0
-            bottomLeftRadius: 0
-            bottomRightRadius: 0
+            topLeftRadius: win.fromLeft && !Tokens.glass ? 0 : 22
+            topRightRadius: win.fromLeft || Tokens.glass ? 22 : 0
+            bottomLeftRadius: Tokens.glass ? 22 : 0
+            bottomRightRadius: Tokens.glass ? 22 : 0
             color: Tokens.barBg
         }
+        GlassEdge { radius: 22; z: 10 }
 
         HoverHandler {
             id: sheetHover

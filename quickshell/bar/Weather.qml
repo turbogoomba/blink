@@ -102,11 +102,13 @@ PanelWindow {
     // Top bar: left and right of the sheet, under the bar.
     // Side bar: above and below the sheet, next to the bar.
     Fillet {
+        visible: Tokens.attached
         x: wx.side ? SettingsService.sideWidth : sheet.x - 14
         y: wx.side ? sheet.y - 14 : SettingsService.topInset
         cx: wx.side ? 14 : 0; cy: wx.side ? 0 : 14
     }
     Fillet {
+        visible: Tokens.attached
         x: wx.side ? SettingsService.sideWidth : sheet.x + sheet.width
         y: wx.side ? sheet.y + sheet.height : SettingsService.topInset
         cx: 14; cy: 14
@@ -152,7 +154,7 @@ PanelWindow {
             : Math.max(6, Math.min(wx.width - width - 6, ShellState.weatherAnchorX - width / 2))
         y: wx.side
             ? Math.max(Tokens.frameT + 14, Math.min(wx.height - Tokens.frameT - 14 - fullHeight, ShellState.weatherAnchorY - fullHeight / 2))
-            : SettingsService.topInset
+            : SettingsService.topInset + Tokens.gap
         clip: true
         focus: true
         Keys.onEscapePressed: wx.close()
@@ -160,12 +162,13 @@ PanelWindow {
         // Square where it joins the bar, round at the free corners
         Rectangle {
             anchors.fill: parent
-            topLeftRadius: 0
-            topRightRadius: wx.side ? Tokens.radiusXl : 0
-            bottomLeftRadius: wx.side ? 0 : Tokens.radiusXl
+            topLeftRadius: Tokens.glass ? Tokens.radiusXl : 0
+            topRightRadius: wx.side || Tokens.glass ? Tokens.radiusXl : 0
+            bottomLeftRadius: wx.side && !Tokens.glass ? 0 : Tokens.radiusXl
             bottomRightRadius: Tokens.radiusXl
             color: Tokens.barBg
         }
+        GlassEdge { radius: Tokens.radiusXl; z: 10 }
 
         MouseArea { anchors.fill: parent }
 

@@ -890,11 +890,22 @@ Flickable {
                     }
                 }
                 SettingRow {
-                    title: "Widget position"
-                    subtitle: "Put it back in the top right corner"
+                    title: "Battery widget"
+                    subtitle: "Charge of this computer, headset, mouse and Bluetooth devices, like on the iPhone"
+                    Toggle {
+                        checked: SettingsService.widgetBattery
+                        apply: function(v) { SettingsService.widgetBattery = v }
+                    }
+                }
+                SettingRow {
+                    title: "Widget positions"
+                    subtitle: "Put both widgets back in the top right corner"
                     PushButton {
                         text: "Reset"
-                        apply: function() { SettingsService.widgetX = -1; SettingsService.widgetY = -1 }
+                        apply: function() {
+                            SettingsService.widgetX = -1; SettingsService.widgetY = -1
+                            SettingsService.batWidgetX = -1; SettingsService.batWidgetY = -1
+                        }
                     }
                 }
                 SettingRow {

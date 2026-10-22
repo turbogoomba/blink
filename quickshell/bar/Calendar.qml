@@ -146,11 +146,11 @@ PanelWindow {
             c.fill()
         }
     }
-    Fillet { x: cal.side ? sheet.x : sheet.x - 14; y: cal.side ? sheet.y - 14 : sheet.y; visible: sheet.height > 1 }
+    Fillet { x: cal.side ? sheet.x : sheet.x - 14; y: cal.side ? sheet.y - 14 : sheet.y; visible: sheet.height > 1 && Tokens.attached }
     Fillet {
         x: cal.side ? sheet.x + sheet.width : sheet.x + sheet.width - 14
         y: cal.side ? sheet.y + sheet.height - 14 : sheet.y + sheet.height
-        visible: sheet.height > 1
+        visible: sheet.height > 1 && Tokens.attached
     }
 
     component NavButton: Rectangle {
@@ -191,8 +191,8 @@ PanelWindow {
             shadowVerticalOffset: 2
         }
         // Flush against the frame/bar it grows out of
-        x: cal.side ? SettingsService.sideWidth : cal.width - Tokens.frameT - width
-        y: cal.side ? cal.height - Tokens.frameT - height : SettingsService.topInset
+        x: cal.side ? SettingsService.sideWidth + Tokens.gap : cal.width - Tokens.frameT - width - (Tokens.glass ? Tokens.gap - Tokens.frameT + 6 : 0)
+        y: cal.side ? cal.height - Tokens.frameT - height - Tokens.gap : SettingsService.topInset + Tokens.gap
         width: 300
         readonly property real fullHeight: body.implicitHeight + 28
         height: fullHeight * Math.max(0, cal.reveal)
@@ -204,12 +204,13 @@ PanelWindow {
 
         Rectangle {
             anchors.fill: parent
-            topLeftRadius: 0
-            topRightRadius: cal.side ? Tokens.radiusXl : 0
-            bottomLeftRadius: cal.side ? 0 : Tokens.radiusXl
-            bottomRightRadius: 0
+            topLeftRadius: Tokens.glass ? Tokens.radiusXl : 0
+            topRightRadius: cal.side || Tokens.glass ? Tokens.radiusXl : 0
+            bottomLeftRadius: cal.side && !Tokens.glass ? 0 : Tokens.radiusXl
+            bottomRightRadius: Tokens.glass ? Tokens.radiusXl : 0
             color: Tokens.barBg
         }
+        GlassEdge { radius: Tokens.radiusXl; z: 10 }
 
         MouseArea { anchors.fill: parent }
 
