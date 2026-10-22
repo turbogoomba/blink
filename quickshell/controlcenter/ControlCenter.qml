@@ -881,7 +881,7 @@ PanelWindow {
         id: soundSection
         // ---------- Lyd ----------
         ColumnLayout {
-            spacing: Tokens.spaceSm
+            spacing: 0
 
             SliderCard {
                 order: 4
@@ -899,11 +899,23 @@ PanelWindow {
                 onIconClicked: if (cc.audio) cc.audio.muted = !cc.audio.muted
             }
 
-            // Each app playing sound, with its own slider
-            Card {
-                order: 4
-                visible: cc.soundApps
+            // Each app playing sound, with its own slider. Slides open under Sound.
+            Item {
+                id: appsBox
                 Layout.fillWidth: true
+                readonly property real full: appsCard.implicitHeight + Tokens.spaceSm
+                Layout.preferredHeight: cc.soundApps ? full : 0
+                Behavior on Layout.preferredHeight { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeMove } }
+                clip: true
+
+            Card {
+                id: appsCard
+                order: 4
+                y: Tokens.spaceSm
+                width: parent.width
+                opacity: cc.soundApps ? appear : 0
+                Behavior on opacity { NumberAnimation { duration: Tokens.durNormal } }
+                transform: Translate { y: cc.soundApps ? 0 : -12; Behavior on y { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeMove } } }
                 implicitHeight: appsCol.implicitHeight + 2 * Tokens.spaceMd
 
                 Column {
@@ -1008,6 +1020,7 @@ PanelWindow {
                         }
                     }
                 }
+            }
             }
         }
     }

@@ -513,12 +513,17 @@ PanelWindow {
         signal dropped(real delta)
         z: dragging ? 10 : 0
 
-        // Magnification: the closer the mouse, the bigger (max 1.45)
+        // Magnification like on a Mac: the closer the mouse, the bigger (max 1.6), on a smooth
+        // curve. The icon also takes more room, so its neighbours move aside and the dock widens.
         readonly property real mag: {
-            if (dock.hoverPos < 0) return 1
+            if (dock.hoverPos < 0 || dock.reordering) return 1
             const c = dock.horizontal ? icon.x + icon.width / 2 : icon.y + icon.height / 2
-            return 1 + 0.45 * Math.max(0, 1 - Math.abs(dock.hoverPos - c) / 110)
+            const d = Math.min(1, Math.abs(dock.hoverPos - c) / 150)
+            return 1 + 0.6 * (Math.cos(d * Math.PI) + 1) / 2
         }
+        // Room in the row, eased so the layout does not chase the mouse
+        property real slot: mag
+        Behavior on slot { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
 
         // Bounce like on a Mac: keeps hopping until the app's window shows up (max 8 s)
         property bool launching: false
@@ -537,8 +542,8 @@ PanelWindow {
             onTriggered: icon.launching = false
         }
 
-        width: dock.size
-        height: dock.size
+        width: dock.horizontal ? dock.size * slot : dock.size
+        height: dock.horizontal ? dock.size : dock.size * slot
 
         // Which way is "away from the edge"
         readonly property real outX: dock.side === "left" ? 1 : dock.side === "right" ? -1 : 0
