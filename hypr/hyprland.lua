@@ -9,6 +9,9 @@ local hyprDir = home .. "/.config/hypr/"
 hl.env("XDG_DATA_DIRS", "/var/lib/flatpak/exports/share:" .. home .. "/.local/share/flatpak/exports/share:/usr/local/share:/usr/share")
 -- App icons in Blink (dock, launcher, switcher): WhiteSur, the same as GTK apps (apps/install.sh)
 hl.env("QS_ICON_THEME", "WhiteSur-dark")
+-- macOS cursor (AUR: apple_cursor). macOS-White is the white one.
+hl.env("XCURSOR_THEME", "macOS")
+hl.env("XCURSOR_SIZE", "24")
 -- Badges and download progress from Electron / Chromium apps (Discord / Vesktop ...) in the dock:
 -- they only send them on desktops they know. Uncomment to also say "Unity", then log out and in.
 -- hl.env("XDG_CURRENT_DESKTOP", "Hyprland:Unity")
@@ -17,6 +20,7 @@ hl.env("QS_ICON_THEME", "WhiteSur-dark")
 hl.on("hyprland.start", function()
     hl.exec_cmd("sh -c 'dbus-update-activation-environment --systemd --all; systemctl --user start blink.service hypridle.service'")
     hl.exec_cmd("awww-daemon")
+    hl.exec_cmd("hyprctl setcursor macOS 24")
     -- Plugins installed with hyprpm (hyprbars: title bars, see hyprbars.lua)
     hl.exec_cmd("hyprpm reload -n")
 end)

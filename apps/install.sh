@@ -93,9 +93,16 @@ set_ini() {
 }
 set_ini gtk-icon-theme-name WhiteSur-dark
 set_ini gtk-font-name "Inter 10"
+set_ini gtk-cursor-theme-name macOS
+set_ini gtk-cursor-theme-size 24
 gsettings set org.gnome.desktop.interface icon-theme WhiteSur-dark 2>/dev/null
 gsettings set org.gnome.desktop.interface font-name "Inter 10" 2>/dev/null
-echo "  ok: GTK font Inter, icons WhiteSur-dark"
+gsettings set org.gnome.desktop.interface cursor-theme macOS 2>/dev/null
+gsettings set org.gnome.desktop.interface cursor-size 24 2>/dev/null
+# Older X11 apps (Steam, games through XWayland) read the default cursor from here
+mkdir -p "$HOME/.icons/default"
+printf '[Icon Theme]\nInherits=macOS\n' > "$HOME/.icons/default/index.theme"
+echo "  ok: GTK font Inter, icons WhiteSur-dark, cursor macOS"
 
 # Nautilus opens folders everywhere: xdg-open, and "Show in folder" from apps.
 # Nautilus answers "Show in folder" itself. Older Blink installs pointed that at Thunar
