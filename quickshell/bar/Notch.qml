@@ -109,17 +109,18 @@ Rectangle {
     readonly property bool showClass: classSoon && !open && !showOsd && !showNotif && !showBt
     readonly property bool peek: !open && !showOsd && !showNotif && !showBt && !showClass && hover.hovered && hasMusic
     readonly property bool compact: !open && !showOsd && !showNotif && !showBt && !showClass && !peek
+        && reaction === "" && (hasMusic || hasShelf)
 
     // Glass themes: the notch hides while it has nothing to say, so the bar is clean like
     // a Mac. It comes back for volume, notifications, the next class, music, recording,
     // files on the shelf, or when the mouse goes to where it sits.
-    readonly property bool idleHidden: Tokens.glass && compact && !hasMusic && !showRec && !hasShelf && !dragging && !hover.hovered
+    readonly property bool idleHidden: Tokens.glass && !open && !showOsd && !showNotif && !showBt && !showClass && !peek
+        && !hasMusic && !hasShelf && !showRec && !dragging && !hover.hovered && reaction === ""
     opacity: idleHidden ? 0 : 1
     scale: idleHidden ? 0.7 : 1
     transformOrigin: Item.Top
     Behavior on opacity { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
     Behavior on scale { NumberAnimation { duration: Tokens.durSlow; easing.type: Tokens.easeGrow } }
-        && reaction === "" && (hasMusic || hasShelf)
 
     onDraggingChanged: {
         if (dragging) {
