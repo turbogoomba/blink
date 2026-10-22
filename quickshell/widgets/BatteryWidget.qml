@@ -9,7 +9,7 @@ import "snap.js" as Snap
 
 // The iPhone "Batteries" widget on the desktop: a ring per device with its charge.
 // This computer (laptops), headsets on a dongle (HeadsetControl), mice and keyboards
-// on a dongle (UPower) and Bluetooth devices. Lies under all windows; drag to move.
+// on a dongle (UPower), Bluetooth devices and phones (KDE Connect). Lies under all windows; drag to move.
 PanelWindow {
     id: w
 
@@ -53,6 +53,9 @@ PanelWindow {
             list.push({ name: d.model || "Device", icon: upowerIcon(d), level: norm(d.percentage), charging: false })
         for (const d of bt)
             list.push({ name: d.name, icon: d.icon || "bluetooth", level: d.battery, charging: false })
+        // Phones and tablets through KDE Connect
+        for (const p of PhoneService.phones)
+            list.push({ name: p.name, icon: p.type === "tablet" ? "tablet" : "phone", level: p.level, charging: p.charging })
         return list.slice(0, 4)
     }
 
