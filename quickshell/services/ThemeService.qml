@@ -8,6 +8,7 @@ import "../theme"
 // Gives the shell's theme to other apps, from the templates in blink/apps:
 //   Kitty            ~/.config/kitty/blink-theme.conf (kitty.conf includes it last)
 //   GTK (Nautilus ...) ~/.config/gtk-3.0 and gtk-4.0/gtk.css, plus light/dark preference
+//   Title bars       ~/.config/blink/hyprbars-colors.lua (hypr/hyprbars.lua reads it)
 //   Discord          ~/.config/vesktop/themes/MacRice.theme.css (Vesktop)
 //   Spotify          a "Blink" Spicetify theme. Applied fully once; after that the colors
 //                    are swapped without closing Spotify (Ctrl+Shift+R in Spotify shows them)
@@ -137,6 +138,16 @@ if [ "$G" = 1 ] && [ -f "$A/gtk/gtk.css" ]; then
     if [ "$LIGHT" = 1 ]; then scheme=prefer-light; else scheme=prefer-dark; fi
     gsettings set org.gnome.desktop.interface color-scheme "$scheme" 2>/dev/null
 fi
+
+# ---------- Window title bars (hyprbars) ----------
+# hypr/hyprbars.lua reads this file; BlinkBars.apply() shows the new colors right away
+h() { echo "$1" | tr -d '#'; }
+mkdir -p "$HOME/.config/blink"
+cat > "$HOME/.config/blink/hyprbars-colors.lua" <<EOF
+-- Written by Blink (Settings > Appearance). Changes when you pick another theme.
+return { bar = "rgb($(h $SURF2))", text = "rgb($(h $TXT))", inactive = "rgb($(h $BORD))" }
+EOF
+command -v hyprctl >/dev/null 2>&1 && hyprctl eval 'if BlinkBars then BlinkBars.apply() end' >/dev/null 2>&1
 
 # ---------- Discord (Vesktop) ----------
 if [ "$V" = 1 ] && [ -d "$HOME/.config/vesktop" ] && [ -f "$A/vesktop/MacRice.theme.css" ]; then

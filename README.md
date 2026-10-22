@@ -23,6 +23,7 @@ and everything grows out of the bar.
 - **Modes**: Do Not Disturb, Focus and Game Mode
 - **Bar sheets**: calendar, weather (MET Norway) and per-app sound
 - **Dock** that hides when a window covers it (intellihide), with notification badges, minimized windows and a Trash
+- **Title bars** on floating windows: round close / minimize / maximize, double-click to maximize (hyprbars)
 - **Launcher**, Alt+Tab switcher and Mission Control
 - **Lock screen** and **SDDM login** that match the shell
 - **Accent color** taken from the wallpaper
@@ -33,6 +34,7 @@ and everything grows out of the bar.
 ## Requirements
 - Arch Linux based distribution
 - Hyprland 0.56+ (Lua config)
+- hyprbars plugin for title bars (optional, the installer sets it up with hyprpm)
 - Quickshell 0.3+
 - The installer handles the rest!
 

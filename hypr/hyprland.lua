@@ -13,6 +13,8 @@ hl.env("QS_ICON_THEME", "Papirus-Dark")
 hl.on("hyprland.start", function()
     hl.exec_cmd("sh -c 'dbus-update-activation-environment --systemd --all; systemctl --user start blink.service hypridle.service'")
     hl.exec_cmd("awww-daemon")
+    -- Plugins installed with hyprpm (hyprbars: title bars, see hyprbars.lua)
+    hl.exec_cmd("hyprpm reload -n")
 end)
 
 ---- INPUT (felles) ----
@@ -45,6 +47,7 @@ end
 ---- RESTEN ----
 require("keybinds")
 require("style")
+require("hyprbars")
 
 ---- VINDUSREGLER ----
 -- Ignorer apper som ber om å starte maksimert (f.eks. kitty)

@@ -59,6 +59,8 @@ PKGS=(
     # tools the shell uses
     brightnessctl ddcutil playerctl cava grim slurp wl-clipboard libnotify jq curl
     wf-recorder ffmpeg pipewire wireplumber power-profiles-daemon networkmanager
+    # building Hyprland plugins with hyprpm (hyprbars: title bars)
+    cmake meson cpio
     # apps
     kitty btop nautilus sushi gvfs ffmpegthumbnailer
     # look
@@ -126,6 +128,17 @@ if ask "Link ~/.config/hypr to the repo?"; then
     [ -f "$REPO/hypr/overrides.lua" ] || { echo "-- Local tweaks for this machine only" > "$REPO/hypr/overrides.lua"; ok "created hypr/overrides.lua"; }
 else
     skip "Hyprland"
+fi
+
+# Title bars on floating windows: the hyprbars plugin (hypr/hyprbars.lua)
+if command -v hyprpm >/dev/null && ask "Install the hyprbars plugin (Mac-style title bars on floating windows)?"; then
+    if hyprpm list 2>/dev/null | grep -q hyprbars; then
+        skip "hyprbars already added"
+    else
+        hyprpm update && hyprpm add https://github.com/hyprwm/hyprland-plugins \
+            && ok "hyprland-plugins added" || warn "hyprpm could not add the plugins (run it inside Hyprland)"
+    fi
+    hyprpm enable hyprbars && ok "hyprbars enabled (loads at login)" || warn "could not enable hyprbars"
 fi
 
 # ---------- 3. Quickshell service ----------
