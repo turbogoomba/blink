@@ -308,7 +308,9 @@ PanelWindow {
         const ids = []
         for (const t of Hyprland.toplevels.values) {
             const appId = t.wayland?.appId
-            if (!appId || appId === "org.quickshell") continue
+            // Blink's own windows (Settings ...): Settings has its own icon. The class depends
+            // on the Quickshell build (org.quickshell, dev.noctalia.noctalia-qs ...).
+            if (!appId || /quickshell|noctalia-qs/i.test(appId)) continue
             if (pinned.some(p => matches(p, appId))) continue
             const key = findEntry(appId)?.id ?? appId
             if (!ids.includes(key)) ids.push(key)
