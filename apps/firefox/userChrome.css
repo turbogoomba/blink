@@ -63,6 +63,23 @@
   font-family: "IBM Plex Sans", sans-serif !important;
 }
 
+/* Low tabs. Newer Firefox sets these on :root, so set them there too (with compact density in user.js) */
+:root,
+#tabbrowser-tabs {
+  --tab-min-height: 26px !important;
+  --tab-block-margin: 2px !important;
+}
+#TabsToolbar,
+#TabsToolbar-customization-target,
+#tabbrowser-arrowscrollbox {
+  min-height: 32px !important;
+  max-height: 32px !important;
+}
+.tabbrowser-tab {
+  min-height: 30px !important;
+  max-height: 30px !important;
+}
+
 /* ---------- The top: one quiet layer, a hairline above the page ---------- */
 #navigator-toolbox {
   background: var(--b-toolbar) !important;
@@ -173,12 +190,11 @@
 /* ---------- Tabs: the active one is a raised card ---------- */
 #TabsToolbar {
   padding-inline: 4px 8px !important;
-  padding-block: 5px 0 !important;
+  padding-block: 2px 0 !important;
 }
 #tabbrowser-tabs,
 #tabbrowser-tabs[orient="horizontal"] {
-  --tab-min-height: 28px !important;
-  --tab-block-margin: 0 !important;
+  --tab-max-height: 30px !important;
   --tab-min-width: 120px !important;
   --tab-max-width: 240px !important;
   border-inline-start: none !important;

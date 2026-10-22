@@ -7,6 +7,10 @@ user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 // Tabs and the window buttons in one row at the top (Firefox draws the buttons)
 user_pref("browser.tabs.inTitlebar", 1);
 
+// Compact density: lower tabs and toolbar (userChrome.css trims the rest)
+user_pref("browser.compactmode.show", true);
+user_pref("browser.uidensity", 1);
+
 // New tab: only your favorites (Shortcuts), two rows, nothing sponsored
 user_pref("browser.newtabpage.activity-stream.feeds.topsites", true);
 user_pref("browser.newtabpage.activity-stream.topSitesRows", 2);
