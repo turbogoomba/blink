@@ -13,6 +13,9 @@ BlinkGlass = {}
 function BlinkGlass.apply()
     local ok, c = pcall(dofile, os.getenv("HOME") .. "/.config/blink/glass.lua")
     local on = ok and type(c) == "table" and c.enabled == true
+    -- Blur only with a glass theme: with it on, see-through kitty flickered on the solid
+    -- themes (where the dock is nearly solid and does not need it)
+    hl.config({ decoration = { blur = { enabled = on } } })
     hl.layer_rule({
         name = "blink-glass",
         enabled = on,
