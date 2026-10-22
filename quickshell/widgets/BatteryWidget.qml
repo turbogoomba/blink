@@ -5,6 +5,7 @@ import Quickshell.Bluetooth
 import Quickshell.Services.UPower
 import "../theme"
 import "../services"
+import "snap.js" as Snap
 
 // The iPhone "Batteries" widget on the desktop: a ring per device with its charge.
 // This computer (laptops), headsets on a dongle (HeadsetControl), mice and keyboards
@@ -59,6 +60,17 @@ PanelWindow {
         id: card
         x: w.savedX
         y: w.savedY
+        // Glides into place after a drop (not while dragging)
+        Behavior on x { enabled: !drag.pressed; NumberAnimation { duration: 320; easing.type: Easing.OutBack; easing.overshoot: 1.2 } }
+        Behavior on y { enabled: !drag.pressed; NumberAnimation { duration: 320; easing.type: Easing.OutBack; easing.overshoot: 1.2 } }
+        // Tell the other widgets where this one is
+        function publish() { ShellState.setWidgetRect("battery", { x: w.savedX, y: w.savedY, w: width, h: height }) }
+        Component.onCompleted: publish()
+        Connections {
+            target: w
+            function onSavedXChanged() { card.publish() }
+            function onSavedYChanged() { card.publish() }
+        }
         // A small square, like the iPhone Batteries widget
         width: 164
         height: 164
@@ -82,8 +94,14 @@ PanelWindow {
             drag.maximumX: w.width - card.width
             drag.maximumY: w.height - card.height
             onReleased: {
-                SettingsService.batWidgetX = Math.round(card.x)
-                SettingsService.batWidgetY = Math.round(card.y)
+                // Snap into line with the screen edges or the other widgets
+                const others = Object.keys(ShellState.widgetRects).filter(k => k !== "battery")
+                    .map(k => ShellState.widgetRects[k])
+                const p = Snap.snap(card.x, card.y, card.width, card.height, w.width, w.height,
+                    SettingsService.topInset, 110, others)
+                SettingsService.batWidgetX = Math.round(p.x)
+                SettingsService.batWidgetY = Math.round(p.y)
+                // Dragging replaced the bindings; follow the settings again (it glides there)
                 card.x = Qt.binding(() => w.savedX)
                 card.y = Qt.binding(() => w.savedY)
             }

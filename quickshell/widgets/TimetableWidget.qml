@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import "../theme"
 import "../services"
+import "snap.js" as Snap
 
 // The timetable as a desktop widget, like the macOS "Up Next" widget.
 // It lies under all windows (layer "bottom"), so it shows on an empty desktop.
@@ -53,6 +54,17 @@ PanelWindow {
         id: card
         x: w.savedX
         y: w.savedY
+        // Glides into place after a drop (not while dragging)
+        Behavior on x { enabled: !drag.pressed; NumberAnimation { duration: 320; easing.type: Easing.OutBack; easing.overshoot: 1.2 } }
+        Behavior on y { enabled: !drag.pressed; NumberAnimation { duration: 320; easing.type: Easing.OutBack; easing.overshoot: 1.2 } }
+        // Tell the other widgets where this one is
+        function publish() { ShellState.setWidgetRect("timetable", { x: w.savedX, y: w.savedY, w: width, h: height }) }
+        Component.onCompleted: publish()
+        Connections {
+            target: w
+            function onSavedXChanged() { card.publish() }
+            function onSavedYChanged() { card.publish() }
+        }
         width: 340
         height: 164
         radius: 22
@@ -76,9 +88,14 @@ PanelWindow {
             drag.maximumX: w.width - card.width
             drag.maximumY: w.height - card.height
             onReleased: {
-                SettingsService.widgetX = Math.round(card.x)
-                SettingsService.widgetY = Math.round(card.y)
-                // Dragging replaced the bindings; follow the settings again (Reset in Settings)
+                // Snap into line with the screen edges or the other widgets
+                const others = Object.keys(ShellState.widgetRects).filter(k => k !== "timetable")
+                    .map(k => ShellState.widgetRects[k])
+                const p = Snap.snap(card.x, card.y, card.width, card.height, w.width, w.height,
+                    SettingsService.topInset, 110, others)
+                SettingsService.widgetX = Math.round(p.x)
+                SettingsService.widgetY = Math.round(p.y)
+                // Dragging replaced the bindings; follow the settings again (it glides there)
                 card.x = Qt.binding(() => w.savedX)
                 card.y = Qt.binding(() => w.savedY)
             }

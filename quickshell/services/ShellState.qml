@@ -4,6 +4,13 @@ import Quickshell
 
 Singleton {
     property bool controlCenterOpen: false
+    // Where the desktop widgets are ({ id: { x, y, w, h } }), so they can snap to each other
+    property var widgetRects: ({})
+    function setWidgetRect(id, r) {
+        const m = Object.assign({}, widgetRects)
+        m[id] = r
+        widgetRects = m
+    }
     // Modes: "" (off), "dnd", "focus" or "game". Only one at a time.
     property string mode: ""
     readonly property bool doNotDisturb: mode !== ""
