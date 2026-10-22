@@ -146,6 +146,8 @@ local function release()
     end, { timeout = 30, type = "oneshot" })
 end
 
+-- Make the file exist from the start, so Blink can watch it
+write_preview("")
 hl.timer(tick, { timeout = 40, type = "repeat" })
 
 -- Letting go after dragging by the title bar, or with Super held
