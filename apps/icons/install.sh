@@ -62,7 +62,9 @@ icon_for() {
 # few Mac apps are called something else here.
 shopt -s nullglob nocaseglob
 # Oldest first, so when two files are for the same app the newest one wins
-mapfile -t ICNS < <(ls -1tr -- "$SRC"/*.icns "$HOME/Downloads"/*.icns 2>/dev/null)
+found=("$SRC"/*.icns "$HOME/Downloads"/*.icns)
+ICNS=()
+[ ${#found[@]} -gt 0 ] && mapfile -t ICNS < <(ls -1tr -- "${found[@]}")
 for icns in "${ICNS[@]}"; do
     word="$(basename "$icns")"; word="${word%%[_ .-]*}"; word="${word,,}"
     case "$word" in
