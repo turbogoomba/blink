@@ -119,6 +119,11 @@ echo "  ok: Neovim app (blink-nvim)"
 [ -e "$HOME/.local/share/applications/blink-gmail.desktop" ] || "$APPS/webapp.sh" "Gmail" https://mail.google.com/ || true
 [ -e "$HOME/.local/share/applications/blink-canvas.desktop" ] || "$APPS/webapp.sh" "Canvas" https://oslomet.instructure.com/ || true
 
+# Open/Save dialogs: GNOME's (like Nautilus), not KDE's
+mkdir -p "$HOME/.config/xdg-desktop-portal"
+ln -sf "$APPS/portals/hyprland-portals.conf" "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf"
+pacman -Qq xdg-desktop-portal-gtk >/dev/null 2>&1 || echo "  note: sudo pacman -S xdg-desktop-portal-gtk  (for the GNOME Open/Save dialog)"
+
 # Default apps for files (PDF, pictures, video, text)
 "$APPS/defaults.sh"
 
