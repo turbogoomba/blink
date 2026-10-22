@@ -99,7 +99,8 @@ PanelWindow {
     // ---------- Downloads ----------
     readonly property string downloadsDir: Quickshell.env("HOME") + "/Downloads"
     property bool downloadsOpen: false
-    readonly property int downloadsShown: Math.min(downloadsModel.count, 12)
+    // FolderListModel.count does not tell bindings when it changes, so count through an Instantiator
+    readonly property int downloadsShown: Math.min(downloadsItems.count, 12)
     FolderListModel {
         id: downloadsModel
         folder: "file://" + dock.downloadsDir
@@ -107,6 +108,16 @@ PanelWindow {
         showDirs: true
         showDirsFirst: false
         showHidden: false
+    }
+    Instantiator {
+        id: downloadsItems
+        model: downloadsModel
+        delegate: QtObject {
+            required property string filePath
+            required property string fileName
+            required property string fileSuffix
+            required property bool fileIsDir
+        }
     }
     readonly property var imageTypes: ["png", "jpg", "jpeg", "gif", "webp", "bmp", "svg"]
     function fileIcon(suffix, isDir) {
@@ -194,7 +205,12 @@ PanelWindow {
         showDotAndDotDot: false
         showDirs: true
     }
-    readonly property bool trashFull: trashModel.count > 0
+    Instantiator {
+        id: trashItems
+        model: trashModel
+        delegate: QtObject {}
+    }
+    readonly property bool trashFull: trashItems.count > 0
     // Make sure the folder exists, then watch it (the model does not notice a folder made later)
     Process {
         running: true
@@ -939,10 +955,11 @@ PanelWindow {
                     Item {
                         id: dlTile
                         required property int index
-                        readonly property string path: downloadsModel.get(index, "filePath") ?? ""
-                        readonly property string name: downloadsModel.get(index, "fileName") ?? ""
-                        readonly property string suffix: downloadsModel.get(index, "fileSuffix") ?? ""
-                        readonly property bool isDir: downloadsModel.get(index, "fileIsDir") ?? false
+                        readonly property var file: downloadsItems.objectAt(index)
+                        readonly property string path: file?.filePath ?? ""
+                        readonly property string name: file?.fileName ?? ""
+                        readonly property string suffix: file?.fileSuffix ?? ""
+                        readonly property bool isDir: file?.fileIsDir ?? false
                         readonly property bool isImage: !isDir && dock.imageTypes.includes(suffix.toLowerCase())
                         width: downloadsMenu.tile
                         height: downloadsMenu.tile + 6
@@ -1044,7 +1061,7 @@ PanelWindow {
                 leftPadding: 10
                 topPadding: Tokens.spaceXs
                 bottomPadding: Tokens.spaceXs
-                text: dock.trashFull ? "Trash · " + trashModel.count + (trashModel.count === 1 ? " item" : " items") : "Trash · empty"
+                text: dock.trashFull ? "Trash · " + trashItems.count + (trashItems.count === 1 ? " item" : " items") : "Trash · empty"
                 color: Tokens.textSecondary
                 font.family: Tokens.fontFamily
                 font.pixelSize: Tokens.fontSmall
