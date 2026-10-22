@@ -115,6 +115,9 @@ mkdir -p "$HOME/.local/share/applications"
 ln -sf "$APPS/nvim/blink-nvim.desktop" "$HOME/.local/share/applications/blink-nvim.desktop"
 echo "  ok: Neovim app (blink-nvim)"
 
+# Default apps for files (PDF, pictures, video, text)
+"$APPS/defaults.sh"
+
 # Nautilus opens folders everywhere: xdg-open, and "Show in folder" from apps.
 # Nautilus answers "Show in folder" itself. Older Blink installs pointed that at Thunar
 # with a link in ~/.local, which would win, so that link is removed.
