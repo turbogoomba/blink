@@ -882,33 +882,6 @@ Flickable {
                     }
                 }
                 SettingRow {
-                    title: "Desktop widget"
-                    subtitle: "Your next classes on the desktop. Drag it to move it"
-                    Toggle {
-                        checked: SettingsService.widgetTimetable
-                        apply: function(v) { SettingsService.widgetTimetable = v }
-                    }
-                }
-                SettingRow {
-                    title: "Battery widget"
-                    subtitle: "Charge of this computer, headset, mouse and Bluetooth devices, like on the iPhone"
-                    Toggle {
-                        checked: SettingsService.widgetBattery
-                        apply: function(v) { SettingsService.widgetBattery = v }
-                    }
-                }
-                SettingRow {
-                    title: "Widget positions"
-                    subtitle: "Put both widgets back in the top right corner"
-                    PushButton {
-                        text: "Reset"
-                        apply: function() {
-                            SettingsService.widgetX = -1; SettingsService.widgetY = -1
-                            SettingsService.batWidgetX = -1; SettingsService.batWidgetY = -1
-                        }
-                    }
-                }
-                SettingRow {
                     title: "Status"
                     subtitle: !TimetableService.active ? "Not shown (buses are active)"
                         : TimetableService.error !== "" ? TimetableService.error
@@ -917,6 +890,50 @@ Flickable {
                     PushButton {
                         text: "Refresh"
                         apply: function() { TimetableService.refresh() }
+                    }
+                }
+            }
+        }
+
+        // ---------- Widgets ----------
+        Column {
+            visible: panel.page === "widgets"
+            width: col.width
+            spacing: Theme.Tokens.spaceMd
+
+            SectionTitle { text: "On the desktop" }
+            Group {
+                SettingRow {
+                    title: "Timetable"
+                    subtitle: SettingsService.widgetTimetable ? "Your next classes. Needs the timetable link (Notch page)" : "Your next classes, like the macOS Up Next widget"
+                    PushButton {
+                        text: SettingsService.widgetTimetable ? "Remove" : "Add"
+                        apply: function() { SettingsService.widgetTimetable = !SettingsService.widgetTimetable }
+                    }
+                }
+                SettingRow {
+                    title: "Batteries"
+                    subtitle: "This computer, headset, mouse and Bluetooth devices, like on the iPhone"
+                    divider: false
+                    PushButton {
+                        text: SettingsService.widgetBattery ? "Remove" : "Add"
+                        apply: function() { SettingsService.widgetBattery = !SettingsService.widgetBattery }
+                    }
+                }
+            }
+
+            SectionTitle { text: "Placement" }
+            Group {
+                SettingRow {
+                    title: "Move widgets"
+                    subtitle: "Drag a widget on the desktop. It snaps to the edges and to the other widgets"
+                    divider: false
+                    PushButton {
+                        text: "Reset"
+                        apply: function() {
+                            SettingsService.widgetX = -1; SettingsService.widgetY = -1
+                            SettingsService.batWidgetX = -1; SettingsService.batWidgetY = -1
+                        }
                     }
                 }
             }

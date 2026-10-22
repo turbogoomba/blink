@@ -25,6 +25,7 @@ FloatingWindow {
         bell:    "M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4",
         corner:  "M5 3l14 7-6 2-2 6z",
         notch:   "M3 6h18v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4zM9 11v1M15 11v1",
+        widgets: "M4 4h7v7H4zM13 4h7v7h-7zM4 13h16v7H4z",
         windows: "M3 5h8v14H3zM13 5h8v6h-8zM13 13h8v6h-8z",
         cc:      "M4 7h10M18 7h2M4 17h2M10 17h10M16 5v4M8 15v4",
         search:  "M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14M20 20l-4-4",
@@ -40,6 +41,7 @@ FloatingWindow {
         { id: "notifications", group: "",            label: "Notifications", glyph: "bell",    sub: "How and where notifications show up",          source: "panels/ShellPanel.qml",     ready: true, page: "notifications" },
         { id: "corners",       group: "Desktop",     label: "Hot Corners",   glyph: "corner",  sub: "Actions in the corners of the screen",         source: "panels/ShellPanel.qml",     ready: true, page: "corners" },
         { id: "controlcenter", group: "",            label: "Control Center", glyph: "cc",     sub: "Pick and order what the Control Center shows", source: "panels/ShellPanel.qml",     ready: true, page: "controlcenter" },
+        { id: "widgets",       group: "",            label: "Widgets",       glyph: "widgets", sub: "Add or remove widgets on the desktop",         source: "panels/ShellPanel.qml",     ready: true, page: "widgets" },
         { id: "notch",         group: "",            label: "Notch",         glyph: "notch",   sub: "What the notch shows",                         source: "panels/ShellPanel.qml",     ready: true, page: "notch" },
         { id: "hyprland",      group: "System",      label: "Windows",       glyph: "windows", sub: "How Hyprland places, spaces and animates windows", source: "panels/HyprlandPanel.qml",  ready: true },
         { id: "about",         group: "",            label: "About",         glyph: "info",    sub: "This computer, and how hard it is working",   source: "panels/AboutPanel.qml",     ready: true }
@@ -50,6 +52,7 @@ FloatingWindow {
     // Search entries for the pages that are not built from HyprSettingsService.
     // Keep these in step with the titles on those pages.
     readonly property var shellIndex: [
+        { panel: "widgets", label: "Widgets", desc: "Add or remove the timetable and battery widgets on the desktop", keys: "widget desktop battery batteries timetable classes add remove snap" },
         { panel: "desktop", label: "Theme", desc: "Blink, Paper, Fjord, Dusk, Forest or Ember for the whole shell", keys: "theme colors colours dark light mode paper fjord dusk forest ember" },
         { panel: "about", label: "About this computer", desc: "Processor, graphics, memory, storage and live usage", keys: "system info specs cpu gpu ram memory disk kernel version uptime hardware" },
         { panel: "wifi", label: "Wi-Fi", desc: "Turn Wi-Fi on or off and join a network", keys: "wireless internet network password eduroam username login school work" },
