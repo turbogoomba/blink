@@ -34,7 +34,11 @@ Scope {
             const w = root.landWindow
             root.landOn = null
             root.landWindow = null
-            if (w) Hyprland.dispatch(`hl.dsp.focus({ window = "address:${root.addr(w)}" })`)
+            if (w) {
+                // Focus does not lift a floating window above the others: put it on top too
+                Hyprland.dispatch(`hl.dsp.focus({ window = "address:${root.addr(w)}" })`)
+                Hyprland.dispatch(`hl.dsp.window.alter_zorder({ mode = "top", window = "address:${root.addr(w)}" })`)
+            }
             else if (ws !== null && ws !== undefined && Hyprland.focusedWorkspace?.id !== ws)
                 Hyprland.dispatch(`hl.dsp.focus({ workspace = "${ws}" })`)
         }
