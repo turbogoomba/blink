@@ -61,7 +61,9 @@ icon_for() {
 # the app. Their file names start with the app ("Finder_Dark_macOS_27_icon.icns"), and a
 # few Mac apps are called something else here.
 shopt -s nullglob nocaseglob
-for icns in "$SRC"/*.icns "$HOME/Downloads"/*.icns; do
+# Oldest first, so when two files are for the same app the newest one wins
+mapfile -t ICNS < <(ls -1tr -- "$SRC"/*.icns "$HOME/Downloads"/*.icns 2>/dev/null)
+for icns in "${ICNS[@]}"; do
     word="$(basename "$icns")"; word="${word%%[_ .-]*}"; word="${word,,}"
     case "$word" in
         finder) word=nautilus ;;
