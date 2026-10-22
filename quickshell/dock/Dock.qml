@@ -35,7 +35,7 @@ PanelWindow {
     // (Settings > Dock > Glass; floating only, and always on with the Glass theme)
     readonly property bool glassy: floating && (SettingsService.dockGlass || Tokens.glass)
     readonly property color bodyColor: Tokens.glass ? Tokens.barBg
-        : glassy ? (Tokens.light ? Qt.rgba(1, 1, 1, 0.45) : Qt.rgba(0.11, 0.11, 0.13, 0.5)) : Tokens.barBg
+        : glassy ? (Tokens.light ? Qt.rgba(1, 1, 1, 0.5) : Qt.rgba(0.09, 0.09, 0.10, 0.68)) : Tokens.barBg
     // Distance from the screen edge to where the dock rests
     readonly property int frameT: floating ? (Tokens.glass ? 8 : Tokens.frameT + 8) : Tokens.frameT
 
@@ -1382,8 +1382,9 @@ PanelWindow {
     }
 
     // ---------- The dock body ----------
-    readonly property real along: (horizontal ? iconGrid.implicitWidth : iconGrid.implicitHeight) + 24
-    readonly property real across: size + 22
+    // The glass dock sits tighter around its icons, like the Tahoe dock
+    readonly property real along: (horizontal ? iconGrid.implicitWidth : iconGrid.implicitHeight) + (glassy ? 16 : 24)
+    readonly property real across: size + (glassy ? 14 : 22)
 
     // Thin strip at the edge that wakes the dock
     Item {
