@@ -98,7 +98,7 @@ Singleton {
 	readonly property int spacing: spaceMd // old name, kept for compatibility
 
 	// ---------- Font ----------
-	readonly property string fontFamily: "IBM Plex Sans"
+	readonly property string fontFamily: "Inter"
 	readonly property int fontSmall: 11   // captions, secondary lines
 	readonly property int fontBody: 13    // normal text
 	readonly property int fontTitle: 15   // headings

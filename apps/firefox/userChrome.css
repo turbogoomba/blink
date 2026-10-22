@@ -62,7 +62,7 @@
 }
 
 * {
-  font-family: "IBM Plex Sans", sans-serif !important;
+  font-family: "Inter", sans-serif !important;
 }
 
 /* Low tabs. Newer Firefox sets these on :root, so set them there too (with compact density in user.js) */

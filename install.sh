@@ -64,7 +64,7 @@ PKGS=(
     # apps
     kitty btop nautilus sushi gvfs ffmpegthumbnailer
     # look
-    ttf-ibm-plex papirus-icon-theme apple_cursor
+    ttf-ibm-plex inter-font papirus-icon-theme apple_cursor
     # login screen
     sddm qt6-declarative
 )

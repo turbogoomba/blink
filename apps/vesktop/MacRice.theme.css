@@ -71,9 +71,9 @@
   --text-link: var(--mr-accent) !important;
 
   /* Font */
-  --font-primary: "IBM Plex Sans", sans-serif !important;
-  --font-display: "IBM Plex Sans", sans-serif !important;
-  --font-headline: "IBM Plex Sans", sans-serif !important;
+  --font-primary: "Inter", sans-serif !important;
+  --font-display: "Inter", sans-serif !important;
+  --font-headline: "Inter", sans-serif !important;
 }
 
 /* ============================================

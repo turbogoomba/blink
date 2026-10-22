@@ -8,7 +8,7 @@ Rectangle {
     height: 1080
     color: "#101012"
 
-    readonly property string fontFamily: "IBM Plex Sans"
+    readonly property string fontFamily: "Inter"
     readonly property string userName: userModel.lastUser
     readonly property string displayName: config.displayName || userName
     property int sessionIndex: sessionModel.lastIndex >= 0 ? sessionModel.lastIndex : 0

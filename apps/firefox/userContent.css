@@ -18,7 +18,7 @@
     color: #e5e5e7 !important;
   }
   * {
-    font-family: "IBM Plex Sans", sans-serif !important;
+    font-family: "Inter", sans-serif !important;
   }
 
   /* Only the favorites: no logo, search box, weather, stories or personalize button.

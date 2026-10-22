@@ -72,7 +72,7 @@ if has_plugin() then
             hyprbars = {
                 enabled = true,
                 bar_height = 32,
-                bar_text_font = "IBM Plex Sans",
+                bar_text_font = "Inter",
                 bar_text_size = 11,
                 bar_text_weight = "medium",
                 bar_text_align = "center",

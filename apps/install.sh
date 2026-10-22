@@ -79,7 +79,7 @@ done
 "$APPS/nautilus/setup.sh"
 command -v thunar >/dev/null && "$APPS/thunar/setup.sh"
 
-# Font and icons for GTK apps: IBM Plex Sans like Blink, WhiteSur (macOS style) icons
+# Font and icons for GTK apps: Inter (close to the macOS font) like Blink, WhiteSur (macOS style) icons
 if [ ! -d "$HOME/.local/share/icons/WhiteSur-dark" ] && [ ! -d /usr/share/icons/WhiteSur-dark ]; then
     git clone --depth 1 https://github.com/vinceliuice/WhiteSur-icon-theme /tmp/whitesur-icons >/dev/null 2>&1 \
         && /tmp/whitesur-icons/install.sh -a >/dev/null && echo "  ok: WhiteSur icons installed"
@@ -92,10 +92,10 @@ set_ini() {
     if grep -q "^$1=" "$ini"; then sed -i "s|^$1=.*|$1=$2|" "$ini"; else echo "$1=$2" >> "$ini"; fi
 }
 set_ini gtk-icon-theme-name WhiteSur-dark
-set_ini gtk-font-name "IBM Plex Sans 10"
+set_ini gtk-font-name "Inter 10"
 gsettings set org.gnome.desktop.interface icon-theme WhiteSur-dark 2>/dev/null
-gsettings set org.gnome.desktop.interface font-name "IBM Plex Sans 10" 2>/dev/null
-echo "  ok: GTK font IBM Plex Sans, icons WhiteSur-dark"
+gsettings set org.gnome.desktop.interface font-name "Inter 10" 2>/dev/null
+echo "  ok: GTK font Inter, icons WhiteSur-dark"
 
 # Nautilus opens folders everywhere: xdg-open, and "Show in folder" from apps.
 # Nautilus answers "Show in folder" itself. Older Blink installs pointed that at Thunar
