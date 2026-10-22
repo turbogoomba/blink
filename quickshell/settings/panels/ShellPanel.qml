@@ -690,6 +690,14 @@ Flickable {
                     }
                 }
                 SettingRow {
+                    title: "Glass"
+                    subtitle: "See-through with blur behind it, like the macOS Tahoe dock. Floating dock only"
+                    Toggle {
+                        checked: SettingsService.dockGlass
+                        apply: function(v) { SettingsService.dockGlass = v }
+                    }
+                }
+                SettingRow {
                     title: "Side drawer"
                     subtitle: "Graphs, favorite apps and folders on the edge opposite the dock"
                     Toggle {

@@ -23,12 +23,19 @@ import "../services"
 // and a red badge with unread notifications.
 PanelWindow {
     id: dock
+    // Own name, so Hyprland can blur behind the glass dock (hypr/glass.lua)
+    WlrLayershell.namespace: "blink-dock"
 
     readonly property string side: SettingsService.dockPosition
     readonly property bool horizontal: side === "bottom"
     // Floating: the dock hovers a little above the edge with all corners round,
     // instead of growing out of the frame (Settings > Dock > Floating; always on glass)
     readonly property bool floating: SettingsService.dockFloating || Tokens.glass
+    // See-through with blur behind it and a light rim, like the macOS Tahoe dock
+    // (Settings > Dock > Glass; floating only, and always on with the Glass theme)
+    readonly property bool glassy: floating && (SettingsService.dockGlass || Tokens.glass)
+    readonly property color bodyColor: Tokens.glass ? Tokens.barBg
+        : glassy ? (Tokens.light ? Qt.rgba(1, 1, 1, 0.45) : Qt.rgba(0.11, 0.11, 0.13, 0.5)) : Tokens.barBg
     // Distance from the screen edge to where the dock rests
     readonly property int frameT: floating ? (Tokens.glass ? 8 : Tokens.frameT + 8) : Tokens.frameT
 
@@ -127,6 +134,19 @@ PanelWindow {
         }
     }
     readonly property var imageTypes: ["png", "jpg", "jpeg", "gif", "webp", "bmp", "svg"]
+    // The three newest downloads for the stack in the dock, oldest first (drawn at the bottom)
+    readonly property var downloadsStack: {
+        const n = Math.min(3, downloadsItems.count)
+        const out = []
+        for (let i = n - 1; i >= 0; i--) {
+            const f = downloadsItems.objectAt(i)
+            if (!f) continue
+            const img = !f.fileIsDir && imageTypes.includes((f.fileSuffix ?? "").toLowerCase())
+            out.push({ image: img, source: img ? "file://" + f.filePath
+                : Quickshell.iconPath(fileIcon(f.fileSuffix, f.fileIsDir), "text-x-generic") })
+        }
+        return out
+    }
     function fileIcon(suffix, isDir) {
         if (isDir) return "folder"
         const s = (suffix ?? "").toLowerCase()
@@ -494,6 +514,7 @@ PanelWindow {
     component DockIcon: Item {
         id: icon
         property string source: ""
+        property var stack: []             // Downloads: files drawn as a fanned stack instead of an icon
         property string label: ""
         property bool running: false
         property bool dimmed: false
@@ -574,6 +595,36 @@ PanelWindow {
             transform: Translate {
                 x: icon.hop * icon.outX + (dock.horizontal ? icon.dragDelta : 0)
                 y: icon.hop * icon.outY + (dock.horizontal ? 0 : icon.dragDelta)
+            }
+
+            // The Downloads stack: each file a little turned, the newest on top
+            Repeater {
+                model: icon.stack
+                Item {
+                    required property var modelData
+                    required property int index
+                    readonly property int fromTop: icon.stack.length - 1 - index
+                    anchors.centerIn: parent
+                    anchors.verticalCenterOffset: -fromTop * 2
+                    width: parent.width * 0.78
+                    height: parent.height * 0.78
+                    rotation: [0, -9, 8][fromTop] ?? 0
+                    // Pictures get a white border, like a photo
+                    Rectangle {
+                        visible: modelData.image
+                        anchors.fill: parent
+                        anchors.margins: -2
+                        radius: 4
+                        color: "white"
+                    }
+                    Image {
+                        anchors.fill: parent
+                        source: modelData.source
+                        sourceSize: Qt.size(96, 96)
+                        fillMode: modelData.image ? Image.PreserveAspectCrop : Image.PreserveAspectFit
+                        asynchronous: true
+                    }
+                }
             }
 
             // Progress the app reports (a download, a copy), along the bottom of the icon
@@ -1439,17 +1490,17 @@ PanelWindow {
         Rectangle {
             anchors.fill: parent
             radius: Tokens.radiusXl
-            color: Tokens.barBg
+            color: dock.bodyColor
         }
         Rectangle {
             visible: !dock.floating
-            color: Tokens.barBg
+            color: dock.bodyColor
             x: dock.side === "right" ? parent.width / 2 : 0
             y: dock.horizontal ? parent.height / 2 : 0
             width: dock.horizontal ? parent.width : parent.width / 2
             height: dock.horizontal ? parent.height / 2 : parent.height
         }
-        GlassEdge { radius: Tokens.radiusXl }
+        GlassEdge { radius: Tokens.radiusXl; force: dock.glassy }
 
         Grid {
             id: iconGrid
@@ -1503,7 +1554,9 @@ PanelWindow {
 
             DockIcon {
                 id: downloadsIcon
-                source: Quickshell.iconPath("folder-download", "folder")
+                // A stack of the newest downloads, like on a Mac (the folder when it is empty)
+                stack: dock.downloadsStack
+                source: stack.length > 0 ? "" : Quickshell.iconPath("folder-download", "folder")
                 label: "Downloads"
                 running: dock.downloadsOpen
                 function toggle() {

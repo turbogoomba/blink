@@ -21,6 +21,14 @@ function BlinkGlass.apply()
         -- Only blur behind what is really there (not the clear parts around the shapes)
         ignore_alpha = 0.15,
     })
+    -- The dock can be glass on its own too (Settings > Dock > Glass)
+    hl.layer_rule({
+        name = "blink-glass-dock",
+        enabled = on or (ok and type(c) == "table" and c.dock == true),
+        match = { namespace = "^blink-dock$" },
+        blur = true,
+        ignore_alpha = 0.15,
+    })
 end
 
 BlinkGlass.apply()

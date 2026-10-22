@@ -53,6 +53,8 @@ Singleton {
     property alias dockHide: adapter.dockHide
     // The dock hovers above the edge with all corners round, instead of growing out of the frame
     property alias dockFloating: adapter.dockFloating
+    // The floating dock is see-through with blur behind it, like macOS Tahoe
+    property alias dockGlass: adapter.dockGlass
     // Pinned apps (desktop entry ids), in order
     property alias dockApps: adapter.dockApps
 
@@ -230,6 +232,7 @@ Singleton {
             property string dockPosition: "bottom"
             property string dockHide: ""
             property bool dockFloating: true
+            property bool dockGlass: true
             property list<string> dockApps: ["firefox", "org.gnome.Nautilus", "kitty"]
             property list<string> favApps: []
             property list<string> favFolders: []

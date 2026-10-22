@@ -6,7 +6,9 @@ import QtQuick
 Item {
     id: edge
     anchors.fill: parent
-    visible: Tokens.glass
+    // Also on a solid theme when a surface asks for it (the glass dock)
+    property bool force: false
+    visible: Tokens.glass || force
     property real radius: Tokens.radiusXl
     property real topLeftRadius: radius
     property real topRightRadius: radius
