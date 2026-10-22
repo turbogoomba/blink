@@ -58,7 +58,21 @@ PanelWindow {
     function iconFile(name) { return Qt.resolvedUrl("../icons/" + name + ".svg") }
 
     // ---------- Data ----------
-    PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
+    PwObjectTracker { objects: [Pipewire.defaultAudioSink, ...cc.soundStreams] }
+    // Apps playing sound right now, for the per-app sliders under Sound
+    readonly property var soundStreams: Pipewire.nodes.values.filter(n => n.isStream && n.isSink && n.audio)
+    // Sound opened to show each app (click "Sound")
+    property bool soundApps: false
+    function streamName(n) {
+        const p = n.properties ?? {}
+        return p["application.name"] || n.description || n.nickname || n.name || "App"
+    }
+    function streamIcon(n) {
+        const p = n.properties ?? {}
+        const name = p["application.icon-name"] || p["application.process.binary"] || streamName(n)
+        const entry = DesktopEntries.heuristicLookup(name)
+        return Quickshell.iconPath(entry?.icon ?? name.toLowerCase(), "audio-x-generic")
+    }
 
     readonly property var btAdapter: Bluetooth.defaultAdapter
     readonly property var btDevice: btAdapter?.devices.values.find(d => d.connected) ?? null
@@ -276,8 +290,12 @@ PanelWindow {
         property string title: ""
         property string icon: ""
         property real value: 0
+        // A chevron after the title; clicking the title opens more (Sound: each app)
+        property bool expandable: false
+        property bool expanded: false
         signal moved(real v)
         signal iconClicked()
+        signal titleClicked()
 
         readonly property real clamped: Math.max(0, Math.min(1, value))
         readonly property bool active: scMouse.containsMouse || scMouse.pressed
@@ -285,16 +303,40 @@ PanelWindow {
         Layout.fillWidth: true
         implicitHeight: 76
 
-        Text {
+        Row {
+            id: titleRow
             anchors.left: parent.left
             anchors.leftMargin: Tokens.spaceLg
             anchors.top: parent.top
             anchors.topMargin: Tokens.spaceMd
-            text: sc.title
-            color: Tokens.textPrimary
-            font.family: Tokens.fontFamily
-            font.pixelSize: Tokens.fontBody
-            font.weight: Font.DemiBold
+            spacing: 6
+
+            Text {
+                text: sc.title
+                color: Tokens.textPrimary
+                font.family: Tokens.fontFamily
+                font.pixelSize: Tokens.fontBody
+                font.weight: Font.DemiBold
+            }
+            Text {
+                visible: sc.expandable
+                anchors.verticalCenter: parent.verticalCenter
+                text: "›"
+                color: Tokens.textSecondary
+                font.family: Tokens.fontFamily
+                font.pixelSize: Tokens.fontTitle
+                font.weight: Font.DemiBold
+                rotation: sc.expanded ? 90 : 0
+                Behavior on rotation { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
+            }
+        }
+        // Click the title (and chevron) to open more
+        MouseArea {
+            visible: sc.expandable
+            anchors.fill: titleRow
+            anchors.margins: -6
+            cursorShape: Qt.PointingHandCursor
+            onClicked: sc.titleClicked()
         }
 
         TintIcon {
@@ -838,17 +880,135 @@ PanelWindow {
     Component {
         id: soundSection
         // ---------- Lyd ----------
-        SliderCard {
-            order: 4
-            title: "Sound"
-            icon: cc.volumeIcon(cc.audio?.volume ?? 0, cc.audio?.muted ?? false)
-            value: cc.audio?.muted ? 0 : (cc.audio?.volume ?? 0)
-            onMoved: v => {
-                if (!cc.audio) return
-                cc.audio.muted = false
-                cc.audio.volume = v
+        ColumnLayout {
+            spacing: Tokens.spaceSm
+
+            SliderCard {
+                order: 4
+                title: "Sound"
+                icon: cc.volumeIcon(cc.audio?.volume ?? 0, cc.audio?.muted ?? false)
+                value: cc.audio?.muted ? 0 : (cc.audio?.volume ?? 0)
+                expandable: true
+                expanded: cc.soundApps
+                onTitleClicked: cc.soundApps = !cc.soundApps
+                onMoved: v => {
+                    if (!cc.audio) return
+                    cc.audio.muted = false
+                    cc.audio.volume = v
+                }
+                onIconClicked: if (cc.audio) cc.audio.muted = !cc.audio.muted
             }
-            onIconClicked: if (cc.audio) cc.audio.muted = !cc.audio.muted
+
+            // Each app playing sound, with its own slider
+            Card {
+                order: 4
+                visible: cc.soundApps
+                Layout.fillWidth: true
+                implicitHeight: appsCol.implicitHeight + 2 * Tokens.spaceMd
+
+                Column {
+                    id: appsCol
+                    x: Tokens.spaceLg
+                    y: Tokens.spaceMd
+                    width: parent.width - 2 * Tokens.spaceLg
+                    spacing: Tokens.spaceMd
+
+                    Text {
+                        visible: cc.soundStreams.length === 0
+                        text: "No apps are playing sound"
+                        color: Tokens.textSecondary
+                        font.family: Tokens.fontFamily
+                        font.pixelSize: Tokens.fontBody
+                    }
+
+                    Repeater {
+                        model: cc.soundStreams
+
+                        Item {
+                            id: app
+                            required property var modelData
+                            readonly property var a: modelData.audio
+                            readonly property real level: a ? (a.muted ? 0 : Math.min(1, a.volume)) : 0
+                            width: appsCol.width
+                            height: 38
+
+                            Image {
+                                id: appIcon
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 24
+                                height: 24
+                                sourceSize: Qt.size(48, 48)
+                                source: cc.streamIcon(app.modelData)
+                                opacity: app.a?.muted ? 0.45 : 1
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: if (app.a) app.a.muted = !app.a.muted
+                                }
+                            }
+                            Text {
+                                anchors.left: appIcon.right
+                                anchors.leftMargin: Tokens.spaceMd
+                                anchors.right: appPct.left
+                                y: 1
+                                text: cc.streamName(app.modelData)
+                                color: Tokens.textPrimary
+                                font.family: Tokens.fontFamily
+                                font.pixelSize: Tokens.fontSmall
+                                font.weight: Font.Medium
+                                elide: Text.ElideRight
+                            }
+                            Text {
+                                id: appPct
+                                anchors.right: parent.right
+                                y: 1
+                                text: Math.round(app.level * 100) + "%"
+                                color: Tokens.textSecondary
+                                font.family: Tokens.fontFamily
+                                font.pixelSize: Tokens.fontSmall
+                                font.features: { "tnum": 1 }
+                            }
+                            Item {
+                                id: appTrack
+                                anchors.left: appIcon.right
+                                anchors.leftMargin: Tokens.spaceMd
+                                anchors.right: parent.right
+                                y: 24
+                                height: 10
+                                Rectangle {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: parent.width
+                                    height: appMouse.containsMouse || appMouse.pressed ? 8 : 5
+                                    radius: height / 2
+                                    color: Tokens.ink(0.15)
+                                    Behavior on height { NumberAnimation { duration: Tokens.durFast } }
+                                    Rectangle {
+                                        width: parent.width * app.level
+                                        height: parent.height
+                                        radius: parent.radius
+                                        color: Tokens.textPrimary
+                                    }
+                                }
+                                MouseArea {
+                                    id: appMouse
+                                    anchors.fill: parent
+                                    anchors.topMargin: -8
+                                    anchors.bottomMargin: -8
+                                    hoverEnabled: true
+                                    function set(x) {
+                                        if (!app.a) return
+                                        app.a.muted = false
+                                        app.a.volume = Math.max(0, Math.min(1, x / appTrack.width))
+                                    }
+                                    onPressed: m => set(m.x)
+                                    onPositionChanged: m => { if (pressed) set(m.x) }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

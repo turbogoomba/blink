@@ -19,7 +19,7 @@ function BlinkGlass.apply()
         match = { namespace = NAMESPACES },
         blur = true,
         -- Only blur behind what is really there (not the clear parts around the shapes)
-        ignore_alpha = 0.3,
+        ignore_alpha = 0.15,
     })
 end
 

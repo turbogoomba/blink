@@ -223,7 +223,8 @@ PanelWindow {
         id: barRect
         anchors { top: parent.top; left: parent.left; right: parent.right; topMargin: -bar.hideOffset }
         height: Tokens.barHeight
-        color: Tokens.barBg
+        // Glass: the bar is clearer than the dock and sheets, like the macOS menu bar
+        color: Tokens.glass ? Tokens.barGlass : Tokens.barBg
 
         // Glass: a faint line along the bottom of the see-through bar
         Rectangle {
@@ -345,6 +346,43 @@ PanelWindow {
                 label: "Memory"
                 value: SystemService.ram
                 baseColor: "#bf5af2"
+            }
+
+            // Network (glass themes, like the Wi-Fi icon in the macOS menu bar). Click opens Control Center.
+            Item {
+                id: netItem
+                visible: Tokens.glass
+                anchors.verticalCenter: parent.verticalCenter
+                implicitWidth: 16
+                implicitHeight: 16
+                scale: netMouse.pressed ? Tokens.pressScale : 1
+                Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
+
+                readonly property int sig: NetworkService.signalStrength
+                readonly property string iconName:
+                      NetworkService.ethernetConnected ? "network-wired-symbolic"
+                    : !NetworkService.connected ? (NetworkService.wifiEnabled ? "network-wireless-offline-symbolic" : "network-wireless-disabled-symbolic")
+                    : sig >= 75 ? "network-wireless-signal-excellent-symbolic"
+                    : sig >= 50 ? "network-wireless-signal-good-symbolic"
+                    : sig >= 25 ? "network-wireless-signal-ok-symbolic"
+                    : "network-wireless-signal-weak-symbolic"
+
+                TintIcon {
+                    anchors.centerIn: parent
+                    width: Tokens.barIcon
+                    height: Tokens.barIcon
+                    sourceSize: Qt.size(Tokens.barIcon * 2, Tokens.barIcon * 2)
+                    opacity: netMouse.containsMouse ? 1 : 0.85
+                    source: Quickshell.iconPath(netItem.iconName, "network-wireless")
+                }
+                MouseArea {
+                    id: netMouse
+                    cursorShape: Qt.PointingHandCursor
+                    anchors.fill: parent
+                    anchors.margins: -6
+                    hoverEnabled: true
+                    onClicked: ShellState.controlCenterOpen = !ShellState.controlCenterOpen
+                }
             }
 
             // Lyd: ikonet viser volumet, klikk åpner lydmenyen

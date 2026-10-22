@@ -61,6 +61,8 @@ Singleton {
 	readonly property int gap: glass ? 10 : 0
 	// The notch stays solid black on glass, like the camera housing on a Mac
 	readonly property color notchBg: glass ? "#000000" : barBg
+	// The top bar on glass: clearer than the dock and sheets
+	readonly property color barGlass: Qt.rgba(0.07, 0.07, 0.09, 0.30)
 
 	// The bar, the frame and every sheet that grows out of them
 	readonly property color barBg: t.frame
