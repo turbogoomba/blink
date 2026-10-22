@@ -81,9 +81,16 @@ Singleton {
         }
     }
 
+    // Hyprland's own open/close animation would play on top of ours: off for this window
+    // while it is minimized, back on a moment after it has come back
+    function setNoAnim(t, on) {
+        Hyprland.dispatch(`hl.dsp.window.set_prop({ prop = "no_anim", value = "${on ? "1" : "unset"}", window = "address:${addr(t)}" })`)
+    }
+
     // Off to the hidden workspace (called by MinimizeFx, or straight away without an effect)
     function hide(t) {
         if (!t) return
+        setNoAnim(t, true)
         Hyprland.dispatch(`hl.dsp.window.move({ workspace = "special:minimized", follow = false, window = "address:${addr(t)}" })`)
     }
 
@@ -113,6 +120,14 @@ Singleton {
         const s = Object.assign({}, saved)
         delete s[addr(t)]
         saved = s
+        animBack.win = t
+        animBack.restart()
+    }
+    Timer {
+        id: animBack
+        property var win: null
+        interval: 500
+        onTriggered: if (win) { root.setNoAnim(win, false); win = null }
     }
     function focus(t) {
         Hyprland.dispatch(`hl.dsp.focus({ window = "address:${addr(t)}" })`)
