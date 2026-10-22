@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Your own app icons on top of MacTahoe (for example dark Tahoe icons from macosicons.com).
 #
-#   1. Download the icons as PNG into one folder (default: ~/Downloads/dock-icons).
+#   1. Download the icons (PNG, or the macOS .icns) into one folder (default: ~/Downloads/dock-icons).
+#      .icns files in ~/Downloads are picked up too and turned into PNG.
 #   2. Name each file after the app: firefox.png, spotify.png, obsidian.png, vesktop.png ...
 #      (the app's name or its .desktop file name; the script finds the right icon name).
 #   3. Run:  apps/icons/install.sh            or  apps/icons/install.sh ~/some/folder
@@ -56,8 +57,38 @@ icon_for() {
 
 [ -d "$SRC" ] || { echo "No folder $SRC. Put your PNG icons there, or give the folder: $0 <folder>"; exit 1; }
 
-n=0
+# macOS .icns files (straight from macosicons.com): turn them into PNG first, named after
+# the app. Their file names start with the app ("Finder_Dark_macOS_27_icon.icns"), and a
+# few Mac apps are called something else here.
 shopt -s nullglob nocaseglob
+for icns in "$SRC"/*.icns "$HOME/Downloads"/*.icns; do
+    word="$(basename "$icns")"; word="${word%%[_ .-]*}"; word="${word,,}"
+    case "$word" in
+        finder) word=nautilus ;;
+        settings|systemsettings) word=preferences-system ;;
+        discord) [ -e /usr/share/applications/vesktop.desktop ] && word=vesktop ;;
+        terminal) word=kitty ;;
+    esac
+    out="$SRC/$word.png"
+    mkdir -p "$SRC"
+    if python3 -c "import PIL" 2>/dev/null; then
+        python3 - "$icns" "$out" <<'PY'
+import sys
+from PIL import Image
+im = Image.open(sys.argv[1]); im.load(); im = im.convert("RGBA")
+if im.width > 512: im = im.resize((512, 512), Image.LANCZOS)
+im.save(sys.argv[2])
+PY
+    elif command -v magick >/dev/null; then
+        magick "$icns" -delete 1--1 -resize 512x512 "$out" 2>/dev/null || magick "$icns[0]" "$out"
+    else
+        echo "  skipped $(basename "$icns"): needs python-pillow or imagemagick (sudo pacman -S python-pillow)"
+        continue
+    fi
+    echo "  converted $(basename "$icns") -> $word.png"
+done
+
+n=0
 for png in "$SRC"/*.png; do
     name="$(basename "$png")"; name="${name%.*}"
     icon="$(icon_for "$name" || true)"
