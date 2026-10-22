@@ -110,6 +110,11 @@ mkdir -p "$HOME/.icons/default"
 printf '[Icon Theme]\nInherits=macOS\n' > "$HOME/.icons/default/index.theme"
 echo "  ok: GTK font Inter, icons Blink (MacTahoe-dark), cursor macOS"
 
+# Neovim as an app (dock, launcher): opens in its own kitty window with the VS Code icon
+mkdir -p "$HOME/.local/share/applications"
+ln -sf "$APPS/nvim/blink-nvim.desktop" "$HOME/.local/share/applications/blink-nvim.desktop"
+echo "  ok: Neovim app (blink-nvim)"
+
 # Nautilus opens folders everywhere: xdg-open, and "Show in folder" from apps.
 # Nautilus answers "Show in folder" itself. Older Blink installs pointed that at Thunar
 # with a link in ~/.local, which would win, so that link is removed.

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Neovim
+GenericName=Text Editor
+Comment=Neovim in its own kitty window
+# Its own window class, so the dock shows it as Neovim (not as another kitty)
+Exec=kitty --class nvim -e nvim %F
+Icon=visual-studio-code
+StartupWMClass=nvim
+Terminal=false
+Categories=Development;TextEditor;
+MimeType=text/plain;text/x-python;text/x-c;text/x-tex;text/markdown;
