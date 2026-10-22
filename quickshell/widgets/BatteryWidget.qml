@@ -59,10 +59,9 @@ PanelWindow {
         id: card
         x: w.savedX
         y: w.savedY
-        width: 340
-        // Grows with the number of devices, like the iPhone widget's list
-        height: Math.max(72, rows.implicitHeight + 28)
-        Behavior on height { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
+        // A small square, like the iPhone Batteries widget
+        width: 164
+        height: 164
         radius: 22
         color: Tokens.cardBg
         border.color: Tokens.ink(0.08)
@@ -99,102 +98,91 @@ PanelWindow {
             font.pixelSize: Tokens.fontBody
         }
 
-        // One row per device: a small ring with the device in it, its name, and the charge
-        Column {
-            id: rows
-            x: 16
-            y: 14
-            width: card.width - 32
-            spacing: 6
+        // A ring with the device in it. The charge goes round from 12 o'clock.
+        component Ring: Item {
+            id: ringItem
+            property var dev: null
+            property real thickness: 5
+            property real iconSize: 20
+            readonly property real level: Math.max(0, Math.min(1, dev?.level ?? 0))
+            readonly property bool low: level < 0.2 && !(dev?.charging ?? false)
+            // Green like on the iPhone, red when low (but not while charging)
+            readonly property color ringColor: low ? Tokens.red : Tokens.green
+
+            Canvas {
+                anchors.fill: parent
+                readonly property string key: ringItem.level + "|" + ringItem.ringColor + "|" + Tokens.themeName + "|" + width
+                onKeyChanged: requestPaint()
+                onPaint: {
+                    const c = getContext("2d")
+                    c.reset()
+                    const t = ringItem.thickness
+                    const r = width / 2 - t / 2 - 1
+                    c.lineWidth = t
+                    c.lineCap = "round"
+                    c.strokeStyle = Tokens.ink(0.14).toString()
+                    c.beginPath()
+                    c.arc(width / 2, height / 2, r, 0, 2 * Math.PI)
+                    c.stroke()
+                    if (ringItem.level > 0) {
+                        c.strokeStyle = ringItem.ringColor.toString()
+                        c.beginPath()
+                        c.arc(width / 2, height / 2, r, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * ringItem.level)
+                        c.stroke()
+                    }
+                }
+                Component.onCompleted: requestPaint()
+            }
+            TintIcon {
+                anchors.centerIn: parent
+                width: ringItem.iconSize
+                height: ringItem.iconSize
+                sourceSize: Qt.size(ringItem.iconSize * 2, ringItem.iconSize * 2)
+                source: ringItem.dev ? Quickshell.iconPath(ringItem.dev.icon + "-symbolic", ringItem.dev.icon) : ""
+            }
+        }
+
+        // One device: the ring in the corner and the charge big underneath (iPhone small widget)
+        Item {
+            visible: w.devices.length === 1
+            anchors.fill: parent
+
+            Ring {
+                x: 16
+                y: 16
+                width: 48
+                height: 48
+                dev: w.devices[0] ?? null
+            }
+            Text {
+                x: 18
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 10
+                text: Math.round(Math.max(0, Math.min(1, w.devices[0]?.level ?? 0)) * 100) + "%"
+                color: Tokens.textPrimary
+                font.family: Tokens.fontFamily
+                font.pixelSize: 44
+                font.weight: Font.Light
+                font.features: { "tnum": 1 }
+            }
+        }
+
+        // Several devices: a ring each, two by two
+        Grid {
+            visible: w.devices.length > 1
+            anchors.centerIn: parent
+            columns: 2
+            rowSpacing: 12
+            columnSpacing: 12
 
             Repeater {
-                model: w.devices
-
-                Item {
-                    id: dev
+                model: w.devices.length > 1 ? w.devices : []
+                Ring {
                     required property var modelData
-                    readonly property real level: Math.max(0, Math.min(1, modelData.level))
-                    readonly property bool low: level < 0.2 && !modelData.charging
-                    // Green like on the iPhone, red when low (but not while charging)
-                    readonly property color ringColor: low ? Tokens.red : Tokens.green
-                    width: rows.width
-                    height: 44
-
-                    Item {
-                        id: ringBox
-                        width: 40
-                        height: 40
-                        anchors.verticalCenter: parent.verticalCenter
-
-                        // The ring: a grey track and the charge on top, from 12 o'clock
-                        Canvas {
-                            anchors.fill: parent
-                            readonly property string key: dev.level + "|" + dev.ringColor + "|" + Tokens.themeName
-                            onKeyChanged: requestPaint()
-                            onPaint: {
-                                const c = getContext("2d")
-                                c.reset()
-                                const r = width / 2 - 3
-                                c.lineWidth = 4
-                                c.lineCap = "round"
-                                c.strokeStyle = Tokens.ink(0.14).toString()
-                                c.beginPath()
-                                c.arc(width / 2, height / 2, r, 0, 2 * Math.PI)
-                                c.stroke()
-                                if (dev.level > 0) {
-                                    c.strokeStyle = dev.ringColor.toString()
-                                    c.beginPath()
-                                    c.arc(width / 2, height / 2, r, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * dev.level)
-                                    c.stroke()
-                                }
-                            }
-                            Component.onCompleted: requestPaint()
-                        }
-                        TintIcon {
-                            anchors.centerIn: parent
-                            width: 18
-                            height: 18
-                            sourceSize: Qt.size(36, 36)
-                            source: Quickshell.iconPath(dev.modelData.icon + "-symbolic", dev.modelData.icon)
-                        }
-                    }
-
-                    Column {
-                        anchors.left: ringBox.right
-                        anchors.leftMargin: 12
-                        anchors.right: pct.left
-                        anchors.rightMargin: 8
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: 1
-                        Text {
-                            width: parent.width
-                            text: dev.modelData.name
-                            color: Tokens.textPrimary
-                            font.family: Tokens.fontFamily
-                            font.pixelSize: Tokens.fontBody
-                            font.weight: Font.DemiBold
-                            elide: Text.ElideRight
-                        }
-                        Text {
-                            visible: text !== ""
-                            text: dev.modelData.charging ? "Charging" : dev.low ? "Low battery" : ""
-                            color: dev.low ? Tokens.red : Tokens.textSecondary
-                            font.family: Tokens.fontFamily
-                            font.pixelSize: Tokens.fontSmall
-                        }
-                    }
-
-                    Text {
-                        id: pct
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: Math.round(dev.level * 100) + "%"
-                        color: Tokens.textPrimary
-                        font.family: Tokens.fontFamily
-                        font.pixelSize: 20
-                        font.weight: Font.Light
-                        font.features: { "tnum": 1 }
-                    }
+                    width: 58
+                    height: 58
+                    dev: modelData
+                    iconSize: 22
                 }
             }
         }
