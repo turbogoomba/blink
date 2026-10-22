@@ -42,10 +42,7 @@ PanelWindow {
     color: "transparent"
     visible: SettingsService.dockEnabled && !ShellState.focusMode
 
-    // The whole dock grows a little while the mouse is on it, like a Mac with magnification
-    readonly property bool mouseOn: dockHover.hovered || bodyHover.hovered
-    property real size: SettingsService.dockSize * (mouseOn && shown ? 1.12 : 1)
-    Behavior on size { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+    property int size: SettingsService.dockSize
     property bool revealed: false
 
     // Out: the mouse is on it, or (intellihide) nothing covers it
