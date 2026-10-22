@@ -7,8 +7,9 @@ local hyprDir = home .. "/.config/hypr/"
 
 ---- MILJØ ----
 hl.env("XDG_DATA_DIRS", "/var/lib/flatpak/exports/share:" .. home .. "/.local/share/flatpak/exports/share:/usr/local/share:/usr/share")
--- App icons in Blink (dock, launcher, switcher): MacTahoe (macOS Tahoe style), the same as GTK apps (apps/install.sh)
-hl.env("QS_ICON_THEME", "MacTahoe-dark")
+-- App icons in Blink (dock, launcher, switcher): "Blink" = MacTahoe-dark (macOS Tahoe style) plus
+-- your own icons from apps/icons/install.sh. The same as GTK apps (apps/install.sh).
+hl.env("QS_ICON_THEME", "Blink")
 -- macOS cursor (AUR: apple_cursor). macOS-White is the white one.
 hl.env("XCURSOR_THEME", "macOS")
 hl.env("XCURSOR_SIZE", "24")
