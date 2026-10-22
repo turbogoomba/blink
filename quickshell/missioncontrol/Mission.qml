@@ -16,6 +16,14 @@ Scope {
     }
     function close() { open = false }
 
+    // Go to a workspace (a number, or "+" for a new empty one after the last).
+    // stay = keep Mission Control open, to look around with the keys.
+    function goTo(ws, stay) {
+        Hyprland.dispatch(`hl.dsp.focus({ workspace = "${ws}" })`)
+        if (stay) Qt.callLater(() => Hyprland.refreshToplevels())
+        else close()
+    }
+
     function addr(t) {
         const a = t.address
         return a.startsWith("0x") ? a : "0x" + a
@@ -108,11 +116,33 @@ Scope {
                 onClicked: root.close()
             }
 
+            // Keys while it is open (it has the keyboard, so Super+number would not reach Hyprland):
+            //   1-9 and Left/Right look at another workspace, Enter / Escape close
             Item {
                 id: keys
                 focus: true
                 Keys.onEscapePressed: root.close()
+                Keys.onReturnPressed: root.close()
+                Keys.onEnterPressed: root.close()
+                Keys.onPressed: event => {
+                    if (event.key >= Qt.Key_1 && event.key <= Qt.Key_9) {
+                        root.goTo(event.key - Qt.Key_0, true)
+                        event.accepted = true
+                    } else if (event.key === Qt.Key_Left || event.key === Qt.Key_Right) {
+                        const ids = win.workspaces.map(w => w.id)
+                        const cur = win.activeWs?.id ?? 1
+                        const i = ids.indexOf(cur)
+                        const next = event.key === Qt.Key_Right
+                            ? (i >= 0 && i < ids.length - 1 ? ids[i + 1] : cur + 1)
+                            : (i > 0 ? ids[i - 1] : Math.max(1, cur - 1))
+                        root.goTo(next, true)
+                        event.accepted = true
+                    }
+                }
             }
+
+            // Fresh window positions for the tiles when the workspace changes while open
+            onActiveWsChanged: if (root.open) Hyprland.refreshToplevels()
 
             // ---------- Arbeidsflater øverst ----------
             Row {
@@ -179,7 +209,7 @@ Scope {
                             cursorShape: Qt.PointingHandCursor
                             anchors.fill: parent
                             hoverEnabled: true
-                            onClicked: Hyprland.dispatch(`hl.dsp.focus({ workspace = "${pill.modelData.id}" })`)
+                            onClicked: root.goTo(pill.modelData.id, false)
                         }
                     }
                 }
@@ -211,7 +241,7 @@ Scope {
                         hoverEnabled: true
                         onClicked: {
                             const next = Math.max(0, ...win.workspaces.map(w => w.id)) + 1
-                            Hyprland.dispatch(`hl.dsp.focus({ workspace = "${next}" })`)
+                            root.goTo(next, false)
                         }
                     }
                 }
