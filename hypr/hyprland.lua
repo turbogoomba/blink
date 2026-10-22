@@ -7,7 +7,8 @@ local hyprDir = home .. "/.config/hypr/"
 
 ---- MILJØ ----
 hl.env("XDG_DATA_DIRS", "/var/lib/flatpak/exports/share:" .. home .. "/.local/share/flatpak/exports/share:/usr/local/share:/usr/share")
-hl.env("QS_ICON_THEME", "Papirus-Dark")
+-- App icons in Blink (dock, launcher, switcher): WhiteSur, the same as GTK apps (apps/install.sh)
+hl.env("QS_ICON_THEME", "WhiteSur-dark")
 -- Badges and download progress from Electron / Chromium apps (Discord / Vesktop ...) in the dock:
 -- they only send them on desktops they know. Uncomment to also say "Unity", then log out and in.
 -- hl.env("XDG_CURRENT_DESKTOP", "Hyprland:Unity")
