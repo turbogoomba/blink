@@ -22,7 +22,8 @@ and everything grows out of the bar.
 - **Control Center** that grows out of the frame: Wi-Fi, Bluetooth, modes, sliders, battery and power profiles, screen recording
 - **Modes**: Do Not Disturb, Focus and Game Mode
 - **Bar sheets**: calendar, weather (MET Norway) and per-app sound
-- **Dock** that hides when a window covers it (intellihide), with notification badges, minimized windows and a Trash
+- **Dock** that hides when a window covers it (intellihide), with badges and progress from apps, music controls, Downloads and a Trash
+- **Minimize** like a Mac: windows shrink into the dock and grow back out (dock, Super+M, title bars, apps' own buttons)
 - **Title bars** on floating windows: round close / minimize / maximize, double-click to maximize (hyprbars)
 - **Launcher**, Alt+Tab switcher and Mission Control
 - **Lock screen** and **SDDM login** that match the shell

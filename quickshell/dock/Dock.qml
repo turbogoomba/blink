@@ -220,11 +220,23 @@ PanelWindow {
         onExited: trashModel.folder = "file://" + dock.trashDir
     }
 
-    // Every name an app goes by, for the notification badge
-    function badgeFor(id, entry, wins) {
+    // Every name an app goes by, for badges and progress
+    function namesFor(id, entry, wins) {
         const names = [id, entry?.id, entry?.name, entry?.startupClass]
         for (const w of wins) names.push(w.wayland?.appId)
+        return names
+    }
+    // The app's own count when it sends one (LauncherService), otherwise unread notifications
+    function badgeFor(id, entry, wins) {
+        const names = namesFor(id, entry, wins)
+        const le = LauncherService.entryFor(names)
+        if (le && le.countVisible && le.count > 0) return le.count
         return NotificationService.badgeFor(names)
+    }
+    // A download or copy the app reports, 0 to 1. -1 = none.
+    function progressFor(id, entry, wins) {
+        const le = LauncherService.entryFor(namesFor(id, entry, wins))
+        return le && le.progressVisible ? le.progress : -1
     }
 
     // A new window: the app's own "New Window" action when it has one (Firefox, Nautilus ...),
@@ -286,8 +298,9 @@ PanelWindow {
     function isActive(t) {
         return !!Hyprland.activeToplevel && Hyprland.activeToplevel.address === t.address
     }
+    // Into the dock with the shrink effect (MinimizeService, MinimizeFx)
     function minimize(w) {
-        Hyprland.dispatch(`hl.dsp.window.move({ workspace = "special:minimized", follow = false, window = "address:${addr(w)}" })`)
+        MinimizeService.minimize(w)
     }
 
     readonly property var minimizedWins: Hyprland.toplevels.values.filter(t => isMinimized(t))
@@ -295,9 +308,7 @@ PanelWindow {
     // Minimized: back to the workspace you are on now, focused. Otherwise just focus it.
     function showWindow(w) {
         if (isMinimized(w)) {
-            const ws = Hyprland.focusedWorkspace?.id ?? 1
-            Hyprland.dispatch(`hl.dsp.window.move({ workspace = "${ws}", window = "address:${addr(w)}" })`)
-            Hyprland.dispatch(`hl.dsp.focus({ window = "address:${addr(w)}" })`)
+            MinimizeService.restore(w)   // grows back out of the dock
         } else {
             Hyprland.dispatch(`hl.dsp.focus({ window = "address:${addr(w)}" })`)
         }
@@ -374,6 +385,43 @@ PanelWindow {
         else hideTimer.restart()
     }
 
+    // ---------- Minimize effect ----------
+    // Where minimized windows shrink to: the end of the dock, just before Downloads,
+    // where their tiles show up. Taken as if the dock were out, in layout coordinates.
+    function minimizeTarget() {
+        const scr = dock.screen
+        if (!scr) return null
+        const p = downloadsIcon.mapToItem(null, downloadsIcon.width / 2, downloadsIcon.height / 2)
+        let x = p.x, y = p.y
+        // Undo the hidden shift, so the point is where the dock rests when it is out
+        if (horizontal) y -= body.hiddenShift
+        else if (side === "left") x += body.hiddenShift
+        else x -= body.hiddenShift
+        // Step back over Downloads, onto the spot of the newest minimized tile
+        const step = dock.size + Tokens.spaceSm
+        if (horizontal) x -= step
+        else y -= step
+        // Window coordinates -> layout coordinates
+        const wx = horizontal || side === "left" ? scr.x : scr.x + scr.width - dock.width
+        const wy = horizontal ? scr.y + scr.height - dock.height : scr.y
+        return Qt.point(wx + x, wy + y)
+    }
+    function registerTarget() {
+        if (dock.screen) MinimizeService.provideTarget(dock.screen.name, () => dock.minimizeTarget())
+    }
+    Component.onCompleted: registerTarget()
+    onScreenChanged: registerTarget()
+
+    // Peek out while a window goes into the dock
+    Connections {
+        target: MinimizeService
+        function onPeek(screenName) {
+            if (screenName !== (dock.screen?.name ?? "")) return
+            dock.revealed = true
+            hideTimer.restart()
+        }
+    }
+
     // Startup: the dock pops up for a moment
     Connections {
         target: BootService
@@ -401,7 +449,8 @@ PanelWindow {
         property bool dimmed: false
         property bool focused: false       // its window is the one in focus: accent dot
         property bool multi: false         // several windows: two dots
-        property int badge: 0              // unread notifications
+        property int badge: 0              // unread notifications, or the app's own count
+        property real progress: -1         // the app's download / copy progress, -1 = none
         property real imageSize: dock.size - 8
         property bool tile: false          // minimized window: icon on a small tile
         property bool draggable: false
@@ -469,6 +518,30 @@ PanelWindow {
             transform: Translate {
                 x: icon.hop * icon.outX + (dock.horizontal ? icon.dragDelta : 0)
                 y: icon.hop * icon.outY + (dock.horizontal ? 0 : icon.dragDelta)
+            }
+
+            // Progress the app reports (a download, a copy), along the bottom of the icon
+            Rectangle {
+                visible: icon.progress >= 0
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 3
+                width: parent.width * 0.8
+                height: 6
+                radius: 3
+                color: Qt.rgba(0, 0, 0, 0.6)
+                border.color: Qt.rgba(1, 1, 1, 0.25)
+                border.width: 1
+
+                Rectangle {
+                    x: 1
+                    y: 1
+                    height: parent.height - 2
+                    width: Math.max(height, (parent.width - 2) * Math.max(0, Math.min(1, icon.progress)))
+                    radius: height / 2
+                    color: Tokens.accent
+                    Behavior on width { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
+                }
             }
 
             // Unread notifications, on the icon's top right corner (grows and hops with it)
@@ -620,6 +693,7 @@ PanelWindow {
         focused: wins.some(w => !dock.isMinimized(w) && dock.isActive(w))
         multi: wins.filter(w => !dock.isMinimized(w)).length > 1
         badge: dock.badgeFor(modelData, entry, wins)
+        progress: dock.progressFor(modelData, entry, wins)
         onClicked: dock.appClicked(modelData, entry, appIcon)
         onRightClicked: dock.openContext(modelData, entry, appIcon)
         // New window: starts the app again (most apps open another window)

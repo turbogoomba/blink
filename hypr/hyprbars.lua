@@ -88,13 +88,13 @@ if has_plugin() then
         icon = "×",
         action = [[hyprctl dispatch 'hl.dsp.window.close()']],
     })
-    -- Minimize: the same hidden workspace the dock uses, so it shows up there
+    -- Minimize: into the dock with Blink's shrink effect (the window was just focused by the click)
     hl.plugin.hyprbars.add_button({
         bg_color = "rgb(f0b443)",
         fg_color = "rgb(5a3a05)",
         size = 13,
         icon = "−",
-        action = [[hyprctl dispatch 'hl.dsp.window.move({ workspace = "special:minimized", follow = false })']],
+        action = "qs -c blink ipc call minimize active",
     })
     hl.plugin.hyprbars.add_button({
         bg_color = "rgb(4fbf68)",

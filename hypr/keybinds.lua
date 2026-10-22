@@ -24,7 +24,7 @@ hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("hyprpicker -a"))
 ------------------------
 hl.bind(mainMod .. " + C", hl.dsp.window.close())
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + M", hl.dsp.window.move({ workspace = "special:minimized", follow = false }))
+hl.bind(mainMod .. " + M", hl.dsp.exec_cmd(qs .. "minimize active"))  -- into the dock, with the shrink effect
 hl.bind(mainMod .. " + SHIFT + M", hl.dsp.workspace.toggle_special("minimized"))
 hl.bind(mainMod .. " + ESCAPE", hl.dsp.exec_cmd("qs -c blink ipc call lock lock"))
 hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd("qs -c blink ipc call mission toggle"))

@@ -23,6 +23,8 @@ ShellRoot {
         AccentService.enabled   // start the wallpaper accent
         RecordService.recording // start the recorder (keys)
         ThemeService.appsDir    // start giving the theme to other apps
+        MinimizeService.saved   // start listening for minimize requests (keys, apps, title bars)
+        LauncherService.entries // start reading badges and progress that apps send
     }
 
     // Bar på hver skjerm
@@ -73,6 +75,15 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         DockUI.Dock {
+            required property var modelData
+            screen: modelData
+        }
+    }
+
+    // Minimize effect: windows shrink into the dock and grow back out
+    Variants {
+        model: Quickshell.screens
+        DockUI.MinimizeFx {
             required property var modelData
             screen: modelData
         }
