@@ -30,6 +30,11 @@ Singleton {
     property alias notchRight: adapter.notchRight
     property alias timetableUrl: adapter.timetableUrl
 
+    // Desktop widgets. Position -1 = the default place (top right)
+    property alias widgetTimetable: adapter.widgetTimetable
+    property alias widgetX: adapter.widgetX
+    property alias widgetY: adapter.widgetY
+
     // Dock
     property alias dockEnabled: adapter.dockEnabled
     // Apps the launcher never shows, by name (other settings apps that Blink's own Settings replace)
@@ -205,6 +210,9 @@ Singleton {
             property int cornerDelay: 250
             property string notchRight: "auto"
             property string timetableUrl: ""
+            property bool widgetTimetable: true
+            property int widgetX: -1
+            property int widgetY: -1
             property bool dockEnabled: true
             property var launcherHidden: ["System Settings", "KDE System Settings", "Thunar Preferences", "Volume Control"]
             property int dockSize: 64

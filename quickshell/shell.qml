@@ -14,6 +14,7 @@ import "./wallpaper" as WallpaperUI
 import "./lock" as LockUI
 import "./switcher" as SwitcherUI
 import "./drawer" as DrawerUI
+import "./widgets" as WidgetsUI
 
 ShellRoot {
     Component.onCompleted: {
@@ -25,6 +26,14 @@ ShellRoot {
         ThemeService.appsDir    // start giving the theme to other apps
         MinimizeService.saved   // start listening for minimize requests (keys, apps, title bars)
         LauncherService.entries // start reading badges and progress that apps send
+    }
+
+    // Desktop widgets (under all windows, on the first screen)
+    LazyLoader {
+        active: SettingsService.widgetTimetable && !ShellState.focusMode
+        WidgetsUI.TimetableWidget {
+            screen: Quickshell.screens[0]
+        }
     }
 
     // Bar på hver skjerm

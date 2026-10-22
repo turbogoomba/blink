@@ -15,6 +15,8 @@ Singleton {
         ? SettingsService.timetableUrl.trim() : root.fileUrl
     readonly property bool enabled: SettingsService.notchRight === "timetable"
         || (SettingsService.notchRight === "auto" && root.url !== "")
+    // Fetching runs for the notch and for the desktop widget
+    readonly property bool active: enabled || (SettingsService.widgetTimetable && root.url !== "")
 
     property string error: ""
     property var events: []      // all future events, sorted
@@ -22,7 +24,7 @@ Singleton {
     property date now: new Date()
 
     onUrlChanged: refresh()
-    onEnabledChanged: refresh()
+    onActiveChanged: refresh()
 
     // Old link file (fallback)
     Process {
@@ -36,7 +38,7 @@ Singleton {
     Component.onCompleted: readCfg.running = true
 
     function refresh() {
-        if (!root.enabled) return
+        if (!root.active) return
         if (root.url === "") {
             root.error = "No timetable link"
             root.events = []
@@ -143,13 +145,13 @@ Singleton {
     // Recompute "in X min" every 30 s, fetch again every 30 min
     Timer {
         interval: 30000
-        running: root.enabled
+        running: root.active
         repeat: true
         onTriggered: root.update()
     }
     Timer {
         interval: 30 * 60 * 1000
-        running: root.enabled
+        running: root.active
         repeat: true
         onTriggered: root.refresh()
     }

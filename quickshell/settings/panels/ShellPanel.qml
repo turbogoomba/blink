@@ -874,8 +874,24 @@ Flickable {
                     }
                 }
                 SettingRow {
+                    title: "Desktop widget"
+                    subtitle: "Your next classes on the desktop. Drag it to move it"
+                    Toggle {
+                        checked: SettingsService.widgetTimetable
+                        apply: function(v) { SettingsService.widgetTimetable = v }
+                    }
+                }
+                SettingRow {
+                    title: "Widget position"
+                    subtitle: "Put it back in the top right corner"
+                    PushButton {
+                        text: "Reset"
+                        apply: function() { SettingsService.widgetX = -1; SettingsService.widgetY = -1 }
+                    }
+                }
+                SettingRow {
                     title: "Status"
-                    subtitle: !TimetableService.enabled ? "Not shown (buses are active)"
+                    subtitle: !TimetableService.active ? "Not shown (buses are active)"
                         : TimetableService.error !== "" ? TimetableService.error
                         : TimetableService.upcoming.length + " upcoming classes loaded"
                     divider: false
