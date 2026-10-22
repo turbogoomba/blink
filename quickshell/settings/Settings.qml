@@ -67,6 +67,7 @@ FloatingWindow {
         { panel: "desktop", label: "Side drawer", desc: "Graphs, favorite apps and folders on the edge opposite the dock", keys: "drawer" },
         { panel: "desktop", label: "Dock position", desc: "Bottom, left or right. The side drawer moves to the opposite edge", keys: "dock side" },
         { panel: "desktop", label: "Dock size", desc: "How big the dock icons are", keys: "dock icons" },
+        { panel: "desktop", label: "Dock hiding", desc: "Out until a window covers it, or only when the mouse touches the edge", keys: "dock intellihide autohide hide" },
         { panel: "corners", label: "Hot corners", desc: "Move the mouse into a top corner to trigger an action", keys: "corner mouse" },
         { panel: "corners", label: "Delay", desc: "How long the mouse must stay in the corner", keys: "corner mouse" },
         { panel: "notch", label: "Show in the notch", desc: "Auto shows the timetable when a link is set, otherwise buses", keys: "timetable bus class" },

@@ -3,7 +3,7 @@
 
 local qs = "qs -c blink ipc call "
 local terminal    = "kitty"
-local fileManager = "thunar"
+local fileManager = "nautilus"
 local mainMod      = "SUPER"
 
 ----------------------

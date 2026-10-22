@@ -40,8 +40,25 @@ Singleton {
     property alias bootAnimation: adapter.bootAnimation
     property alias frameViz: adapter.frameViz
     property alias dockPosition: adapter.dockPosition
+    // When the dock shows: "intellihide" (out whenever no window covers it, and at the edge),
+    // "autohide" (only when the mouse touches the edge), "" = intellihide on laptops, autohide elsewhere
+    property alias dockHide: adapter.dockHide
     // Pinned apps (desktop entry ids), in order
     property alias dockApps: adapter.dockApps
+
+    // Blink moved from Thunar to Nautilus: swap it in the pinned apps once
+    function migrate() {
+        const nautilus = "org.gnome.Nautilus"
+        let changed = false
+        const list = []
+        for (const a of dockApps) {
+            const id = /^thunar(\.desktop)?$/i.test(a) ? nautilus : a
+            if (id !== a) changed = true
+            if (list.indexOf(id) === -1) list.push(id)
+            else changed = true
+        }
+        if (changed) dockApps = list
+    }
 
     // Drawer: favorite apps (desktop entry ids) and folders (paths)
     property alias favApps: adapter.favApps
@@ -124,6 +141,7 @@ Singleton {
         watchChanges: true
         onFileChanged: reload()
         onAdapterUpdated: writeAdapter()
+        onLoaded: root.migrate()
         onLoadFailed: error => {
             if (error === FileViewError.FileNotFound) writeAdapter()
         }
@@ -146,7 +164,8 @@ Singleton {
             property bool bootAnimation: true
             property string frameViz: "glow"
             property string dockPosition: "bottom"
-            property list<string> dockApps: ["firefox", "thunar", "kitty"]
+            property string dockHide: ""
+            property list<string> dockApps: ["firefox", "org.gnome.Nautilus", "kitty"]
             property list<string> favApps: []
             property list<string> favFolders: []
             property bool accentFromWallpaper: true

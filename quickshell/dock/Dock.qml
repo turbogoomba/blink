@@ -1,15 +1,22 @@
 import QtQuick
 import QtQuick.Effects
+import Qt.labs.folderlistmodel
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import Quickshell.Services.UPower
 import "../theme"
 import "../services"
 
 // The dock: black, part of the frame, at the bottom, left or right (Settings > Display & Dock).
-// Hidden inside the frame until the mouse touches the edge. Right-click an icon for options.
-// Click the app you are using to minimize it; click again to bring it back where you are.
-// Minimized windows also sit as small tiles at the end. Drag pinned icons to reorder them.
+// Autohide: hidden inside the frame until the mouse touches the edge.
+// Intellihide (default on laptops): also out whenever no window covers its spot.
+// Right-click an icon for options. Click the app you are using to minimize it; click again
+// to bring it back where you are. Drag pinned icons to reorder them.
+// Order: pinned apps and Settings | other running apps | minimized windows and the Trash.
+// A dot under a running app (two for several windows), in the accent for the one in focus,
+// and a red badge with unread notifications.
 PanelWindow {
     id: dock
 
@@ -32,8 +39,11 @@ PanelWindow {
     property int size: SettingsService.dockSize
     property bool revealed: false
 
+    // Out: the mouse is on it, or (intellihide) nothing covers it
+    readonly property bool shown: revealed || intelliOpen
+
     // Grows out of the frame with a small bounce, tucks back quickly
-    property real reveal: revealed ? 1 : 0
+    property real reveal: shown ? 1 : 0
     Behavior on reveal {
         id: openBehavior   // targetValue = where it is going, read before the animation starts
         NumberAnimation {
@@ -54,7 +64,7 @@ PanelWindow {
 
     // Input mask. Explicit numbers instead of `item:` so it follows the window
     // when the compositor gives it its real size after startup.
-    readonly property Item maskItem: revealed ? hoverZone : trigger
+    readonly property Item maskItem: shown ? hoverZone : trigger
     mask: Region {
         x: dock.maskItem.x
         y: dock.maskItem.y
@@ -62,6 +72,100 @@ PanelWindow {
         height: dock.maskItem.height
         Region { x: windowMenu.x; y: windowMenu.y; width: windowMenu.width; height: windowMenu.height }
         Region { x: contextMenu.x; y: contextMenu.y; width: contextMenu.width; height: contextMenu.height }
+        Region { x: trashMenu.x; y: trashMenu.y; width: trashMenu.width; height: trashMenu.height }
+    }
+
+    // ---------- Intellihide ----------
+    readonly property bool laptop: UPower.displayDevice?.isLaptopBattery ?? false
+    readonly property bool intellihide: SettingsService.dockHide === "intellihide"
+        || (SettingsService.dockHide === "" && laptop)
+    // Does a window on this screen's workspace lie over the dock's spot?
+    property bool covered: true
+    readonly property bool intelliOpen: intellihide && !covered
+
+    function updateCovered() {
+        const mon = Hyprland.monitorFor(dock.screen)
+        const scr = dock.screen
+        if (!mon || !scr) { covered = true; return }
+        const wsId = mon.activeWorkspace?.id ?? -1
+        const specialId = mon.lastIpcObject?.specialWorkspace?.id ?? 0
+
+        // Where the dock rests when it is out, in layout coordinates
+        const deep = dock.across + dock.frameT
+        let rx, ry, rw, rh
+        if (horizontal) {
+            rw = dock.along; rh = deep
+            rx = scr.x + (scr.width - rw) / 2
+            ry = scr.y + scr.height - rh
+        } else {
+            rw = deep; rh = dock.along
+            rx = side === "left" ? scr.x : scr.x + scr.width - rw
+            ry = scr.y + (scr.height - rh) / 2
+        }
+
+        for (const t of Hyprland.toplevels.values) {
+            const o = t.lastIpcObject
+            if (!o || !o.at || !o.size || o.hidden) continue
+            if (o.mapped === false) continue
+            const ws = o.workspace?.id ?? t.workspace?.id
+            if (ws !== wsId && !(specialId !== 0 && ws === specialId)) continue
+            const x = o.at[0], y = o.at[1], w = o.size[0], h = o.size[1]
+            if (x < rx + rw && x + w > rx && y < ry + rh && y + h > ry) { covered = true; return }
+        }
+        covered = false
+    }
+
+    // Window positions only arrive when asked for, so ask on Hyprland events and now and then
+    // (dragging a floating window sends no event until it lands)
+    function refreshCovered() {
+        Hyprland.refreshToplevels()
+        Hyprland.refreshMonitors()
+        coverCheck.restart()
+    }
+    Timer { id: coverCheck; interval: 120; onTriggered: dock.updateCovered() }
+    Timer { id: coverSoon; interval: 60; onTriggered: dock.refreshCovered() }
+    Timer {
+        interval: 800
+        repeat: true
+        running: dock.intellihide && dock.visible
+        onTriggered: dock.refreshCovered()
+    }
+    Connections {
+        target: Hyprland
+        enabled: dock.intellihide
+        function onRawEvent(event) { coverSoon.restart() }
+    }
+    onIntellihideChanged: if (intellihide) refreshCovered()
+    onAlongChanged: if (intellihide) updateCovered()
+
+    // ---------- Trash ----------
+    readonly property string trashDir: Quickshell.env("HOME") + "/.local/share/Trash/files"
+    property bool trashMenuOpen: false
+    FolderListModel {
+        id: trashModel
+        showHidden: true
+        showDotAndDotDot: false
+        showDirs: true
+    }
+    readonly property bool trashFull: trashModel.count > 0
+    // Make sure the folder exists, then watch it (the model does not notice a folder made later)
+    Process {
+        running: true
+        command: ["mkdir", "-p", dock.trashDir]
+        onExited: trashModel.folder = "file://" + dock.trashDir
+    }
+
+    // Every name an app goes by, for the notification badge
+    function badgeFor(id, entry, wins) {
+        const names = [id, entry?.id, entry?.name, entry?.startupClass]
+        for (const w of wins) names.push(w.wayland?.appId)
+        return NotificationService.badgeFor(names)
+    }
+
+    // Close every window of an app
+    function quitApp(id) {
+        for (const w of windowsFor(id))
+            Hyprland.dispatch(`hl.dsp.window.close({ window = "address:${addr(w)}" })`)
     }
 
     // ---------- Apps ----------
@@ -133,6 +237,7 @@ PanelWindow {
 
     function appClicked(id, entry, iconItem) {
         contextItem = null
+        trashMenuOpen = false
         const wins = windowsFor(id)
 
         // Not running: start it and bounce
@@ -181,12 +286,13 @@ PanelWindow {
 
     function openContext(id, entry, iconItem) {
         menuAppId = ""
+        trashMenuOpen = false
         popupAt = popupPoint(iconItem)
         contextItem = { id: entry?.id ?? id, entry: entry, pinned: SettingsService.isPinned(id), rawId: id }
     }
 
     function updateHover() {
-        if (dockHover.hovered || bodyHover.hovered || menuHover.hovered || contextHover.hovered) hideTimer.stop()
+        if (dockHover.hovered || bodyHover.hovered || menuHover.hovered || contextHover.hovered || trashHover.hovered) hideTimer.stop()
         else hideTimer.restart()
     }
 
@@ -205,6 +311,7 @@ PanelWindow {
         onTriggered: {
             dock.menuAppId = ""
             dock.contextItem = null
+            dock.trashMenuOpen = false
             dock.revealed = false
         }
     }
@@ -216,6 +323,9 @@ PanelWindow {
         property string label: ""
         property bool running: false
         property bool dimmed: false
+        property bool focused: false       // its window is the one in focus: accent dot
+        property bool multi: false         // several windows: two dots
+        property int badge: 0              // unread notifications
         property real imageSize: dock.size - 8
         property bool tile: false          // minimized window: icon on a small tile
         property bool draggable: false
@@ -281,6 +391,29 @@ PanelWindow {
                 x: icon.hop * icon.outX + (dock.horizontal ? icon.dragDelta : 0)
                 y: icon.hop * icon.outY + (dock.horizontal ? 0 : icon.dragDelta)
             }
+
+            // Unread notifications, on the icon's top right corner (grows and hops with it)
+            Rectangle {
+                visible: icon.badge > 0
+                height: 18
+                width: Math.max(height, badgeText.implicitWidth + 10)
+                radius: height / 2
+                x: parent.width - width * 0.7
+                y: -height * 0.3
+                color: "#e5484d"
+                border.color: Tokens.barBg
+                border.width: 2
+
+                Text {
+                    id: badgeText
+                    anchors.centerIn: parent
+                    text: icon.badge > 99 ? "99+" : icon.badge
+                    color: "white"
+                    font.family: Tokens.fontFamily
+                    font.pixelSize: 11
+                    font.weight: Font.DemiBold
+                }
+            }
         }
 
         SequentialAnimation {
@@ -323,7 +456,7 @@ PanelWindow {
             color: Tokens.surface
             border.color: Tokens.border
             border.width: 1
-            visible: iconMouse.containsMouse && icon.label !== "" && !dock.contextItem && !icon.dragging
+            visible: iconMouse.containsMouse && icon.label !== "" && !dock.contextItem && !dock.trashMenuOpen && !icon.dragging
 
             Text {
                 id: labelText
@@ -335,16 +468,25 @@ PanelWindow {
             }
         }
 
-        // Dot: white = running, grey = only minimized. Sits on the edge side.
-        Rectangle {
+        // Dots: white = running, accent = in focus, grey = only minimized,
+        // two = several windows. They sit on the edge side.
+        Grid {
+            visible: icon.running
+            columns: dock.horizontal ? 2 : 1
+            spacing: 3
             x: dock.horizontal ? (parent.width - width) / 2
              : dock.side === "left" ? -6 : parent.width + 2
             y: dock.horizontal ? parent.height + 2 : (parent.height - height) / 2
-            width: 4
-            height: 4
-            radius: 2
-            color: icon.dimmed ? Tokens.textSecondary : Tokens.textPrimary
-            visible: icon.running
+
+            Repeater {
+                model: icon.multi ? 2 : 1
+                Rectangle {
+                    width: 4
+                    height: 4
+                    radius: 2
+                    color: icon.focused ? Tokens.accent : icon.dimmed ? Tokens.textSecondary : Tokens.textPrimary
+                }
+            }
         }
 
         MouseArea {
@@ -394,6 +536,9 @@ PanelWindow {
         running: wins.length > 0
         onRunningChanged: if (running) appIcon.stopBounce()
         dimmed: running && wins.every(w => dock.isMinimized(w))
+        focused: wins.some(w => !dock.isMinimized(w) && dock.isActive(w))
+        multi: wins.filter(w => !dock.isMinimized(w)).length > 1
+        badge: dock.badgeFor(modelData, entry, wins)
         onClicked: dock.appClicked(modelData, entry, appIcon)
         onRightClicked: dock.openContext(modelData, entry, appIcon)
     }
@@ -558,6 +703,61 @@ PanelWindow {
                     dock.contextItem = null
                 }
             }
+            MenuRow {
+                visible: contextMenu.open && dock.windowsFor(contextMenu.item?.rawId ?? "").length > 0
+                text: "Quit"
+                danger: true
+                onActivated: {
+                    dock.quitApp(contextMenu.item.rawId)
+                    dock.contextItem = null
+                }
+            }
+        }
+    }
+
+    // Right-click on the Trash
+    PopupBox {
+        id: trashMenu
+        readonly property bool open: dock.trashMenuOpen
+        width: open ? 200 : 0
+        height: open ? trashColumn.implicitHeight + 12 : 0
+        visible: open
+
+        HoverHandler {
+            id: trashHover
+            onHoveredChanged: dock.updateHover()
+        }
+
+        Column {
+            id: trashColumn
+            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 6 }
+            spacing: 2
+
+            Text {
+                leftPadding: 10
+                topPadding: Tokens.spaceXs
+                bottomPadding: Tokens.spaceXs
+                text: dock.trashFull ? "Trash · " + trashModel.count + (trashModel.count === 1 ? " item" : " items") : "Trash · empty"
+                color: Tokens.textSecondary
+                font.family: Tokens.fontFamily
+                font.pixelSize: Tokens.fontSmall
+            }
+            MenuRow {
+                text: "Open"
+                onActivated: {
+                    Quickshell.execDetached(["gio", "open", "trash:///"])
+                    dock.trashMenuOpen = false
+                }
+            }
+            MenuRow {
+                visible: dock.trashFull
+                text: "Empty Trash"
+                danger: true
+                onActivated: {
+                    Quickshell.execDetached(["gio", "trash", "--empty"])
+                    dock.trashMenuOpen = false
+                }
+            }
         }
     }
 
@@ -688,22 +888,11 @@ PanelWindow {
 
             HoverHandler { id: rowHover }
 
+            // Pinned apps, then Settings
             Repeater {
                 id: pinnedRepeater
                 model: SettingsService.dockApps
                 PinnedIcon {}
-            }
-
-            Repeater {
-                model: dock.runningApps
-                AppIcon {}
-            }
-
-            // Divider
-            Rectangle {
-                width: dock.horizontal ? 1 : dock.size * 0.7
-                height: dock.horizontal ? dock.size * 0.7 : 1
-                color: Tokens.border
             }
 
             DockIcon {
@@ -713,9 +902,21 @@ PanelWindow {
                 onClicked: ShellState.settingsOpen = !ShellState.settingsOpen
             }
 
-            // Minimized windows, after a second divider
+            // Running apps that are not pinned, after a divider
             Rectangle {
-                visible: dock.minimizedWins.length > 0
+                visible: dock.runningApps.length > 0
+                width: dock.horizontal ? 1 : dock.size * 0.7
+                height: dock.horizontal ? dock.size * 0.7 : 1
+                color: Tokens.border
+            }
+
+            Repeater {
+                model: dock.runningApps
+                AppIcon {}
+            }
+
+            // Minimized windows and the Trash, after the last divider
+            Rectangle {
                 width: dock.horizontal ? 1 : dock.size * 0.7
                 height: dock.horizontal ? dock.size * 0.7 : 1
                 color: Tokens.border
@@ -724,6 +925,22 @@ PanelWindow {
             Repeater {
                 model: dock.minimizedWins
                 MinimizedIcon {}
+            }
+
+            DockIcon {
+                id: trashIcon
+                source: Quickshell.iconPath(dock.trashFull ? "user-trash-full" : "user-trash", "user-trash")
+                label: "Trash"
+                onClicked: {
+                    dock.trashMenuOpen = false
+                    Quickshell.execDetached(["gio", "open", "trash:///"])
+                }
+                onRightClicked: {
+                    dock.menuAppId = ""
+                    dock.contextItem = null
+                    dock.popupAt = dock.popupPoint(trashIcon)
+                    dock.trashMenuOpen = true
+                }
             }
         }
     }

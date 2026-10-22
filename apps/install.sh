@@ -62,9 +62,9 @@ fi
 
 echo
 
-# ---------- GTK and Thunar ----------
+# ---------- GTK and Nautilus ----------
 # A real gtk.css you made yourself is moved aside first, never lost
-echo "GTK and Thunar"
+echo "GTK and Nautilus"
 for v in gtk-3.0 gtk-4.0; do
     dst="$HOME/.config/$v/gtk.css"
     if [ -e "$dst" ] && [ ! -L "$dst" ]; then
@@ -73,7 +73,8 @@ for v in gtk-3.0 gtk-4.0; do
     fi
     link "$APPS/gtk/gtk.css" "$dst"
 done
-"$APPS/thunar/setup.sh"
+"$APPS/nautilus/setup.sh"
+command -v thunar >/dev/null && "$APPS/thunar/setup.sh"
 
 # Font and icons for GTK apps: IBM Plex Sans like Blink, WhiteSur (macOS style) icons
 if [ ! -d "$HOME/.local/share/icons/WhiteSur-dark" ] && [ ! -d /usr/share/icons/WhiteSur-dark ]; then
@@ -93,11 +94,12 @@ gsettings set org.gnome.desktop.interface icon-theme WhiteSur-dark 2>/dev/null
 gsettings set org.gnome.desktop.interface font-name "IBM Plex Sans 10" 2>/dev/null
 echo "  ok: GTK font IBM Plex Sans, icons WhiteSur-dark"
 
-# Thunar opens folders everywhere: xdg-open, and "Show in folder" from apps.
-# A copy in ~/.local wins over other file managers (Dolphin, Nautilus) installed system wide.
-xdg-mime default thunar.desktop inode/directory && echo "  ok: Thunar is the default for folders"
-if [ -f /usr/share/dbus-1/services/org.xfce.Thunar.FileManager1.service ]; then
-    link /usr/share/dbus-1/services/org.xfce.Thunar.FileManager1.service \
-        "$HOME/.local/share/dbus-1/services/org.freedesktop.FileManager1.service"
+# Nautilus opens folders everywhere: xdg-open, and "Show in folder" from apps.
+# Nautilus answers "Show in folder" itself. Older Blink installs pointed that at Thunar
+# with a link in ~/.local, which would win, so that link is removed.
+xdg-mime default org.gnome.Nautilus.desktop inode/directory && echo "  ok: Nautilus is the default for folders"
+fm1="$HOME/.local/share/dbus-1/services/org.freedesktop.FileManager1.service"
+if [ -L "$fm1" ] && readlink "$fm1" | grep -qi thunar; then
+    rm -f "$fm1" && echo "  ok: \"Show in folder\" no longer goes to Thunar"
 fi
-echo "  -> Restart Thunar: thunar -q"
+echo "  -> Restart Nautilus: nautilus -q"

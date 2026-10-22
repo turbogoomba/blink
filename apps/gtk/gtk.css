@@ -176,3 +176,70 @@ ThunarWindow scrollbar slider {
   border-radius: 3px;
   background-color: alpha(#ffffff, 0.18);
 }
+
+/* ============================================================
+   Window buttons in GTK 4 / libadwaita apps (Nautilus and others):
+   small round close / minimize / maximize like a Mac, grey when the
+   window is not in focus, symbols when you point at them.
+   libadwaita draws the circle on the icon, not the button.
+   ============================================================ */
+windowcontrols > button {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0 3px;
+  background: none;
+  box-shadow: none;
+}
+windowcontrols > button > image {
+  min-width: 12px;
+  min-height: 12px;
+  padding: 0;
+  -gtk-icon-size: 8px;
+  border-radius: 50%;
+  box-shadow: none;
+  color: transparent;
+}
+windowcontrols > button.close > image    { background-color: #ee5d5b; }
+windowcontrols > button.minimize > image { background-color: #f0b443; }
+windowcontrols > button.maximize > image { background-color: #4fbf68; }
+windowcontrols:hover > button > image    { color: rgba(0, 0, 0, 0.55); }
+window:backdrop windowcontrols > button > image { background-color: alpha(@window_fg_color, 0.22); }
+
+/* ============================================================
+   Nautilus, Finder style: compact striped list, quiet sidebar
+   with accent icons. Only applies inside Nautilus windows.
+   Layout (columns, list view, bookmarks): apps/nautilus/setup.sh
+   ============================================================ */
+.nautilus-window .navigation-sidebar > row {
+  min-height: 28px;
+  padding: 0 8px;
+  margin: 1px 6px;
+  border-radius: 6px;
+}
+.nautilus-window .navigation-sidebar > row image {
+  color: @accent_color;
+}
+.nautilus-window .navigation-sidebar > row:selected {
+  background-color: alpha(@window_fg_color, 0.10);
+  color: @window_fg_color;
+}
+.nautilus-window columnview > listview > row {
+  min-height: 22px;
+}
+.nautilus-window columnview > listview > row > cell {
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+.nautilus-window columnview > listview > row:nth-child(even) {
+  background-color: alpha(@window_fg_color, 0.04);
+}
+.nautilus-window columnview > listview > row:selected {
+  background-color: @accent_bg_color;
+  color: @accent_fg_color;
+}
+.nautilus-window columnview > header > button {
+  font-size: 12px;
+  font-weight: 500;
+  color: alpha(@window_fg_color, 0.6);
+}

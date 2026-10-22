@@ -420,7 +420,7 @@ Flickable {
                 }
                 SettingRow {
                     title: "GTK apps"
-                    subtitle: "Thunar and other GTK apps, after they restart"
+                    subtitle: "Nautilus and other GTK apps, after they restart"
                     Toggle {
                         checked: SettingsService.themeGtk
                         apply: function(v) { SettingsService.themeGtk = v }
@@ -667,6 +667,19 @@ Flickable {
                         ]
                         current: SettingsService.dockPosition
                         apply: function(v) { SettingsService.dockPosition = v }
+                    }
+                }
+                SettingRow {
+                    title: "Hide"
+                    subtitle: "When covered: out until a window lies over it. Auto: that on laptops, at the edge on desktops"
+                    Segments {
+                        options: [
+                            { value: "", label: "Auto" },
+                            { value: "intellihide", label: "When covered" },
+                            { value: "autohide", label: "At the edge" }
+                        ]
+                        current: SettingsService.dockHide
+                        apply: function(v) { SettingsService.dockHide = v }
                     }
                 }
                 SettingRow {

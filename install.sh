@@ -60,7 +60,7 @@ PKGS=(
     brightnessctl ddcutil playerctl cava grim slurp wl-clipboard libnotify jq curl
     wf-recorder ffmpeg pipewire wireplumber power-profiles-daemon networkmanager
     # apps
-    kitty btop thunar
+    kitty btop nautilus sushi gvfs ffmpegthumbnailer
     # look
     ttf-ibm-plex papirus-icon-theme apple_cursor
     # login screen

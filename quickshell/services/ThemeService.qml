@@ -7,7 +7,7 @@ import "../theme"
 
 // Gives the shell's theme to other apps, from the templates in blink/apps:
 //   Kitty            ~/.config/kitty/blink-theme.conf (kitty.conf includes it last)
-//   GTK (Thunar ...) ~/.config/gtk-3.0 and gtk-4.0/gtk.css, plus light/dark preference
+//   GTK (Nautilus ...) ~/.config/gtk-3.0 and gtk-4.0/gtk.css, plus light/dark preference
 //   Discord          ~/.config/vesktop/themes/MacRice.theme.css (Vesktop)
 //   Spotify          a "Blink" Spicetify theme. Applied fully once; after that the colors
 //                    are swapped without closing Spotify (Ctrl+Shift+R in Spotify shows them)

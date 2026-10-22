@@ -22,6 +22,7 @@ and everything grows out of the bar.
 - **Control Center** that grows out of the frame: Wi-Fi, Bluetooth, modes, sliders, battery and power profiles, screen recording
 - **Modes**: Do Not Disturb, Focus and Game Mode
 - **Bar sheets**: calendar, weather (MET Norway) and per-app sound
+- **Dock** that hides when a window covers it (intellihide), with notification badges, minimized windows and a Trash
 - **Launcher**, Alt+Tab switcher and Mission Control
 - **Lock screen** and **SDDM login** that match the shell
 - **Accent color** taken from the wallpaper
@@ -47,6 +48,7 @@ Log out and back in when it is done.
 | Keys | Action |
 |---|---|
 | Super + Space | Launcher |
+| Super + E | Files (Nautilus) |
 | Super + Tab | Mission Control |
 | Alt + Tab | Switch windows |
 | Super + W | Wallpaper picker |
@@ -60,6 +62,6 @@ Log out and back in when it is done.
 hypr/        Hyprland config (Lua)
 quickshell/  The shell: bar, notch, dock, control center, services
 sddm/        Login screen theme
-apps/        Firefox, Spotify and Vesktop themes
+apps/        Firefox, Spotify, Vesktop, GTK and Nautilus themes
 systemd/     Blink shell service
 ```

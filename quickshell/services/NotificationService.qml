@@ -30,6 +30,7 @@ Singleton {
                 time: new Date()
             }, ...root.history].slice(0, 50)
             root.unread += 1
+            root.bump(n)
 
             if (ShellState.doNotDisturb) return
             if (SettingsService.notifStyle === "corner") {
@@ -169,6 +170,64 @@ Singleton {
         unread = 0
     }
     function markRead() { unread = 0 }
+
+    // ---------- Dock badges ----------
+    // Unread per app since you last used it: [{ keys: ["vesktop", "Vesktop"], count }]
+    // The keys are the notification's desktop entry and app name. Opening the app clears it.
+    property var badges: []
+
+    function keysOf(n) {
+        return [n?.desktopEntry, n?.appName].filter(k => !!k)
+    }
+
+    // Same app? Exact, or one name inside the other ("zapzap" / "com.rtosta.zapzap")
+    function sameApp(a, b) {
+        if (!a || !b) return false
+        a = a.toLowerCase()
+        b = b.toLowerCase()
+        if (a === b) return true
+        if (a.length < 4 || b.length < 4) return false
+        return a.indexOf(b) >= 0 || b.indexOf(a) >= 0
+    }
+
+    function matchesAny(keys, names) {
+        return keys.some(k => names.some(x => sameApp(k, x)))
+    }
+
+    function bump(n) {
+        const keys = keysOf(n)
+        if (keys.length === 0) return
+        // No badge for the app you are looking at
+        const active = Hyprland.activeToplevel?.wayland?.appId ?? ""
+        if (active && matchesAny(keys, [active])) return
+        const list = badges.map(b => Object.assign({}, b))
+        const hit = list.find(b => matchesAny(b.keys, keys))
+        if (hit) hit.count += 1
+        else list.push({ keys: keys, count: 1 })
+        badges = list
+    }
+
+    // Count for a dock icon: give it every name the app goes by
+    function badgeFor(names) {
+        const n = names.filter(x => !!x)
+        let sum = 0
+        for (const b of badges) if (matchesAny(b.keys, n)) sum += b.count
+        return sum
+    }
+
+    function clearBadge(names) {
+        const n = names.filter(x => !!x)
+        if (badges.some(b => matchesAny(b.keys, n)))
+            badges = badges.filter(b => !matchesAny(b.keys, n))
+    }
+
+    Connections {
+        target: Hyprland
+        function onActiveToplevelChanged() {
+            const id = Hyprland.activeToplevel?.wayland?.appId
+            if (id) root.clearBadge([id])
+        }
+    }
 
     // "nå", "5 min", "2 h", "3 d"
     function ago(t) {
