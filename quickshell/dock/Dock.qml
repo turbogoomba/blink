@@ -6,6 +6,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Services.UPower
+import Quickshell.Services.Mpris
 import "../theme"
 import "../services"
 
@@ -14,7 +15,9 @@ import "../services"
 // Intellihide (default on laptops): also out whenever no window covers its spot.
 // Right-click an icon for options. Click the app you are using to minimize it; click again
 // to bring it back where you are. Drag pinned icons to reorder them.
-// Order: pinned apps and Settings | other running apps | minimized windows and the Trash.
+// Middle-click an app for a new window. Right-click an app that plays music for its controls.
+// Order: pinned apps and Settings | other running apps | minimized windows, Downloads, Trash.
+// Downloads opens the newest files as a grid: click to open one, or drag it into an app.
 // A dot under a running app (two for several windows), in the accent for the one in focus,
 // and a red badge with unread notifications.
 PanelWindow {
@@ -73,6 +76,50 @@ PanelWindow {
         Region { x: windowMenu.x; y: windowMenu.y; width: windowMenu.width; height: windowMenu.height }
         Region { x: contextMenu.x; y: contextMenu.y; width: contextMenu.width; height: contextMenu.height }
         Region { x: trashMenu.x; y: trashMenu.y; width: trashMenu.width; height: trashMenu.height }
+        Region { x: downloadsMenu.x; y: downloadsMenu.y; width: downloadsMenu.width; height: downloadsMenu.height }
+    }
+
+    // Close every popup (window list, right-click menus, Downloads)
+    function closeMenus() {
+        menuAppId = ""
+        contextItem = null
+        trashMenuOpen = false
+        downloadsOpen = false
+    }
+
+    // ---------- Music ----------
+    // The player that belongs to an app (Spotify, Firefox playing a video ...)
+    function playerFor(id, entry) {
+        if (!id) return null
+        const names = [id, entry?.id, entry?.name, entry?.startupClass].filter(x => !!x)
+        return Mpris.players.values.find(p => names.some(n =>
+            NotificationService.sameApp(n, p.desktopEntry ?? "") || NotificationService.sameApp(n, p.identity ?? ""))) ?? null
+    }
+
+    // ---------- Downloads ----------
+    readonly property string downloadsDir: Quickshell.env("HOME") + "/Downloads"
+    property bool downloadsOpen: false
+    readonly property int downloadsShown: Math.min(downloadsModel.count, 12)
+    FolderListModel {
+        id: downloadsModel
+        folder: "file://" + dock.downloadsDir
+        sortField: FolderListModel.Time   // newest first
+        showDirs: true
+        showDirsFirst: false
+        showHidden: false
+    }
+    readonly property var imageTypes: ["png", "jpg", "jpeg", "gif", "webp", "bmp", "svg"]
+    function fileIcon(suffix, isDir) {
+        if (isDir) return "folder"
+        const s = (suffix ?? "").toLowerCase()
+        if (s === "pdf") return "application-pdf"
+        if (["zip", "7z", "rar", "tar", "gz", "xz", "zst"].includes(s)) return "package-x-generic"
+        if (["mp4", "mkv", "webm", "mov", "avi"].includes(s)) return "video-x-generic"
+        if (["mp3", "flac", "ogg", "wav", "m4a"].includes(s)) return "audio-x-generic"
+        if (["doc", "docx", "odt"].includes(s)) return "x-office-document"
+        if (["xls", "xlsx", "ods", "csv"].includes(s)) return "x-office-spreadsheet"
+        if (["py", "js", "qml", "c", "cpp", "h", "sh", "lua", "json"].includes(s)) return "text-x-script"
+        return "text-x-generic"
     }
 
     // ---------- Intellihide ----------
@@ -238,6 +285,7 @@ PanelWindow {
     function appClicked(id, entry, iconItem) {
         contextItem = null
         trashMenuOpen = false
+        downloadsOpen = false
         const wins = windowsFor(id)
 
         // Not running: start it and bounce
@@ -287,12 +335,14 @@ PanelWindow {
     function openContext(id, entry, iconItem) {
         menuAppId = ""
         trashMenuOpen = false
+        downloadsOpen = false
         popupAt = popupPoint(iconItem)
         contextItem = { id: entry?.id ?? id, entry: entry, pinned: SettingsService.isPinned(id), rawId: id }
     }
 
     function updateHover() {
-        if (dockHover.hovered || bodyHover.hovered || menuHover.hovered || contextHover.hovered || trashHover.hovered) hideTimer.stop()
+        if (dockHover.hovered || bodyHover.hovered || menuHover.hovered || contextHover.hovered
+            || trashHover.hovered || downloadsHover.hovered) hideTimer.stop()
         else hideTimer.restart()
     }
 
@@ -309,9 +359,7 @@ PanelWindow {
         id: hideTimer
         interval: 450
         onTriggered: {
-            dock.menuAppId = ""
-            dock.contextItem = null
-            dock.trashMenuOpen = false
+            dock.closeMenus()
             dock.revealed = false
         }
     }
@@ -333,6 +381,7 @@ PanelWindow {
         readonly property bool dragging: iconMouse.dragging
         signal clicked()
         signal rightClicked()
+        signal middleClicked()
         signal dropped(real delta)
         z: dragging ? 10 : 0
 
@@ -351,6 +400,8 @@ PanelWindow {
             if (!bounceAnim.running) bounceAnim.start()
         }
         function stopBounce() { launching = false }
+        // One small hop (a new window of an app that is already open)
+        function hopOnce() { if (!bounceAnim.running && !settleAnim.running) settleAnim.start() }
 
         Timer {
             id: launchTimeout
@@ -456,7 +507,8 @@ PanelWindow {
             color: Tokens.surface
             border.color: Tokens.border
             border.width: 1
-            visible: iconMouse.containsMouse && icon.label !== "" && !dock.contextItem && !dock.trashMenuOpen && !icon.dragging
+            visible: iconMouse.containsMouse && icon.label !== "" && !dock.contextItem
+                && !dock.trashMenuOpen && !dock.downloadsOpen && !icon.dragging
 
             Text {
                 id: labelText
@@ -494,7 +546,7 @@ PanelWindow {
             anchors.fill: parent
             hoverEnabled: true
             preventStealing: true
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
             property real pressPos: 0
             property bool dragging: false
             property bool wasDrag: false
@@ -520,6 +572,7 @@ PanelWindow {
             onClicked: mouse => {
                 if (wasDrag) return
                 if (mouse.button === Qt.RightButton) icon.rightClicked()
+                else if (mouse.button === Qt.MiddleButton) icon.middleClicked()
                 else icon.clicked()
             }
         }
@@ -541,6 +594,14 @@ PanelWindow {
         badge: dock.badgeFor(modelData, entry, wins)
         onClicked: dock.appClicked(modelData, entry, appIcon)
         onRightClicked: dock.openContext(modelData, entry, appIcon)
+        // New window: starts the app again (most apps open another window)
+        onMiddleClicked: {
+            if (!entry) return
+            dock.closeMenus()
+            entry.execute()
+            if (running) appIcon.hopOnce()
+            else appIcon.bounce()
+        }
     }
 
     // A pinned app: can be dragged to a new place
@@ -639,11 +700,46 @@ PanelWindow {
         }
     }
 
+    // Round icon button (music controls)
+    component CtrlButton: Item {
+        id: btn
+        scale: btnMouse.pressed ? Tokens.pressScaleIcon : 1
+        Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
+        property string icon: ""
+        property int size: 18
+        signal clicked()
+        width: size + 14
+        height: size + 14
+
+        Rectangle {
+            anchors.fill: parent
+            radius: width / 2
+            color: btnMouse.containsMouse ? Tokens.fillHover : "transparent"
+        }
+        TintIcon {
+            anchors.centerIn: parent
+            width: btn.size
+            height: btn.size
+            source: Quickshell.iconPath(btn.icon)
+            opacity: btnMouse.pressed ? 0.6 : 1
+        }
+        MouseArea {
+            id: btnMouse
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            anchors.fill: parent
+            onClicked: btn.clicked()
+        }
+    }
+
     PopupBox {
         id: contextMenu
         readonly property bool open: dock.contextItem !== null
         readonly property var item: dock.contextItem
-        width: open ? 220 : 0
+        // Music from this app, shown at the top of the menu
+        readonly property var player: open ? dock.playerFor(item?.rawId, item?.entry) : null
+        readonly property bool hasMusic: player !== null && (player.trackTitle ?? "") !== ""
+        width: open ? (hasMusic ? 270 : 220) : 0
         height: open ? ctxColumn.implicitHeight + 12 : 0
         visible: open
 
@@ -665,6 +761,85 @@ PanelWindow {
                 color: Tokens.textSecondary
                 font.family: Tokens.fontFamily
                 font.pixelSize: Tokens.fontSmall
+            }
+
+            // Now playing: cover, title, artist and the controls
+            Item {
+                visible: contextMenu.hasMusic
+                width: parent.width
+                height: visible ? 104 : 0
+
+                Rectangle {
+                    id: artBox
+                    x: 6
+                    y: 4
+                    width: 48
+                    height: 48
+                    radius: Tokens.radiusSm
+                    color: Tokens.fillHover
+                    clip: true
+
+                    Image {
+                        anchors.fill: parent
+                        source: contextMenu.player?.trackArtUrl ?? ""
+                        sourceSize: Qt.size(96, 96)
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
+                    }
+                }
+
+                Column {
+                    anchors.left: artBox.right
+                    anchors.leftMargin: 10
+                    anchors.right: parent.right
+                    anchors.rightMargin: 6
+                    anchors.verticalCenter: artBox.verticalCenter
+                    spacing: 2
+
+                    Text {
+                        width: parent.width
+                        text: contextMenu.player?.trackTitle ?? ""
+                        color: Tokens.textPrimary
+                        font.family: Tokens.fontFamily
+                        font.pixelSize: Tokens.fontBody
+                        font.weight: Font.DemiBold
+                        elide: Text.ElideRight
+                    }
+                    Text {
+                        width: parent.width
+                        text: contextMenu.player?.trackArtist ?? ""
+                        color: Tokens.textSecondary
+                        font.family: Tokens.fontFamily
+                        font.pixelSize: Tokens.fontSmall
+                        elide: Text.ElideRight
+                    }
+                }
+
+                Row {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    y: artBox.y + artBox.height + 6
+                    spacing: Tokens.spaceSm
+
+                    CtrlButton {
+                        icon: "media-skip-backward-symbolic"
+                        onClicked: contextMenu.player?.previous()
+                    }
+                    CtrlButton {
+                        icon: contextMenu.player?.isPlaying ? "media-playback-pause-symbolic"
+                                                            : "media-playback-start-symbolic"
+                        onClicked: contextMenu.player?.togglePlaying()
+                    }
+                    CtrlButton {
+                        icon: "media-skip-forward-symbolic"
+                        onClicked: contextMenu.player?.next()
+                    }
+                }
+            }
+            Rectangle {
+                visible: contextMenu.hasMusic
+                width: parent.width
+                height: 1
+                color: Tokens.border
             }
 
             MenuRow {
@@ -710,6 +885,138 @@ PanelWindow {
                 onActivated: {
                     dock.quitApp(contextMenu.item.rawId)
                     dock.contextItem = null
+                }
+            }
+        }
+    }
+
+    // Downloads: the newest files as a grid. Click opens, drag takes the file into an app.
+    PopupBox {
+        id: downloadsMenu
+        readonly property bool open: dock.downloadsOpen
+        readonly property int tile: 78
+        width: open ? tile * 4 + Tokens.spaceXs * 3 + 16 : 0
+        height: open ? dlColumn.implicitHeight + 16 : 0
+        visible: open
+
+        HoverHandler {
+            id: downloadsHover
+            onHoveredChanged: dock.updateHover()
+        }
+
+        Column {
+            id: dlColumn
+            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 8 }
+            spacing: Tokens.spaceSm
+
+            Text {
+                leftPadding: 4
+                text: "Downloads"
+                color: Tokens.textSecondary
+                font.family: Tokens.fontFamily
+                font.pixelSize: Tokens.fontSmall
+            }
+
+            Text {
+                visible: dock.downloadsShown === 0
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                topPadding: Tokens.spaceMd
+                bottomPadding: Tokens.spaceMd
+                text: "Nothing downloaded yet"
+                color: Tokens.textSecondary
+                font.family: Tokens.fontFamily
+                font.pixelSize: Tokens.fontBody
+            }
+
+            Grid {
+                columns: 4
+                spacing: Tokens.spaceXs
+
+                Repeater {
+                    model: dock.downloadsShown
+
+                    Item {
+                        id: dlTile
+                        required property int index
+                        readonly property string path: downloadsModel.get(index, "filePath") ?? ""
+                        readonly property string name: downloadsModel.get(index, "fileName") ?? ""
+                        readonly property string suffix: downloadsModel.get(index, "fileSuffix") ?? ""
+                        readonly property bool isDir: downloadsModel.get(index, "fileIsDir") ?? false
+                        readonly property bool isImage: !isDir && dock.imageTypes.includes(suffix.toLowerCase())
+                        width: downloadsMenu.tile
+                        height: downloadsMenu.tile + 6
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: Tokens.radiusSm
+                            color: dlMouse.containsMouse ? Tokens.fillHover : "transparent"
+                        }
+
+                        Image {
+                            id: dlThumb
+                            visible: dlTile.isImage
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            y: 6
+                            width: 46
+                            height: 46
+                            source: dlTile.isImage ? "file://" + dlTile.path : ""
+                            sourceSize: Qt.size(92, 92)
+                            fillMode: Image.PreserveAspectCrop
+                            asynchronous: true
+                        }
+                        Image {
+                            visible: !dlTile.isImage
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            y: 6
+                            width: 46
+                            height: 46
+                            sourceSize: Qt.size(92, 92)
+                            source: Quickshell.iconPath(dock.fileIcon(dlTile.suffix, dlTile.isDir), "text-x-generic")
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.margins: 4
+                            y: 56
+                            horizontalAlignment: Text.AlignHCenter
+                            text: dlTile.name
+                            color: Tokens.textPrimary
+                            font.family: Tokens.fontFamily
+                            font.pixelSize: Tokens.fontSmall
+                            elide: Text.ElideMiddle
+                        }
+
+                        // Drag the file out into another app
+                        Item {
+                            id: dlDrag
+                            Drag.active: dlMouse.drag.active
+                            Drag.dragType: Drag.Automatic
+                            Drag.supportedActions: Qt.CopyAction
+                            Drag.mimeData: { "text/uri-list": "file://" + dlTile.path }
+                        }
+
+                        MouseArea {
+                            id: dlMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            drag.target: dlDrag
+                            onClicked: {
+                                Quickshell.execDetached(["xdg-open", dlTile.path])
+                                dock.downloadsOpen = false
+                            }
+                        }
+                    }
+                }
+            }
+
+            MenuRow {
+                text: "Open in Files"
+                onActivated: {
+                    Quickshell.execDetached(["xdg-open", dock.downloadsDir])
+                    dock.downloadsOpen = false
                 }
             }
         }
@@ -928,6 +1235,24 @@ PanelWindow {
             }
 
             DockIcon {
+                id: downloadsIcon
+                source: Quickshell.iconPath("folder-download", "folder")
+                label: "Downloads"
+                running: dock.downloadsOpen
+                function toggle() {
+                    const open = !dock.downloadsOpen
+                    dock.closeMenus()
+                    if (open) {
+                        dock.popupAt = dock.popupPoint(downloadsIcon)
+                        dock.downloadsOpen = true
+                    }
+                }
+                onClicked: toggle()
+                onRightClicked: toggle()
+                onMiddleClicked: Quickshell.execDetached(["xdg-open", dock.downloadsDir])
+            }
+
+            DockIcon {
                 id: trashIcon
                 source: Quickshell.iconPath(dock.trashFull ? "user-trash-full" : "user-trash", "user-trash")
                 label: "Trash"
@@ -936,8 +1261,7 @@ PanelWindow {
                     Quickshell.execDetached(["gio", "open", "trash:///"])
                 }
                 onRightClicked: {
-                    dock.menuAppId = ""
-                    dock.contextItem = null
+                    dock.closeMenus()
                     dock.popupAt = dock.popupPoint(trashIcon)
                     dock.trashMenuOpen = true
                 }
