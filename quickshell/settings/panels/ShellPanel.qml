@@ -698,6 +698,14 @@ Flickable {
                     }
                 }
                 SettingRow {
+                    title: "Minimize into app icon"
+                    subtitle: "Minimized windows go into their app's icon. Off: a tile for each after the divider"
+                    Toggle {
+                        checked: SettingsService.minimizeIntoApp
+                        apply: function(v) { SettingsService.minimizeIntoApp = v }
+                    }
+                }
+                SettingRow {
                     title: "Side drawer"
                     subtitle: "Graphs, favorite apps and folders on the edge opposite the dock"
                     Toggle {

@@ -458,17 +458,27 @@ PanelWindow {
     // ---------- Minimize effect ----------
     // Where minimized windows shrink to: the end of the dock, just before Downloads,
     // where their tiles show up. Taken as if the dock were out, in layout coordinates.
-    function minimizeTarget() {
+    // App icons by id, so a window can shrink into its own app's icon
+    property var appIcons: ({})
+    function iconForWindow(t) {
+        const appId = t?.wayland?.appId ?? ""
+        for (const id in appIcons) if (matches(id, appId)) return appIcons[id]
+        return null
+    }
+    function minimizeTarget(t) {
         const scr = dock.screen
         if (!scr) return null
-        const p = downloadsIcon.mapToItem(null, downloadsIcon.width / 2, downloadsIcon.height / 2)
+        // Into the app's icon, or onto the spot of the newest minimized tile (just before Downloads)
+        const appIcon = SettingsService.minimizeIntoApp ? iconForWindow(t) : null
+        const target = appIcon ?? downloadsIcon
+        const p = target.mapToItem(null, target.width / 2, target.height / 2)
         let x = p.x, y = p.y
         // Undo the hidden shift, so the point is where the dock rests when it is out
         if (horizontal) y -= body.hiddenShift
         else if (side === "left") x += body.hiddenShift
         else x -= body.hiddenShift
         // Step back over Downloads, onto the spot of the newest minimized tile
-        const step = dock.size + Tokens.spaceSm
+        const step = appIcon ? 0 : dock.size + Tokens.spaceSm
         if (horizontal) x -= step
         else y -= step
         // Window coordinates -> layout coordinates
@@ -477,7 +487,7 @@ PanelWindow {
         return Qt.point(wx + x, wy + y)
     }
     function registerTarget() {
-        if (dock.screen) MinimizeService.provideTarget(dock.screen.name, () => dock.minimizeTarget())
+        if (dock.screen) MinimizeService.provideTarget(dock.screen.name, t => dock.minimizeTarget(t))
     }
     Component.onCompleted: registerTarget()
     onScreenChanged: registerTarget()
@@ -796,6 +806,8 @@ PanelWindow {
         label: entry?.name ?? modelData
         running: wins.length > 0
         onRunningChanged: if (running) appIcon.stopBounce()
+        Component.onCompleted: dock.appIcons[modelData] = appIcon
+        Component.onDestruction: if (dock.appIcons[modelData] === appIcon) delete dock.appIcons[modelData]
         dimmed: running && wins.every(w => dock.isMinimized(w))
         focused: wins.some(w => !dock.isMinimized(w) && dock.isActive(w))
         multi: wins.filter(w => !dock.isMinimized(w)).length > 1
@@ -1541,7 +1553,7 @@ PanelWindow {
                 AppIcon {}
             }
 
-            // Minimized windows and the Trash, after the last divider
+            // Minimized windows (unless they go into their app's icon) and the Trash, after the last divider
             Rectangle {
                 width: dock.horizontal ? 1 : dock.size * 0.7
                 height: dock.horizontal ? dock.size * 0.7 : 1
@@ -1549,7 +1561,7 @@ PanelWindow {
             }
 
             Repeater {
-                model: dock.minimizedWins
+                model: SettingsService.minimizeIntoApp ? [] : dock.minimizedWins
                 MinimizedIcon {}
             }
 

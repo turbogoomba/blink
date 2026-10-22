@@ -55,6 +55,8 @@ Singleton {
     property alias dockFloating: adapter.dockFloating
     // The floating dock is see-through with blur behind it, like macOS Tahoe
     property alias dockGlass: adapter.dockGlass
+    // Minimized windows go into their app's icon (like the macOS setting), not tiles after a divider
+    property alias minimizeIntoApp: adapter.minimizeIntoApp
     // Pinned apps (desktop entry ids), in order
     property alias dockApps: adapter.dockApps
 
@@ -233,6 +235,7 @@ Singleton {
             property string dockHide: ""
             property bool dockFloating: true
             property bool dockGlass: true
+            property bool minimizeIntoApp: true
             property list<string> dockApps: ["firefox", "org.gnome.Nautilus", "kitty"]
             property list<string> favApps: []
             property list<string> favFolders: []

@@ -51,9 +51,10 @@ Singleton {
         if (!o || !o.at || !o.size || o.size[0] <= 0) return null
         return Qt.rect(o.at[0], o.at[1], o.size[0], o.size[1])
     }
-    function targetOn(screenName) {
+    // t: the window, so the dock can point at that app's icon
+    function targetOn(screenName, t) {
         const fn = targets[screenName]
-        try { return fn ? fn() : null } catch (e) { return null }
+        try { return fn ? fn(t) : null } catch (e) { return null }
     }
 
     // ---------- Minimize ----------
@@ -74,7 +75,7 @@ Singleton {
             if (!t) return
             const scr = root.screenOf(t)
             const r = root.rectOf(t)
-            const to = root.targetOn(scr)
+            const to = root.targetOn(scr, t)
             root.peek(scr)
             if (!r || !to) { root.hide(t); return }
             root.shrink(t, scr, r, to)   // MinimizeFx hides the window once it has its picture
@@ -106,7 +107,7 @@ Singleton {
         if (!isMinimized(t)) { focus(t); return }
         const s = saved[addr(t)]
         const scr = Hyprland.focusedMonitor?.name ?? ""
-        const from = targetOn(scr)
+        const from = targetOn(scr, t)
         if (s && s.rect && s.grab && from) root.grow(t, scr, s.rect, from, s.grab.url)
         else bringBack(t)   // never seen shrinking (minimized before Blink started): no picture
     }

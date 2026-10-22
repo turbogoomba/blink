@@ -79,11 +79,11 @@ done
 "$APPS/nautilus/setup.sh"
 command -v thunar >/dev/null && "$APPS/thunar/setup.sh"
 
-# Font and icons for GTK apps: Inter (close to the macOS font) like Blink, WhiteSur (macOS style) icons
-if [ ! -d "$HOME/.local/share/icons/WhiteSur-dark" ] && [ ! -d /usr/share/icons/WhiteSur-dark ]; then
-    git clone --depth 1 https://github.com/vinceliuice/WhiteSur-icon-theme /tmp/whitesur-icons >/dev/null 2>&1 \
-        && /tmp/whitesur-icons/install.sh -a >/dev/null && echo "  ok: WhiteSur icons installed"
-    rm -rf /tmp/whitesur-icons
+# Font and icons for GTK apps: Inter (close to the macOS font) like Blink, MacTahoe (macOS Tahoe style) icons
+if [ ! -d "$HOME/.local/share/icons/MacTahoe-dark" ] && [ ! -d /usr/share/icons/MacTahoe-dark ]; then
+    git clone --depth 1 https://github.com/vinceliuice/MacTahoe-icon-theme /tmp/mactahoe-icons >/dev/null 2>&1 \
+        && /tmp/mactahoe-icons/install.sh >/dev/null && echo "  ok: MacTahoe icons installed"
+    rm -rf /tmp/mactahoe-icons
 fi
 ini="$HOME/.config/gtk-3.0/settings.ini"
 mkdir -p "$(dirname "$ini")"
@@ -91,18 +91,18 @@ mkdir -p "$(dirname "$ini")"
 set_ini() {
     if grep -q "^$1=" "$ini"; then sed -i "s|^$1=.*|$1=$2|" "$ini"; else echo "$1=$2" >> "$ini"; fi
 }
-set_ini gtk-icon-theme-name WhiteSur-dark
+set_ini gtk-icon-theme-name MacTahoe-dark
 set_ini gtk-font-name "Inter 10"
 set_ini gtk-cursor-theme-name macOS
 set_ini gtk-cursor-theme-size 24
-gsettings set org.gnome.desktop.interface icon-theme WhiteSur-dark 2>/dev/null
+gsettings set org.gnome.desktop.interface icon-theme MacTahoe-dark 2>/dev/null
 gsettings set org.gnome.desktop.interface font-name "Inter 10" 2>/dev/null
 gsettings set org.gnome.desktop.interface cursor-theme macOS 2>/dev/null
 gsettings set org.gnome.desktop.interface cursor-size 24 2>/dev/null
 # Older X11 apps (Steam, games through XWayland) read the default cursor from here
 mkdir -p "$HOME/.icons/default"
 printf '[Icon Theme]\nInherits=macOS\n' > "$HOME/.icons/default/index.theme"
-echo "  ok: GTK font Inter, icons WhiteSur-dark, cursor macOS"
+echo "  ok: GTK font Inter, icons MacTahoe-dark, cursor macOS"
 
 # Nautilus opens folders everywhere: xdg-open, and "Show in folder" from apps.
 # Nautilus answers "Show in folder" itself. Older Blink installs pointed that at Thunar
