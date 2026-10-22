@@ -26,6 +26,7 @@ FloatingWindow {
         corner:  "M5 3l14 7-6 2-2 6z",
         notch:   "M3 6h18v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4zM9 11v1M15 11v1",
         windows: "M3 5h8v14H3zM13 5h8v6h-8zM13 13h8v6h-8z",
+        cc:      "M4 7h10M18 7h2M4 17h2M10 17h10M16 5v4M8 15v4",
         search:  "M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14M20 20l-4-4",
         info:    "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 11v5M12 8h.01"
     })
@@ -38,6 +39,7 @@ FloatingWindow {
         { id: "desktop",       group: "Personalize", label: "Appearance",    glyph: "look",    sub: "Bar, wallpaper, colors and the dock",          source: "panels/ShellPanel.qml",     ready: true, page: "desktop" },
         { id: "notifications", group: "",            label: "Notifications", glyph: "bell",    sub: "How and where notifications show up",          source: "panels/ShellPanel.qml",     ready: true, page: "notifications" },
         { id: "corners",       group: "Desktop",     label: "Hot Corners",   glyph: "corner",  sub: "Actions in the corners of the screen",         source: "panels/ShellPanel.qml",     ready: true, page: "corners" },
+        { id: "controlcenter", group: "",            label: "Control Center", glyph: "cc",     sub: "Pick and order what the Control Center shows", source: "panels/ShellPanel.qml",     ready: true, page: "controlcenter" },
         { id: "notch",         group: "",            label: "Notch",         glyph: "notch",   sub: "What the notch shows",                         source: "panels/ShellPanel.qml",     ready: true, page: "notch" },
         { id: "hyprland",      group: "System",      label: "Windows",       glyph: "windows", sub: "How Hyprland places, spaces and animates windows", source: "panels/HyprlandPanel.qml",  ready: true },
         { id: "about",         group: "",            label: "About",         glyph: "info",    sub: "This computer, and how hard it is working",   source: "panels/AboutPanel.qml",     ready: true }
@@ -70,6 +72,9 @@ FloatingWindow {
         { panel: "desktop", label: "Dock hiding", desc: "Out until a window covers it, or only when the mouse touches the edge", keys: "dock intellihide autohide hide" },
         { panel: "corners", label: "Hot corners", desc: "Move the mouse into a top corner to trigger an action", keys: "corner mouse" },
         { panel: "corners", label: "Delay", desc: "How long the mouse must stay in the corner", keys: "corner mouse" },
+        { panel: "controlcenter", label: "Sections", desc: "Show, hide and reorder the parts of the Control Center", keys: "control center order layout customize hide sliders battery recording" },
+        { panel: "controlcenter", label: "Toggles", desc: "Pick which quick toggles the Control Center shows", keys: "control center wifi bluetooth airplane modes windows night shift tiles" },
+        { panel: "controlcenter", label: "Width", desc: "How wide the Control Center is", keys: "control center size compact wide" },
         { panel: "notch", label: "Show in the notch", desc: "Auto shows the timetable when a link is set, otherwise buses", keys: "timetable bus class" },
         { panel: "notch", label: "Timetable", desc: "Link to your class calendar for the next class countdown", keys: "calendar class link schedule" }
     ]

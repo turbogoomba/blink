@@ -123,6 +123,54 @@ Singleton {
     property alias notifTimeout: adapter.notifTimeout    // seconds
     property alias notifShowBody: adapter.notifShowBody
 
+    // Control Center: section order, what is hidden (sections and tiles), and width
+    property alias ccSections: adapter.ccSections
+    property alias ccHidden: adapter.ccHidden
+    property alias ccWidth: adapter.ccWidth           // "compact", "normal" or "wide"
+
+    // Every section and tile the Control Center knows about, with names for Settings
+    readonly property var ccSectionInfo: [
+        { id: "connections", label: "Connections & toggles", hint: "Wi-Fi, Bluetooth, modes and more" },
+        { id: "record",      label: "Screen Recording",      hint: "Record the screen or an area" },
+        { id: "display",     label: "Display",               hint: "Brightness slider (laptops)" },
+        { id: "sound",       label: "Sound",                 hint: "Volume slider" },
+        { id: "battery",     label: "Battery",               hint: "Charge and power mode (laptops)" }
+    ]
+    readonly property var ccTileInfo: [
+        { id: "wifi",       label: "Wi-Fi" },
+        { id: "bluetooth",  label: "Bluetooth" },
+        { id: "airplane",   label: "Airplane Mode" },
+        { id: "modes",      label: "Modes",       hint: "Do Not Disturb, Focus, Game Mode" },
+        { id: "windows",    label: "Windows",     hint: "Floating or tiling" },
+        { id: "nightshift", label: "Night Shift" }
+    ]
+    // Saved order, plus any section added later at the end
+    readonly property var ccOrder: {
+        const known = ccSectionInfo.map(s => s.id)
+        const saved = ccSections.filter(id => known.indexOf(id) >= 0)
+        return [...saved, ...known.filter(id => saved.indexOf(id) < 0)]
+    }
+    function ccShown(id) { return ccHidden.indexOf(id) < 0 }
+    function ccSetShown(id, on) {
+        const rest = ccHidden.filter(h => h !== id)
+        ccHidden = on ? rest : [...rest, id]
+    }
+    // dir -1 = up, 1 = down
+    function ccMove(id, dir) {
+        const list = [...ccOrder]
+        const i = list.indexOf(id)
+        const j = i + dir
+        if (i < 0 || j < 0 || j >= list.length) return
+        list[i] = list[j]
+        list[j] = id
+        ccSections = list
+    }
+    function ccReset() {
+        ccSections = ccSectionInfo.map(s => s.id)
+        ccHidden = []
+        ccWidth = "normal"
+    }
+
     // Night Shift
     property alias nightLight: adapter.nightLight
     property alias nightTemp: adapter.nightTemp
@@ -183,6 +231,9 @@ Singleton {
             property int notifMax: 3
             property int notifTimeout: 5
             property bool notifShowBody: true
+            property list<string> ccSections: ["connections", "record", "display", "sound", "battery"]
+            property list<string> ccHidden: []
+            property string ccWidth: "normal"
         }
     }
 }
