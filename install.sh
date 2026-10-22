@@ -131,7 +131,11 @@ else
 fi
 
 # Title bars on floating windows: the hyprbars plugin (hypr/hyprbars.lua)
-if command -v hyprpm >/dev/null && ask "Install the hyprbars plugin (Mac-style title bars on floating windows)?"; then
+if ! command -v hyprpm >/dev/null && command -v yay >/dev/null \
+    && ask "Install the hyprbars plugin (Mac-style title bars on floating windows)?"; then
+    # Some Hyprland packages come without hyprpm: use the AUR package (hypr/hyprbars.lua loads it)
+    yay -S --needed hyprland-plugin-hyprbars && ok "hyprbars installed" || warn "could not install hyprland-plugin-hyprbars"
+elif command -v hyprpm >/dev/null && ask "Install the hyprbars plugin (Mac-style title bars on floating windows)?"; then
     if hyprpm list 2>/dev/null | grep -q hyprbars; then
         skip "hyprbars already added"
     else

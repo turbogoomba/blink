@@ -3,13 +3,34 @@
 -- Round close / minimize / maximize on the left, symbols when you point at them,
 -- the title in the middle. Double-click the bar to maximize. Tiled windows get no bar.
 --
--- The plugin is installed once with hyprpm (install.sh does it):
+-- Install the plugin once, either way works:
+--   yay -S hyprland-plugin-hyprbars    (AUR package, loaded below)
 --   hyprpm update && hyprpm add https://github.com/hyprwm/hyprland-plugins && hyprpm enable hyprbars
--- hyprland.lua loads it at startup (hyprpm reload). Hyprland reads the config again
--- once the plugin is in, so everything below waits for hl.plugin.hyprbars.
+--                                       (hyprland.lua runs hyprpm reload at startup)
+-- Hyprland reads the config again once the plugin is in, so everything below waits
+-- for hl.plugin.hyprbars.
 --
 -- Colors follow Blink's theme: ThemeService writes ~/.config/blink/hyprbars-colors.lua
 -- and calls BlinkBars.apply() when the theme changes.
+
+-- Installed as a package instead (AUR: hyprland-plugin-hyprbars, same version as Hyprland)?
+-- Load it from wherever the package put it.
+local PACKAGE_PATHS = {
+    "/usr/lib/hyprland-plugins/hyprbars.so",
+    "/usr/lib/hyprland-plugins/libhyprbars.so",
+    "/usr/lib/hyprland/plugins/hyprbars.so",
+    "/usr/lib/hyprland/hyprbars.so",
+    "/usr/lib/hyprbars.so",
+    "/usr/lib/libhyprbars.so",
+}
+for _, p in ipairs(PACKAGE_PATHS) do
+    local f = io.open(p, "r")
+    if f then
+        f:close()
+        hl.plugin.load(p)
+        break
+    end
+end
 
 local function has_plugin()
     return hl.plugin ~= nil and hl.plugin.hyprbars ~= nil
