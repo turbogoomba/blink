@@ -149,10 +149,6 @@ ThunarWindow .view:selected {
   color: rgba(0, 0, 0, 0.85);
   border-radius: 10px;
 }
-.thunar iconview,
-ThunarWindow iconview {
-  -GtkIconView-selection-box-alpha: 0;
-}
 
 /* Lines between parts: barely there */
 .thunar paned > separator,
