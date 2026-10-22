@@ -187,6 +187,7 @@ if [ "$F" = 1 ] && [ -f "$A/firefox/userChrome.css" ]; then
             -e "s|--mr-text: #[0-9a-fA-F]*;|--mr-text: $TXT;|" \\
             -e "s|--mr-text-dim: #[0-9a-fA-F]*;|--mr-text-dim: $TXT2;|" \\
             -e "s|--mr-accent: #[0-9a-fA-F]*;|--mr-accent: $ACC;|" \\
+            -e "s|--mr-bar: #[0-9a-fA-F]*;|--mr-bar: $SURF2;|" \\
             "$A/firefox/userChrome.css" > "$P/chrome/userChrome.css.blink" && mv -f "$P/chrome/userChrome.css.blink" "$P/chrome/userChrome.css"
         sed -e "s|#1c1c1e|$WIN|gI" -e "s|#000000|$FRAME|gI" -e "s|#2c2c2e|$SURF|gI" -e "s|#3a3a3c|$BORD|gI" -e "s|#e5e5e7|$TXT|gI" \\
             "$A/firefox/userContent.css" > "$P/chrome/userContent.css.blink" && mv -f "$P/chrome/userContent.css.blink" "$P/chrome/userContent.css"

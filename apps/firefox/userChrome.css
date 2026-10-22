@@ -1,6 +1,6 @@
 /* ============================================
    Blink — Firefox (v5, "dark and clean": layers of grey with soft shadows)
-   Two rows: the window buttons and the tabs, then back / forward / reload,
+   Under the window's title bar (hyprbars, same color): the tabs, then back / forward / reload,
    the address bar (sunk into the toolbar) and a few buttons. The active tab is a
    raised card; the star in the address bar shows (and toggles) a favorite.
    The colors below are replaced by Blink when you pick a theme
@@ -16,10 +16,12 @@
   --mr-text: #e5e5e7;
   --mr-text-dim: #98989d;
   --mr-accent: #5fa8d3;
+  --mr-bar: #242426;
   color-scheme: dark !important;
 
-  /* The layers, from the theme colors above */
-  --b-toolbar: color-mix(in srgb, var(--mr-surface) 72%, var(--mr-bg));
+  /* The layers, from the theme colors above. The toolbar has the same color as the
+     window title bar above it (hyprbars, --mr-bar), so the two read as one. */
+  --b-toolbar: var(--mr-bar);
   --b-page: var(--mr-surface);
   --b-tab: color-mix(in srgb, var(--mr-text) 6%, var(--mr-surface));
   --b-group: color-mix(in srgb, var(--mr-text) 2%, var(--mr-surface));
@@ -122,52 +124,10 @@
   display: none !important;
 }
 
-/* ---------- Window buttons: round, like the title bars (hyprbars is off for Firefox) ---------- */
-/* Firefox has more than one set of window buttons (one per toolbar that can be on top).
-   Hide them all, then show only the set in the tab row. */
-.titlebar-buttonbox-container {
-  display: none !important;
-}
-#TabsToolbar .titlebar-buttonbox-container {
-  display: flex !important;
-  align-items: center !important;
-  padding-inline: 10px 8px !important;
-}
-.titlebar-buttonbox {
-  gap: 8px !important;
-}
+/* ---------- Window buttons: the title bar above has them (hyprbars), so Firefox's go ---------- */
 .titlebar-buttonbox-container,
-.titlebar-buttonbox,
-.titlebar-button {
-  -moz-window-dragging: no-drag !important;   /* a click is a click, never the start of a window drag */
-}
-.titlebar-button {
-  appearance: none !important;
-  width: 12px !important;
-  height: 12px !important;
-  min-width: 12px !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  border-radius: 50% !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-.titlebar-button > .toolbarbutton-icon {
-  opacity: 0 !important;
-  width: 8px !important;
-  height: 8px !important;
-  transition: opacity 90ms ease !important;
-}
-.titlebar-buttonbox:hover .titlebar-button > .toolbarbutton-icon {
-  opacity: 0.6 !important;
-}
-.titlebar-close { background-color: #ee5d5b !important; }
-.titlebar-min { background-color: #f0b443 !important; }
-.titlebar-max,
-.titlebar-restore { background-color: #4fbf68 !important; }
-/* Grey while Firefox is not the window in focus */
-#navigator-toolbox:-moz-window-inactive .titlebar-button {
-  background-color: color-mix(in srgb, var(--mr-text) 22%, transparent) !important;
+.titlebar-buttonbox {
+  display: none !important;
 }
 
 /* ---------- Fewer buttons ---------- */

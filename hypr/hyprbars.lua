@@ -110,11 +110,11 @@ if has_plugin() then
         match = { float = false },
         ["hyprbars:no_bar"] = true,
     })
-    -- Apps that draw their own title bar (GTK 4 / libadwaita like Nautilus, Blink Settings,
-    -- and Firefox, whose round buttons sit next to the tabs: apps/firefox/userChrome.css)
+    -- Apps that draw their own title bar (GTK 4 / libadwaita like Nautilus, Blink Settings).
+    -- Firefox keeps the bar: its toolbar has the bar's color (apps/firefox/userChrome.css).
     hl.window_rule({
         name = "hyprbars-own-titlebar",
-        match = { class = "^(org\\.gnome\\..*|.*(quickshell|noctalia-qs).*|firefox)$" },
+        match = { class = "^(org\\.gnome\\..*|.*(quickshell|noctalia-qs).*)$" },
         ["hyprbars:no_bar"] = true,
     })
 end
