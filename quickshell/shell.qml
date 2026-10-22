@@ -15,7 +15,6 @@ import "./lock" as LockUI
 import "./switcher" as SwitcherUI
 import "./drawer" as DrawerUI
 import "./widgets" as WidgetsUI
-import "./snap" as SnapUI
 
 ShellRoot {
     Component.onCompleted: {
@@ -28,9 +27,6 @@ ShellRoot {
         MinimizeService.saved   // start listening for minimize requests (keys, apps, title bars)
         LauncherService.entries // start reading badges and progress that apps send
     }
-
-    // Where a window dragged to the screen edge will go (hypr/snap.lua)
-    SnapUI.SnapPreview {}
 
     // Desktop widgets (under all windows, on the first screen)
     LazyLoader {
