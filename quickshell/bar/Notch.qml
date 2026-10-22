@@ -113,8 +113,7 @@ Rectangle {
     // Glass themes: the notch hides while it has nothing to say, so the bar is clean like
     // a Mac. It comes back for volume, notifications, the next class, music, recording,
     // files on the shelf, or when the mouse goes to where it sits.
-    readonly property bool idleHidden: Tokens.glass && compact && !hasMusic && !showRec
-        && !hasShelf && !dragging && !hover.hovered
+    readonly property bool idleHidden: Tokens.glass && compact && !hasMusic && !showRec && !hasShelf && !dragging && !hover.hovered
     opacity: idleHidden ? 0 : 1
     scale: idleHidden ? 0.7 : 1
     transformOrigin: Item.Top
