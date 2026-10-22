@@ -43,8 +43,8 @@ icon_for() {
         # By file name: firefox.desktop, org.gnome.Nautilus.desktop, dev.vencord.Vesktop.desktop ...
         for f in "$d"/*.desktop; do
             [ -e "$f" ] || continue
-            local base; base="$(basename "$f" .desktop)"
-            if [ "${base,,}" = "${want,,}" ] || [ "${base##*.}" = "$want" ] || [ "${base,,##*.}" = "${want,,}" ]; then
+            local base low; base="$(basename "$f" .desktop)"; low="${base,,}"
+            if [ "$low" = "${want,,}" ] || [ "${low##*.}" = "${want,,}" ]; then
                 grep -m1 '^Icon=' "$f" | cut -d= -f2- && return
             fi
         done
