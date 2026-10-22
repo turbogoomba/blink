@@ -35,7 +35,7 @@ PanelWindow {
     // (Settings > Dock > Glass; floating only, and always on with the Glass theme)
     readonly property bool glassy: floating && (SettingsService.dockGlass || Tokens.glass)
     readonly property color bodyColor: Tokens.glass ? Tokens.barBg
-        : glassy ? (Tokens.light ? Qt.rgba(1, 1, 1, 0.5) : Qt.rgba(0.09, 0.09, 0.10, 0.68)) : Tokens.barBg
+        : glassy ? (Tokens.light ? Qt.rgba(1, 1, 1, 0.78) : Qt.rgba(0.10, 0.10, 0.11, 0.84)) : Tokens.barBg
     // Distance from the screen edge to where the dock rests
     readonly property int frameT: floating ? (Tokens.glass ? 8 : Tokens.frameT + 8) : Tokens.frameT
 
