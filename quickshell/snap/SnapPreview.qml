@@ -5,7 +5,7 @@ import Quickshell.Wayland
 import "../theme"
 
 // Where a window will go when you let go of it at the edge of the screen (hypr/snap.lua
-// tells us: qs -c blink ipc call snap show <monitor> x y w h / hide). A soft rounded
+// tells us: qs -c blink ipc call snap place <monitor> x y w h / clear). A soft rounded
 // box grows into place, like on macOS.
 PanelWindow {
     id: p
@@ -25,12 +25,12 @@ PanelWindow {
 
     IpcHandler {
         target: "snap"
-        function show(monitor: string, x: int, y: int, w: int, h: int): void {
+        function place(monitor: string, x: int, y: int, w: int, h: int): void {
             p.monitor = monitor
             p.target = Qt.rect(x, y, w, h)
             p.shown = true
         }
-        function hide(): void { p.shown = false }
+        function clear(): void { p.shown = false }
     }
 
     Rectangle {

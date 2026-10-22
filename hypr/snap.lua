@@ -69,11 +69,11 @@ end
 
 local function preview(zone, mon)
     if not zone then
-        hl.exec_cmd("qs -c blink ipc call snap hide")
+        hl.exec_cmd("qs -c blink ipc call snap clear")
         return
     end
     local r = target(zone, area(mon))
-    hl.exec_cmd(string.format("qs -c blink ipc call snap show %s %d %d %d %d",
+    hl.exec_cmd(string.format("qs -c blink ipc call snap place %s %d %d %d %d",
         mon.name, math.floor(r.x - mon.x), math.floor(r.y - mon.y), math.floor(r.w), math.floor(r.h)))
 end
 
