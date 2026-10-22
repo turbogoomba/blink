@@ -7,6 +7,8 @@ import "../services"
 // The timetable as a desktop widget, like the macOS "Up Next" widget.
 // It lies under all windows (layer "bottom"), so it shows on an empty desktop.
 // Drag it to move it; the place is saved in settings (widgetX / widgetY).
+// The window covers the whole screen but only takes the mouse over the card (mask),
+// so dragging moves the card inside it, smoothly, without moving a window around.
 PanelWindow {
     id: w
 
@@ -15,26 +17,17 @@ PanelWindow {
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
     exclusionMode: ExclusionMode.Ignore
     color: "transparent"
-    anchors { top: true; left: true }
-    implicitWidth: card.width + 2 * pad
-    implicitHeight: card.height + 2 * pad
-
-    readonly property int pad: 12   // room for the shadow and the press bounce
+    anchors { top: true; bottom: true; left: true; right: true }
+    // Explicit numbers (not item:) so the mask follows the card while it is dragged
+    mask: Region { x: card.x; y: card.y; width: card.width; height: card.height }
 
     // ---------- Position ----------
-    readonly property real screenW: screen ? screen.width : 1920
-    readonly property real screenH: screen ? screen.height : 1080
-    readonly property real defX: screenW - implicitWidth - Tokens.frameT - 24
-    readonly property real defY: SettingsService.topInset + 20
-    // Saved place, plus how far it has been dragged right now
-    property real dragX: 0
-    property real dragY: 0
-    readonly property real posX: Math.max(0, Math.min(screenW - implicitWidth,
-        (SettingsService.widgetX >= 0 ? SettingsService.widgetX : defX) + dragX))
-    readonly property real posY: Math.max(0, Math.min(screenH - implicitHeight,
-        (SettingsService.widgetY >= 0 ? SettingsService.widgetY : defY) + dragY))
-    margins.left: Math.round(posX)
-    margins.top: Math.round(posY)
+    readonly property real defX: width - card.width - Tokens.frameT - 36
+    readonly property real defY: SettingsService.topInset + 32
+    function clampX(x) { return Math.max(0, Math.min(width - card.width, x)) }
+    function clampY(y) { return Math.max(0, Math.min(height - card.height, y)) }
+    readonly property real savedX: clampX(SettingsService.widgetX >= 0 ? SettingsService.widgetX : defX)
+    readonly property real savedY: clampY(SettingsService.widgetY >= 0 ? SettingsService.widgetY : defY)
 
     // ---------- What to show: the next day with classes ----------
     function sameDay(a, b) {
@@ -58,8 +51,8 @@ PanelWindow {
 
     Rectangle {
         id: card
-        x: w.pad
-        y: w.pad
+        x: w.savedX
+        y: w.savedY
         width: 340
         height: 164
         radius: 22
@@ -69,26 +62,23 @@ PanelWindow {
         scale: drag.pressed ? 0.98 : 1
         Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
-        // Drag anywhere to move it. The window moves under the mouse, so the mouse
-        // stays at the same place inside it; add the difference each time.
+        // Drag anywhere to move it
         MouseArea {
             id: drag
             anchors.fill: parent
             cursorShape: pressed ? Qt.ClosedHandCursor : Qt.ArrowCursor
-            property real sx: 0
-            property real sy: 0
-            onPressed: m => { sx = m.x; sy = m.y }
-            onPositionChanged: m => {
-                if (!pressed) return
-                w.dragX += m.x - sx
-                w.dragY += m.y - sy
-            }
+            drag.target: card
+            drag.threshold: 2
+            drag.minimumX: 0
+            drag.minimumY: 0
+            drag.maximumX: w.width - card.width
+            drag.maximumY: w.height - card.height
             onReleased: {
-                const x = Math.round(w.posX), y = Math.round(w.posY)
-                w.dragX = 0
-                w.dragY = 0
-                SettingsService.widgetX = x
-                SettingsService.widgetY = y
+                SettingsService.widgetX = Math.round(card.x)
+                SettingsService.widgetY = Math.round(card.y)
+                // Dragging replaced the bindings; follow the settings again (Reset in Settings)
+                card.x = Qt.binding(() => w.savedX)
+                card.y = Qt.binding(() => w.savedY)
             }
         }
 
