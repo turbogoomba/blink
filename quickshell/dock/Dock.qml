@@ -34,8 +34,10 @@ PanelWindow {
         right: dock.side !== "left"
     }
     exclusionMode: ExclusionMode.Ignore
-    implicitHeight: horizontal ? 360 : 0
-    implicitWidth: horizontal ? 0 : 360
+    // Tall/wide enough for the biggest popup (the menu with music, Downloads).
+    // Only the dock and open popups take input (see mask), the rest lets clicks through.
+    implicitHeight: horizontal ? 640 : 0
+    implicitWidth: horizontal ? 0 : 400
     color: "transparent"
     visible: SettingsService.dockEnabled && !ShellState.focusMode
 
@@ -223,6 +225,16 @@ PanelWindow {
         const names = [id, entry?.id, entry?.name, entry?.startupClass]
         for (const w of wins) names.push(w.wayland?.appId)
         return NotificationService.badgeFor(names)
+    }
+
+    // A new window: the app's own "New Window" action when it has one (Firefox, Nautilus ...),
+    // otherwise start it again (Kitty and most apps open another window)
+    function newWindow(entry) {
+        if (!entry) return
+        const acts = entry.actions ?? []
+        const act = acts.find(a => /new.?window/i.test(a.id ?? "") || /^new window$/i.test(a.name ?? ""))
+        if (act) act.execute()
+        else entry.execute()
     }
 
     // Close every window of an app
@@ -614,7 +626,7 @@ PanelWindow {
         onMiddleClicked: {
             if (!entry) return
             dock.closeMenus()
-            entry.execute()
+            dock.newWindow(entry)
             if (running) appIcon.hopOnce()
             else appIcon.bounce()
         }
@@ -648,7 +660,7 @@ PanelWindow {
         // Away from the edge, next to the icon
         x: dock.horizontal ? Math.max(8, Math.min(dock.width - width - 8, dock.popupAt.x - width / 2))
          : dock.side === "left" ? dock.popupAt.x + 14 : dock.popupAt.x - width - 14
-        y: dock.horizontal ? dock.popupAt.y - height - 14
+        y: dock.horizontal ? Math.max(8, dock.popupAt.y - height - 14)
          : Math.max(8, Math.min(dock.height - height - 8, dock.popupAt.y - height / 2))
     }
 
@@ -890,7 +902,7 @@ PanelWindow {
                 visible: !!contextMenu.item?.entry
                 text: "New Window"
                 onActivated: {
-                    contextMenu.item.entry.execute()
+                    dock.newWindow(contextMenu.item.entry)
                     dock.contextItem = null
                 }
             }
