@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import Quickshell.Widgets
 import Quickshell.Services.UPower
 import Quickshell.Services.Mpris
 import "../theme"
@@ -333,16 +334,14 @@ PanelWindow {
             iconItem.bounce()
             return
         }
-        // Several windows: show the list
+        // Several windows: show their previews (click again to close them)
         if (wins.length > 1) {
-            if (menuAppId === id) {
-                menuAppId = ""
-            } else {
-                popupAt = popupPoint(iconItem)
-                menuAppId = id
-            }
+            previewOpen.stop()
+            if (menuAppId === id) menuAppId = ""
+            else openPreview(id, iconItem)
             return
         }
+        menuAppId = ""
         // The window you are using: tuck it away. Otherwise bring it here.
         const w = wins[0]
         if (!isMinimized(w) && isActive(w)) minimize(w)
@@ -369,6 +368,48 @@ PanelWindow {
         reordering = true
         SettingsService.moveTo(id, to)
         Qt.callLater(() => dock.reordering = false)
+    }
+
+    // ---------- Window previews on hover ----------
+    property string hoverId: ""
+    property var hoverItem: null
+    function iconHovered(id, iconItem, isHovered) {
+        if (isHovered) {
+            hoverId = id
+            hoverItem = iconItem
+            previewLeave.stop()
+            if (contextItem || trashMenuOpen || downloadsOpen) return
+            // Previews already open: follow the mouse to the next app at once
+            if (menuAppId !== "" && id !== menuAppId) {
+                if (windowsFor(id).length > 0) openPreview(id, iconItem)
+                else menuAppId = ""
+            } else if (menuAppId === "") {
+                previewOpen.restart()
+            }
+        } else if (hoverId === id) {
+            hoverId = ""
+            previewOpen.stop()
+            previewLeave.restart()
+        }
+    }
+    function openPreview(id, iconItem) {
+        popupAt = popupPoint(iconItem)
+        menuAppId = id
+    }
+    Timer {
+        id: previewOpen
+        interval: 550
+        onTriggered: {
+            if (dock.hoverId !== "" && dock.hoverItem && !dock.contextItem
+                && dock.windowsFor(dock.hoverId).length > 0)
+                dock.openPreview(dock.hoverId, dock.hoverItem)
+        }
+    }
+    // Leaving the icon: close unless the mouse went onto the previews or another app
+    Timer {
+        id: previewLeave
+        interval: 350
+        onTriggered: if (!menuHover.hovered && dock.hoverId === "") dock.menuAppId = ""
     }
 
     function openContext(id, entry, iconItem) {
@@ -456,6 +497,7 @@ PanelWindow {
         property bool draggable: false
         property real dragDelta: 0
         readonly property bool dragging: iconMouse.dragging
+        readonly property bool hovered: iconMouse.containsMouse
         signal clicked()
         signal rightClicked()
         signal middleClicked()
@@ -609,7 +651,7 @@ PanelWindow {
             border.color: Tokens.border
             border.width: 1
             visible: iconMouse.containsMouse && icon.label !== "" && !dock.contextItem
-                && !dock.trashMenuOpen && !dock.downloadsOpen && !icon.dragging
+                && !dock.trashMenuOpen && !dock.downloadsOpen && dock.menuAppId === "" && !icon.dragging
 
             Text {
                 id: labelText
@@ -696,6 +738,7 @@ PanelWindow {
         progress: dock.progressFor(modelData, entry, wins)
         onClicked: dock.appClicked(modelData, entry, appIcon)
         onRightClicked: dock.openContext(modelData, entry, appIcon)
+        onHoveredChanged: dock.iconHovered(modelData, appIcon, hovered)
         // New window: starts the app again (most apps open another window)
         onMiddleClicked: {
             if (!entry) return
@@ -769,33 +812,134 @@ PanelWindow {
         }
     }
 
+    // Window previews: live pictures of an app's windows, above its icon.
+    // Opens when you rest the mouse on a running app, or click one with several windows.
+    // Click a picture to go to that window; the x closes it. Minimized ones show how they looked.
     PopupBox {
         id: windowMenu
         readonly property bool open: dock.menuAppId !== ""
-        readonly property var wins: open ? dock.windowsFor(dock.menuAppId) : []
-        width: open ? 260 : 0
-        height: open ? menuColumn.implicitHeight + 12 : 0
+        readonly property var wins: open ? dock.windowsFor(dock.menuAppId).slice(0, 6) : []
+        readonly property int thumbH: 116
+        width: open ? previewRow.implicitWidth + 16 : 0
+        height: open ? previewRow.implicitHeight + 16 : 0
         visible: open
+        clip: true
 
         HoverHandler {
             id: menuHover
             onHoveredChanged: dock.updateHover()
         }
 
-        Column {
-            id: menuColumn
-            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 6 }
-            spacing: 2
+        Row {
+            id: previewRow
+            x: 8
+            y: 8
+            spacing: Tokens.spaceSm
 
             Repeater {
                 model: windowMenu.wins
 
-                MenuRow {
+                Item {
+                    id: pTile
                     required property var modelData
-                    text: (modelData.title || "Untitled") + (dock.isMinimized(modelData) ? "  (minimized)" : "")
-                    onActivated: {
-                        dock.showWindow(modelData)
-                        dock.menuAppId = ""
+                    readonly property bool minimized: dock.isMinimized(modelData)
+                    readonly property var size: modelData.lastIpcObject?.size ?? [16, 10]
+                    readonly property real aspect: size[1] > 0 ? size[0] / size[1] : 1.6
+                    readonly property url still: MinimizeService.saved[MinimizeService.addr(modelData)]?.grab?.url ?? ""
+                    width: Math.max(96, Math.min(220, windowMenu.thumbH * aspect))
+                    height: windowMenu.thumbH + 26
+
+                    Rectangle {
+                        id: pFrame
+                        width: parent.width
+                        height: windowMenu.thumbH
+                        radius: Tokens.radiusMd
+                        color: Tokens.surface
+                        border.color: pMouse.containsMouse ? Tokens.accent : Tokens.border
+                        border.width: pMouse.containsMouse ? 2 : 1
+
+                        ClippingRectangle {
+                            anchors.fill: parent
+                            anchors.margins: 2
+                            radius: Tokens.radiusMd - 2
+                            color: "transparent"
+
+                            // Live while it is on a workspace
+                            ScreencopyView {
+                                anchors.fill: parent
+                                visible: !pTile.minimized
+                                captureSource: windowMenu.open && !pTile.minimized ? pTile.modelData.wayland : null
+                                live: true
+                            }
+                            // Minimized: the picture from when it went into the dock, else its icon
+                            Image {
+                                anchors.fill: parent
+                                visible: pTile.minimized && pTile.still.toString() !== ""
+                                source: pTile.minimized ? pTile.still : ""
+                                fillMode: Image.PreserveAspectFit
+                                opacity: 0.75
+                            }
+                            Image {
+                                anchors.centerIn: parent
+                                visible: pTile.minimized && pTile.still.toString() === ""
+                                width: 40
+                                height: 40
+                                sourceSize: Qt.size(80, 80)
+                                source: Quickshell.iconPath(dock.findEntry(pTile.modelData.wayland?.appId ?? "")?.icon
+                                    ?? (pTile.modelData.wayland?.appId ?? "").toLowerCase(), "application-x-executable")
+                            }
+                        }
+
+                        MouseArea {
+                            id: pMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                dock.showWindow(pTile.modelData)
+                                dock.menuAppId = ""
+                            }
+                        }
+
+                        // Close this window
+                        Rectangle {
+                            visible: pMouse.containsMouse || closeMouse.containsMouse
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.margins: 6
+                            width: 20
+                            height: 20
+                            radius: 10
+                            color: closeMouse.containsMouse ? "#ee5d5b" : Qt.rgba(0, 0, 0, 0.65)
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "×"
+                                color: "white"
+                                font.family: Tokens.fontFamily
+                                font.pixelSize: 14
+                                font.weight: Font.DemiBold
+                            }
+                            MouseArea {
+                                id: closeMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Hyprland.dispatch(`hl.dsp.window.close({ window = "address:${dock.addr(pTile.modelData)}" })`)
+                            }
+                        }
+                    }
+
+                    Text {
+                        anchors.top: pFrame.bottom
+                        anchors.topMargin: 6
+                        width: parent.width
+                        horizontalAlignment: Text.AlignHCenter
+                        text: (pTile.minimized ? "\u2013 " : "") + (pTile.modelData.title || "Untitled")
+                        color: pMouse.containsMouse ? Tokens.textPrimary : Tokens.textSecondary
+                        font.family: Tokens.fontFamily
+                        font.pixelSize: Tokens.fontSmall
+                        elide: Text.ElideRight
                     }
                 }
             }
