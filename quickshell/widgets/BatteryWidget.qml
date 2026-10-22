@@ -60,7 +60,9 @@ PanelWindow {
         x: w.savedX
         y: w.savedY
         width: 340
-        height: 164
+        // Grows with the number of devices, like the iPhone widget's list
+        height: Math.max(72, rows.implicitHeight + 28)
+        Behavior on height { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
         radius: 22
         color: Tokens.cardBg
         border.color: Tokens.ink(0.08)
@@ -97,37 +99,43 @@ PanelWindow {
             font.pixelSize: Tokens.fontBody
         }
 
-        Row {
-            anchors.centerIn: parent
-            spacing: 18
+        // One row per device: a small ring with the device in it, its name, and the charge
+        Column {
+            id: rows
+            x: 16
+            y: 14
+            width: card.width - 32
+            spacing: 6
 
             Repeater {
                 model: w.devices
 
-                Column {
+                Item {
                     id: dev
                     required property var modelData
                     readonly property real level: Math.max(0, Math.min(1, modelData.level))
+                    readonly property bool low: level < 0.2 && !modelData.charging
                     // Green like on the iPhone, red when low (but not while charging)
-                    readonly property color ringColor: level < 0.2 && !modelData.charging ? Tokens.red : Tokens.green
-                    spacing: 10
-                    width: 64
+                    readonly property color ringColor: low ? Tokens.red : Tokens.green
+                    width: rows.width
+                    height: 44
 
                     Item {
-                        width: 64
-                        height: 64
+                        id: ringBox
+                        width: 40
+                        height: 40
+                        anchors.verticalCenter: parent.verticalCenter
 
                         // The ring: a grey track and the charge on top, from 12 o'clock
                         Canvas {
-                            id: ring
                             anchors.fill: parent
                             readonly property string key: dev.level + "|" + dev.ringColor + "|" + Tokens.themeName
                             onKeyChanged: requestPaint()
                             onPaint: {
                                 const c = getContext("2d")
                                 c.reset()
-                                const r = width / 2 - 4
-                                c.lineWidth = 6
+                                const r = width / 2 - 3
+                                c.lineWidth = 4
                                 c.lineCap = "round"
                                 c.strokeStyle = Tokens.ink(0.14).toString()
                                 c.beginPath()
@@ -142,25 +150,49 @@ PanelWindow {
                             }
                             Component.onCompleted: requestPaint()
                         }
-
                         TintIcon {
                             anchors.centerIn: parent
-                            width: 26
-                            height: 26
-                            sourceSize: Qt.size(52, 52)
+                            width: 18
+                            height: 18
+                            sourceSize: Qt.size(36, 36)
                             source: Quickshell.iconPath(dev.modelData.icon + "-symbolic", dev.modelData.icon)
                         }
+                    }
 
+                    Column {
+                        anchors.left: ringBox.right
+                        anchors.leftMargin: 12
+                        anchors.right: pct.left
+                        anchors.rightMargin: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 1
+                        Text {
+                            width: parent.width
+                            text: dev.modelData.name
+                            color: Tokens.textPrimary
+                            font.family: Tokens.fontFamily
+                            font.pixelSize: Tokens.fontBody
+                            font.weight: Font.DemiBold
+                            elide: Text.ElideRight
+                        }
+                        Text {
+                            visible: text !== ""
+                            text: dev.modelData.charging ? "Charging" : dev.low ? "Low battery" : ""
+                            color: dev.low ? Tokens.red : Tokens.textSecondary
+                            font.family: Tokens.fontFamily
+                            font.pixelSize: Tokens.fontSmall
+                        }
                     }
 
                     Text {
-                        width: parent.width
-                        horizontalAlignment: Text.AlignHCenter
-                        text: Math.round(dev.level * 100) + "%" + (dev.modelData.charging ? " +" : "")
+                        id: pct
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Math.round(dev.level * 100) + "%"
                         color: Tokens.textPrimary
                         font.family: Tokens.fontFamily
-                        font.pixelSize: Tokens.fontTitle
-                        font.weight: Font.DemiBold
+                        font.pixelSize: 20
+                        font.weight: Font.Light
                         font.features: { "tnum": 1 }
                     }
                 }
