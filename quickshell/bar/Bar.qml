@@ -225,6 +225,14 @@ PanelWindow {
         height: Tokens.barHeight
         color: Tokens.barBg
 
+        // Glass: a faint line along the bottom of the see-through bar
+        Rectangle {
+            visible: Tokens.glass
+            anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+            height: 1
+            color: Qt.rgba(1, 1, 1, 0.09)
+        }
+
         // The notch face looks toward the mouse while it is over the bar
         HoverHandler { id: barHover }
 
@@ -562,7 +570,7 @@ PanelWindow {
         y: Tokens.barHeight - bar.hideOffset
         width: bar.filletSize
         height: bar.filletSize
-        visible: bar.filletSize >= 1
+        visible: bar.filletSize >= 1 && Tokens.attached
         opacity: Math.max(0, Math.min(1, (BootService.notch - 0.6) / 0.4))
         onWidthChanged: requestPaint()
         onPaint: {

@@ -434,7 +434,7 @@ PanelWindow {
         id: filletTop
         x: cc.side ? panel.x : panel.x - 14
         y: cc.side ? panel.y - 14 : panel.y
-        visible: panel.height > 1
+        visible: panel.height > 1 && Tokens.attached
     }
 
     // Top bar: under the sheet, at the right edge. Side bar: right of the sheet, on the bottom edge.
@@ -442,7 +442,7 @@ PanelWindow {
         id: filletSide
         x: cc.side ? panel.x + panel.width : panel.x + panel.width - 14
         y: cc.side ? panel.y + panel.height - 14 : panel.y + panel.height
-        visible: panel.height > 1
+        visible: panel.height > 1 && Tokens.attached
     }
 
     Item {
@@ -457,8 +457,9 @@ PanelWindow {
             shadowVerticalOffset: 2
         }
         // Flush against the frame/bar it grows out of
-        x: cc.side ? SettingsService.sideWidth : cc.width - Tokens.frameT - width
-        y: cc.side ? cc.height - Tokens.frameT - height : SettingsService.topInset
+        // (glass: floating a little away from the bar and the edge)
+        x: cc.side ? SettingsService.sideWidth + Tokens.gap : cc.width - Tokens.frameT - width - (Tokens.glass ? Tokens.gap - Tokens.frameT + 6 : 0)
+        y: cc.side ? cc.height - Tokens.frameT - height - Tokens.gap : SettingsService.topInset + Tokens.gap
         width: ({ compact: 300, normal: 340, wide: 400 })[SettingsService.ccWidth] ?? 340
         Behavior on width { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeMove } }
         readonly property real fullHeight: content.implicitHeight + 24
@@ -472,12 +473,13 @@ PanelWindow {
         // (bottom-left under the top bar, top-right next to the side bar).
         Rectangle {
             anchors.fill: parent
-            topLeftRadius: 0
-            topRightRadius: cc.side ? Tokens.radiusXl : 0
-            bottomLeftRadius: cc.side ? 0 : Tokens.radiusXl
-            bottomRightRadius: 0
+            topLeftRadius: Tokens.glass ? Tokens.radiusXl : 0
+            topRightRadius: cc.side || Tokens.glass ? Tokens.radiusXl : 0
+            bottomLeftRadius: cc.side && !Tokens.glass ? 0 : Tokens.radiusXl
+            bottomRightRadius: Tokens.glass ? Tokens.radiusXl : 0
             color: Tokens.barBg
         }
+        GlassEdge { radius: Tokens.radiusXl; z: 10 }
 
         // Klikk inni panelet skal ikke lukke
         MouseArea { anchors.fill: parent }

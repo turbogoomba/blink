@@ -50,6 +50,7 @@ function BlinkBars.apply()
     hl.config({
         plugin = {
             hyprbars = {
+                bar_blur = c.glass == true,
                 bar_color = c.bar,
                 col = { text = c.text },
                 inactive_button_color = c.inactive,

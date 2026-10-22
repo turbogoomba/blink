@@ -101,8 +101,8 @@ PanelWindow {
             c.fill()
         }
     }
-    Fillet { mirrored: win.onLeft; x: win.onLeft ? sheet.x + sheet.width : sheet.x - 14; y: sheet.y }
-    Fillet { mirrored: win.onLeft; x: win.onLeft ? sheet.x : sheet.x + sheet.width - 14; y: sheet.y + sheet.height }
+    Fillet { visible: sheet.height > 1 && Tokens.attached; mirrored: win.onLeft; x: win.onLeft ? sheet.x + sheet.width : sheet.x - 14; y: sheet.y }
+    Fillet { visible: sheet.height > 1 && Tokens.attached; mirrored: win.onLeft; x: win.onLeft ? sheet.x : sheet.x + sheet.width - 14; y: sheet.y + sheet.height }
 
     Item {
         id: sheet
@@ -115,8 +115,8 @@ PanelWindow {
             blurMax: 32
             shadowVerticalOffset: 2
         }
-        x: win.onLeft ? SettingsService.leftInset : win.width - win.frameT - width
-        y: SettingsService.topInset
+        x: win.onLeft ? SettingsService.leftInset + Tokens.gap : win.width - win.frameT - width - (Tokens.glass ? Tokens.gap - win.frameT + 6 : 0)
+        y: SettingsService.topInset + Tokens.gap
         width: 372
         height: 0
         clip: true
@@ -124,12 +124,13 @@ PanelWindow {
         // Black like the bar, square where it joins the frame, round at the free corner
         Rectangle {
             anchors.fill: parent
-            topLeftRadius: 0
-            topRightRadius: 0
-            bottomLeftRadius: win.onLeft ? 0 : Tokens.radiusXl
-            bottomRightRadius: win.onLeft ? Tokens.radiusXl : 0
+            topLeftRadius: Tokens.glass ? Tokens.radiusXl : 0
+            topRightRadius: Tokens.glass ? Tokens.radiusXl : 0
+            bottomLeftRadius: win.onLeft && !Tokens.glass ? 0 : Tokens.radiusXl
+            bottomRightRadius: win.onLeft || Tokens.glass ? Tokens.radiusXl : 0
             color: Tokens.barBg
         }
+        GlassEdge { radius: Tokens.radiusXl; z: 10 }
 
         HoverHandler {
             id: sheetHover

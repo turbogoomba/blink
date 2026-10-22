@@ -26,7 +26,11 @@ PanelWindow {
 
     readonly property string side: SettingsService.dockPosition
     readonly property bool horizontal: side === "bottom"
-    readonly property int frameT: Tokens.frameT
+    // Floating: the dock hovers a little above the edge with all corners round,
+    // instead of growing out of the frame (Settings > Dock > Floating; always on glass)
+    readonly property bool floating: SettingsService.dockFloating || Tokens.glass
+    // Distance from the screen edge to where the dock rests
+    readonly property int frameT: floating ? (Tokens.glass ? 8 : Tokens.frameT + 8) : Tokens.frameT
 
     anchors {
         bottom: true
@@ -1375,6 +1379,7 @@ PanelWindow {
 
     // Before the dock (left of it, or above it)
     Fillet {
+        visible: !dock.floating
         cx: dock.horizontal ? 0 : dock.side === "left" ? 14 : 0
         cy: dock.horizontal ? 0 : 0
         x: dock.horizontal ? body.x - 14 : dock.side === "left" ? body.x : body.x + body.width - 14
@@ -1383,6 +1388,7 @@ PanelWindow {
     }
     // After the dock (right of it, or below it)
     Fillet {
+        visible: !dock.floating
         cx: dock.horizontal ? 14 : dock.side === "left" ? 14 : 0
         cy: dock.horizontal ? 0 : 14
         x: dock.horizontal ? body.x + dock.along : dock.side === "left" ? body.x : body.x + body.width - 14
@@ -1405,8 +1411,9 @@ PanelWindow {
         // The bounce past "revealed" stretches the dock instead of lifting it,
         // so its edge never leaves the frame.
         readonly property real rawShift: (1 - dock.reveal) * (dock.across + dock.frameT + 4)
-        readonly property real hiddenShift: Math.max(0, rawShift)
-        readonly property real stretch: Math.max(0, -rawShift)
+        // Floating, the bounce lifts it a little past its place instead
+        readonly property real hiddenShift: dock.floating ? rawShift : Math.max(0, rawShift)
+        readonly property real stretch: dock.floating ? 0 : Math.max(0, -rawShift)
         readonly property real thick: dock.across + stretch
         width: dock.horizontal ? dock.along : thick
         height: dock.horizontal ? thick : dock.along
@@ -1430,12 +1437,14 @@ PanelWindow {
             color: Tokens.barBg
         }
         Rectangle {
+            visible: !dock.floating
             color: Tokens.barBg
             x: dock.side === "right" ? parent.width / 2 : 0
             y: dock.horizontal ? parent.height / 2 : 0
             width: dock.horizontal ? parent.width : parent.width / 2
             height: dock.horizontal ? parent.height / 2 : parent.height
         }
+        GlassEdge { radius: Tokens.radiusXl }
 
         Grid {
             id: iconGrid

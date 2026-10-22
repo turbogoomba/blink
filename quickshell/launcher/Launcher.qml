@@ -174,8 +174,8 @@ PanelWindow {
             c.fill()
         }
     }
-    Fillet { x: box.x - 14 }
-    Fillet { x: box.x + box.width; mirrored: true }
+    Fillet { x: box.x - 14; visible: Tokens.attached }
+    Fillet { x: box.x + box.width; mirrored: true; visible: Tokens.attached }
 
     // The sheet: starts as the notch and grows down out of it
     Item {
@@ -189,15 +189,17 @@ PanelWindow {
             blurMax: 32
             shadowVerticalOffset: 2
         }
-        readonly property real topPad: launcher.fromBottom ? 12 : SettingsService.topInset + 6
+        // Glass: a floating box under the bar (like Spotlight) instead of growing out of the notch
+        readonly property real topPad: launcher.fromBottom || Tokens.glass ? 12 : SettingsService.topInset + 6
         readonly property real fullW: 640
         readonly property real startW: 200
-        readonly property real startH: launcher.fromBottom ? Tokens.frameT : SettingsService.topInset + 8
+        readonly property real startH: launcher.fromBottom ? Tokens.frameT : Tokens.glass ? 12 : SettingsService.topInset + 8
         property real fullH: topPad + content.implicitHeight + (launcher.fromBottom ? Tokens.frameT + 8 : 8)
         Behavior on fullH { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
         anchors.horizontalCenter: parent.horizontalCenter
-        y: launcher.fromBottom ? launcher.height - height : 0
+        y: launcher.fromBottom ? launcher.height - height - (Tokens.glass ? Tokens.gap : 0)
+         : Tokens.glass ? SettingsService.topInset + Tokens.gap : 0
         width: startW + (fullW - startW) * launcher.reveal
         height: startH + (fullH - startH) * Math.max(0, launcher.reveal)
         clip: true
@@ -205,12 +207,13 @@ PanelWindow {
         // Same black as the bar. The corners against the bar/frame hide, the free ones are round.
         Rectangle {
             anchors.fill: parent
-            topLeftRadius: launcher.fromBottom ? Tokens.radiusXl : 0
-            topRightRadius: launcher.fromBottom ? Tokens.radiusXl : 0
-            bottomLeftRadius: launcher.fromBottom ? 0 : Tokens.radiusXl
-            bottomRightRadius: launcher.fromBottom ? 0 : Tokens.radiusXl
+            topLeftRadius: launcher.fromBottom || Tokens.glass ? Tokens.radiusXl : 0
+            topRightRadius: launcher.fromBottom || Tokens.glass ? Tokens.radiusXl : 0
+            bottomLeftRadius: launcher.fromBottom && !Tokens.glass ? 0 : Tokens.radiusXl
+            bottomRightRadius: launcher.fromBottom && !Tokens.glass ? 0 : Tokens.radiusXl
             color: Tokens.barBg
         }
+        GlassEdge { radius: Tokens.radiusXl; z: 10 }
 
         // Klikk inni boksen skal ikke lukke
         MouseArea {

@@ -13,9 +13,10 @@ Scope {
     property int radius: 20
     property color color: Tokens.barBg
 
-    // Game Mode hides the frame so games get the whole screen
+    // Game Mode hides the frame so games get the whole screen.
+    // Glass themes have no frame either, like macOS: just the bar and the floating dock.
     Variants {
-        model: ShellState.gameMode ? [] : Quickshell.screens
+        model: ShellState.gameMode || Tokens.glass ? [] : Quickshell.screens
 
         Scope {
             id: s

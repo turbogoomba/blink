@@ -160,7 +160,7 @@ Rectangle {
           : peek ? 110
           : baseHeight
     radius: open || showNotif || peek ? 24 : showBt || showOsd || showClass ? 18 : 8
-    color: Tokens.barBg
+    color: Tokens.notchBg
     clip: true
 
     // Springy morph, like the Dynamic Island. The side bar's notch panel turns it

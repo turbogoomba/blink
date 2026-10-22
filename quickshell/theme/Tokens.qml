@@ -29,6 +29,11 @@ Singleton {
 		daylight: { name: "Daylight", sub: "Bright and crisp, like macOS in light mode", light: true,
 		          frame: "#ececf0", window: "#ffffff", sidebar: "#f2f2f5", card: "#ffffff", surface: "#f5f5f7", surfaceAlt: "#f0f0f3",
 		          border: "#d2d2d7", text: "#1d1d1f", text2: "#6e6e73", accent: "#007aff", onAccent: "#ffffff", wall: "#c9d6e8" },
+		// Dark Liquid Glass: see-through bar, dock and sheets with blur behind them
+		// (Hyprland layer rules, hypr/glass.lua). No frame; sheets and the dock float.
+		glass:  { name: "Glass",  sub: "Dark Liquid Glass, blur behind the bar, dock and menus", light: false, glass: true,
+		          frame: "#a316161c", window: "#1c1c1e", sidebar: "#111113", card: "#a31c1c22", surface: "#2c2c2e", surfaceAlt: "#242426",
+		          border: "#3a3a3c", text: "#f2f2f5", text2: "#a1a1a8", accent: "#0a84ff", onAccent: "#ffffff", wall: "#3b3858" },
 		paper:  { name: "Paper",  sub: "Soft light grey, easy on the eyes", light: true,
 		          frame: "#d3d3d9", window: "#e3e3e8", sidebar: "#d9d9df", card: "#ececf0", surface: "#f1f1f4", surfaceAlt: "#e7e7ec",
 		          border: "#c2c2ca", text: "#1c1c1e", text2: "#5c5c64", accent: "#2f6fd6", onAccent: "#ffffff", wall: "#b4c1d4" },
@@ -45,9 +50,17 @@ Singleton {
 		          frame: "#120d0b", window: "#19120f", sidebar: "#120d0b", card: "#221a16", surface: "#2a201b", surfaceAlt: "#1d1613",
 		          border: "#46352e", text: "#f0e6df", text2: "#a8968c", accent: "#ff8a3d", onAccent: "#d9000000", wall: "#4a2c20" }
 	})
-	readonly property var themeOrder: ["blink", "daylight", "paper", "fjord", "dusk", "forest", "ember"]
+	readonly property var themeOrder: ["blink", "glass", "daylight", "paper", "fjord", "dusk", "forest", "ember"]
 	readonly property var t: themes[themeName] ?? themes.blink
 	readonly property bool light: t.light
+	// Glass themes: see-through surfaces with blur, no frame, sheets float free of the edges
+	readonly property bool glass: t.glass ?? false
+	// Sheets and the dock join the frame/bar with concave corners (off on glass)
+	readonly property bool attached: !glass
+	// Space between a floating sheet and the bar or screen edge
+	readonly property int gap: glass ? 10 : 0
+	// The notch stays solid black on glass, like the camera housing on a Mac
+	readonly property color notchBg: glass ? "#000000" : barBg
 
 	// The bar, the frame and every sheet that grows out of them
 	readonly property color barBg: t.frame

@@ -76,7 +76,8 @@ Singleton {
             t.window, t.sidebar, t.surface, t.surfaceAlt, t.border, t.text, t.text2,
             hex(Tokens.accent), hex(Qt.lighter(Tokens.accent, 1.18)), hex(Tokens.onAccent),
             t.light ? "1" : "0",
-            t.frame]
+            hex(Tokens.barBg),   // without its alpha (glass themes have a see-through frame color)
+            Tokens.glass ? "1" : "0"]
         writer.running = true
     }
 
@@ -85,7 +86,7 @@ Singleton {
     readonly property string script: `
 A=$1; K=$2; G=$3; V=$4; S=$5; F=$6; NAME=$7; WIN=$8; SIDE=$9; shift 9
 SURF=$1; SURF2=$2; BORD=$3; TXT=$4; TXT2=$5; ACC=$6; ACCL=$7; ONACC=$8; LIGHT=$9; shift 9
-FRAME=$1
+FRAME=$1; GLASS=$2
 
 # ---------- Kitty ----------
 if [ "$K" = 1 ]; then
@@ -117,6 +118,8 @@ color15 $TXT
 color4 $ACC
 color12 $ACCL
 EOF
+        # Glass: see-through terminal, Hyprland blurs what is behind it (restart kitty to see it)
+        [ "$GLASS" = 1 ] && echo "background_opacity 0.78" >> "$f"
     fi
     pkill -USR1 -x kitty 2>/dev/null
 fi
@@ -142,12 +145,19 @@ fi
 # ---------- Window title bars (hyprbars) ----------
 # hypr/hyprbars.lua reads this file; BlinkBars.apply() shows the new colors right away
 h() { echo "$1" | tr -d '#'; }
+if [ "$GLASS" = 1 ]; then GLASSB=true; WINBAR="rgba($(h $WIN)c7)"; else GLASSB=false; WINBAR="rgb($(h $WIN))"; fi
 mkdir -p "$HOME/.config/blink"
 cat > "$HOME/.config/blink/hyprbars-colors.lua" <<EOF
 -- Written by Blink (Settings > Appearance). Changes when you pick another theme.
-return { bar = "rgb($(h $SURF2))", text = "rgb($(h $TXT))", inactive = "rgb($(h $BORD))", win = "rgb($(h $WIN))" }
+return { bar = "rgb($(h $SURF2))", text = "rgb($(h $TXT))", inactive = "rgb($(h $BORD))", win = "$WINBAR", glass = $GLASSB }
 EOF
 command -v hyprctl >/dev/null 2>&1 && hyprctl eval 'if BlinkBars then BlinkBars.apply() end' >/dev/null 2>&1
+# Glass: blur behind Blink's bar, dock and sheets (hypr/glass.lua reads this)
+cat > "$HOME/.config/blink/glass.lua" <<EOF
+-- Written by Blink (Settings > Appearance): is the theme a glass theme?
+return { enabled = $GLASSB }
+EOF
+command -v hyprctl >/dev/null 2>&1 && hyprctl eval 'if BlinkGlass then BlinkGlass.apply() end' >/dev/null 2>&1
 
 # ---------- Discord (Vesktop) ----------
 if [ "$V" = 1 ] && [ -d "$HOME/.config/vesktop" ] && [ -f "$A/vesktop/MacRice.theme.css" ]; then

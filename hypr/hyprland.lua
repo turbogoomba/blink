@@ -56,6 +56,7 @@ end
 require("keybinds")
 require("style")
 require("hyprbars")
+require("glass")
 
 ---- VINDUSREGLER ----
 -- Ignorer apper som ber om å starte maksimert (f.eks. kitty)

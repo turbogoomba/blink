@@ -48,6 +48,8 @@ Singleton {
     // When the dock shows: "intellihide" (out whenever no window covers it, and at the edge),
     // "autohide" (only when the mouse touches the edge), "" = intellihide on laptops, autohide elsewhere
     property alias dockHide: adapter.dockHide
+    // The dock hovers above the edge with all corners round, instead of growing out of the frame
+    property alias dockFloating: adapter.dockFloating
     // Pinned apps (desktop entry ids), in order
     property alias dockApps: adapter.dockApps
 
@@ -221,6 +223,7 @@ Singleton {
             property string frameViz: "glow"
             property string dockPosition: "bottom"
             property string dockHide: ""
+            property bool dockFloating: true
             property list<string> dockApps: ["firefox", "org.gnome.Nautilus", "kitty"]
             property list<string> favApps: []
             property list<string> favFolders: []

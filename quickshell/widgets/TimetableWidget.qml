@@ -62,6 +62,8 @@ PanelWindow {
         scale: drag.pressed ? 0.98 : 1
         Behavior on scale { NumberAnimation { duration: Tokens.durFast; easing.type: Tokens.easeMove } }
 
+        GlassEdge { radius: 22; z: 10 }
+
         // Drag anywhere to move it
         MouseArea {
             id: drag

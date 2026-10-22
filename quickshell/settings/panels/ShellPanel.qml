@@ -682,6 +682,14 @@ Flickable {
                     }
                 }
                 SettingRow {
+                    title: "Floating"
+                    subtitle: "Hovers above the edge with round corners, instead of growing out of the frame. Always on with Glass"
+                    Toggle {
+                        checked: SettingsService.dockFloating
+                        apply: function(v) { SettingsService.dockFloating = v }
+                    }
+                }
+                SettingRow {
                     title: "Side drawer"
                     subtitle: "Graphs, favorite apps and folders on the edge opposite the dock"
                     Toggle {
