@@ -136,6 +136,11 @@
 .titlebar-buttonbox {
   gap: 8px !important;
 }
+.titlebar-buttonbox-container,
+.titlebar-buttonbox,
+.titlebar-button {
+  -moz-window-dragging: no-drag !important;   /* a click is a click, never the start of a window drag */
+}
 .titlebar-button {
   appearance: none !important;
   width: 12px !important;

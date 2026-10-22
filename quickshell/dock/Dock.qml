@@ -257,8 +257,11 @@ PanelWindow {
     }
 
     // ---------- Apps ----------
+    // The app list loads a moment after Blink starts, and byId() does not tell bindings when it
+    // arrives. Reading DesktopEntries.applications makes bindings that call this look again.
     function findEntry(id) {
         if (!id) return null
+        void DesktopEntries.applications.values.length
         return DesktopEntries.byId(id) ?? DesktopEntries.heuristicLookup(id)
     }
 
@@ -323,6 +326,7 @@ PanelWindow {
     }
 
     function appClicked(id, entry, iconItem) {
+        entry = entry ?? findEntry(id)   // look again at the click, in case it was not loaded yet
         contextItem = null
         trashMenuOpen = false
         downloadsOpen = false
@@ -413,6 +417,7 @@ PanelWindow {
     }
 
     function openContext(id, entry, iconItem) {
+        entry = entry ?? findEntry(id)
         menuAppId = ""
         trashMenuOpen = false
         downloadsOpen = false
@@ -741,9 +746,10 @@ PanelWindow {
         onHoveredChanged: dock.iconHovered(modelData, appIcon, hovered)
         // New window: starts the app again (most apps open another window)
         onMiddleClicked: {
-            if (!entry) return
+            const e = entry ?? dock.findEntry(modelData)
+            if (!e) return
             dock.closeMenus()
-            dock.newWindow(entry)
+            dock.newWindow(e)
             if (running) appIcon.hopOnce()
             else appIcon.bounce()
         }
