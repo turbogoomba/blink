@@ -106,16 +106,15 @@
 }
 
 /* ---------- Window buttons: round, like the title bars (hyprbars is off for Firefox) ---------- */
+/* Firefox has more than one set of window buttons (one per toolbar that can be on top).
+   Hide them all, then show only the set in the tab row. */
 .titlebar-buttonbox-container {
+  display: none !important;
+}
+#TabsToolbar .titlebar-buttonbox-container {
   display: flex !important;
   align-items: center !important;
   padding-inline: 10px 8px !important;
-}
-/* Firefox keeps a second set in the address bar row (for when the tabs are not at the top):
-   only the one next to the tabs */
-#nav-bar .titlebar-buttonbox-container,
-#nav-bar .titlebar-buttonbox {
-  display: none !important;
 }
 .titlebar-buttonbox {
   gap: 8px !important;
