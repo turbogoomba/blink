@@ -207,7 +207,7 @@ Singleton {
             property string timetableUrl: ""
             property bool dockEnabled: true
             property var launcherHidden: ["System Settings", "KDE System Settings", "Thunar Preferences", "Volume Control"]
-            property int dockSize: 60
+            property int dockSize: 64
             property bool drawerEnabled: true
             property bool bootAnimation: true
             property string frameViz: "glow"

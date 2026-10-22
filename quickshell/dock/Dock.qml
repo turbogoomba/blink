@@ -42,7 +42,10 @@ PanelWindow {
     color: "transparent"
     visible: SettingsService.dockEnabled && !ShellState.focusMode
 
-    property int size: SettingsService.dockSize
+    // The whole dock grows a little while the mouse is on it, like a Mac with magnification
+    readonly property bool mouseOn: dockHover.hovered || bodyHover.hovered
+    property real size: SettingsService.dockSize * (mouseOn && shown ? 1.12 : 1)
+    Behavior on size { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
     property bool revealed: false
 
     // Out: the mouse is on it, or (intellihide) nothing covers it
@@ -497,7 +500,7 @@ PanelWindow {
         property bool multi: false         // several windows: two dots
         property int badge: 0              // unread notifications, or the app's own count
         property real progress: -1         // the app's download / copy progress, -1 = none
-        property real imageSize: dock.size - 8
+        property real imageSize: dock.size - 4
         property bool tile: false          // minimized window: icon on a small tile
         property bool draggable: false
         property real dragDelta: 0
@@ -509,11 +512,11 @@ PanelWindow {
         signal dropped(real delta)
         z: dragging ? 10 : 0
 
-        // Magnification: the closer the mouse, the bigger (max 1.35)
+        // Magnification: the closer the mouse, the bigger (max 1.45)
         readonly property real mag: {
             if (dock.hoverPos < 0) return 1
             const c = dock.horizontal ? icon.x + icon.width / 2 : icon.y + icon.height / 2
-            return 1 + 0.35 * Math.max(0, 1 - Math.abs(dock.hoverPos - c) / 110)
+            return 1 + 0.45 * Math.max(0, 1 - Math.abs(dock.hoverPos - c) / 110)
         }
 
         // Bounce like on a Mac: keeps hopping until the app's window shows up (max 8 s)
