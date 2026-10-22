@@ -8,7 +8,10 @@ import "../theme"
 import "../services"
 
 // Mac-style Alt+Tab: a row of app icons, most recently used first.
-// Hold Alt, tap Tab to move, let go of Alt to switch. Esc cancels.
+// Every window, on every workspace; minimized ones at the end (dimmed).
+// The number under an icon is its workspace. Hold Alt, tap Tab to move, let go of Alt to
+// switch: goes to that window's workspace and puts the window on top (minimized ones grow
+// back out of the dock). Esc cancels.
 // Keys call: qs ipc call switcher next | prev
 PanelWindow {
     id: sw
@@ -42,11 +45,17 @@ PanelWindow {
         return Quickshell.iconPath(entry?.icon ?? id.toLowerCase(), "application-x-executable")
     }
 
-    // Windows sorted by when they were last focused
+    function isMinimized(t) { return (t.workspace?.name ?? "") === "special:minimized" }
+
+    // Windows sorted by when they were last focused, minimized ones last
     function collect() {
-        const list = Hyprland.toplevels.values.filter(t =>
-            t.wayland && (t.workspace?.name ?? "") !== "special:minimized")
-        list.sort((a, b) => (a.lastIpcObject?.focusHistoryID ?? 999) - (b.lastIpcObject?.focusHistoryID ?? 999))
+        const list = Hyprland.toplevels.values.filter(t => t.wayland && (t.workspace?.id ?? 0) !== 0
+            && (!(t.workspace?.name ?? "").startsWith("special:") || isMinimized(t)))
+        list.sort((a, b) => {
+            const ma = isMinimized(a) ? 1 : 0, mb = isMinimized(b) ? 1 : 0
+            if (ma !== mb) return ma - mb
+            return (a.lastIpcObject?.focusHistoryID ?? 999) - (b.lastIpcObject?.focusHistoryID ?? 999)
+        })
         return list
     }
 
@@ -68,10 +77,29 @@ PanelWindow {
         selected = (selected + dir + windows.length) % windows.length
     }
 
+    // While open the switcher holds the keyboard. When it lets go, Hyprland gives focus back to
+    // the window used before, so focusing the picked one right away was undone. Let go first,
+    // then go to the window a moment later.
+    property var picked: null
     function confirm() {
-        const w = windows[selected]
+        picked = windows[selected] ?? null
         open = false
-        if (w) Hyprland.dispatch(`hl.dsp.focus({ window = "address:${addr(w)}" })`)
+        land.restart()
+    }
+    Timer {
+        id: land
+        interval: 60
+        onTriggered: {
+            const w = sw.picked
+            sw.picked = null
+            if (!w) return
+            if (sw.isMinimized(w)) {
+                MinimizeService.restore(w)   // grows back out of the dock, onto this workspace
+                return
+            }
+            Hyprland.dispatch(`hl.dsp.focus({ window = "address:${sw.addr(w)}" })`)
+            Hyprland.dispatch(`hl.dsp.window.alter_zorder({ mode = "top", window = "address:${sw.addr(w)}" })`)
+        }
     }
 
     function cancel() { open = false }
@@ -152,6 +180,9 @@ PanelWindow {
                     required property var modelData
                     required property int index
                     readonly property bool isSelected: index === sw.selected
+                    readonly property bool minimized: sw.isMinimized(modelData)
+                    readonly property int wsId: modelData.workspace?.id ?? 0
+                    readonly property bool otherWs: !minimized && wsId !== (Hyprland.focusedWorkspace?.id ?? -1)
 
                     width: 76
                     height: 76
@@ -171,8 +202,33 @@ PanelWindow {
                         height: 56
                         sourceSize: Qt.size(112, 112)
                         source: sw.iconFor(tile.modelData)
+                        opacity: tile.minimized ? 0.5 : 1
                         scale: tile.isSelected ? 1.06 : 1
                         Behavior on scale { NumberAnimation { duration: Tokens.durNormal; easing.type: Tokens.easeGrow } }
+                    }
+
+                    // Which workspace it is on (or that it is minimized), when it is not this one
+                    Rectangle {
+                        visible: tile.otherWs || tile.minimized
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.margins: 2
+                        width: Math.max(18, wsText.implicitWidth + 8)
+                        height: 18
+                        radius: 9
+                        color: Tokens.surface
+                        border.color: Tokens.border
+                        border.width: 1
+
+                        Text {
+                            id: wsText
+                            anchors.centerIn: parent
+                            text: tile.minimized ? "\u2013" : tile.wsId
+                            color: Tokens.textSecondary
+                            font.family: Tokens.fontFamily
+                            font.pixelSize: Tokens.fontSmall
+                            font.weight: Font.DemiBold
+                        }
                     }
 
                     MouseArea {
@@ -197,7 +253,13 @@ PanelWindow {
             anchors.bottomMargin: 14
             width: parent.width - 40
             horizontalAlignment: Text.AlignHCenter
-            text: sw.windows[sw.selected]?.title ?? ""
+            text: {
+                const w = sw.windows[sw.selected]
+                if (!w) return ""
+                const where = sw.isMinimized(w) ? "  ·  Minimized"
+                    : (w.workspace?.id ?? 0) !== (Hyprland.focusedWorkspace?.id ?? -1) ? "  ·  Desktop " + w.workspace.id : ""
+                return (w.title ?? "") + where
+            }
             color: Tokens.textPrimary
             font.family: Tokens.fontFamily
             font.pixelSize: Tokens.fontBody
