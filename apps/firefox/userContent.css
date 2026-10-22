@@ -1,33 +1,163 @@
-/* Blink — mørk bakgrunn på nye faner */
-@-moz-document url("about:newtab"), url("about:home"), url("about:blank") {
-  body {
-    background-color: #000000 !important;
-  }
+/* ============================================
+   Blink — Firefox new tab: your favorites (v5, "dark and clean")
+   The favorites are Firefox's own Shortcuts: pin, drag and edit them on the page
+   (right-click a tile). Two rows, no sponsored tiles or stories (user.js).
+   Colors: Blink swaps these exact colors for the theme's
+   (#1c1c1e page, #2c2c2e tiles, #3a3a3c lines, #e5e5e7 text, #000000 frame).
+   ============================================ */
+
+@-moz-document url("about:blank") {
+  body { background-color: #1c1c1e !important; }
 }
 
-/* Blink — minimal new tab */
 @-moz-document url("about:newtab"), url("about:home") {
-  body { background: #000000 !important; }
+  body,
+  .outer-wrapper,
+  .activity-stream {
+    background: #1c1c1e !important;
+    color: #e5e5e7 !important;
+  }
+  * {
+    font-family: "IBM Plex Sans", sans-serif !important;
+  }
 
+  /* Only the favorites: no logo, search box, weather, stories or personalize button.
+     The address bar is the search. */
   .logo-and-wordmark-wrapper, .logo-and-wordmark, .logo,
-  .top-sites, .top-sites-list,
+  .search-wrapper, .fake-searchbox,
   .weather, .weatherCard,
-  .personalize-button,
+  .personalize-button, .customize-menu-animate-wrapper,
+  .discovery-stream .ds-section, .ds-collection-card-grid, .ds-card-grid,
   [class*="widget"], [class*="Widget"],
-  .discovery-stream, .wallpaper-attribution {
+  .wallpaper-attribution, .top-site-outer .top-site-sponsored,
+  .sponsored-label {
     display: none !important;
   }
 
-  .search-wrapper {
-    padding-top: 34vh !important;
+  .outer-wrapper {
+    padding-top: 9vh !important;
+  }
+  main {
+    max-width: 900px !important;
+    margin: 0 auto !important;
   }
 
-  .search-handoff-button,
-  .search-inner-wrapper input {
+  /* Heading */
+  .top-sites-wrapper::before,
+  .top-sites::before {
+    content: "Favorites";
+    display: block;
+    margin: 0 8px 18px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #e5e5e7;
+    opacity: 0.95;
+  }
+
+  /* Six to a row */
+  .top-sites-list {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .top-site-outer {
+    width: auto !important;
+    margin: 0 !important;
+    padding: 14px 6px 10px !important;
+    border-radius: 14px !important;
+    transition: background-color 140ms ease, transform 140ms ease !important;
+  }
+  .top-site-outer:hover,
+  .top-site-outer:focus-within {
+    background: color-mix(in srgb, #e5e5e7 6%, transparent) !important;
+    transform: translateY(-2px);
+  }
+  .top-site-outer .top-site-inner > a {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  /* The tile: a raised rounded square */
+  .top-site-outer .tile {
+    width: 64px !important;
+    height: 64px !important;
+    border-radius: 16px !important;
     background-color: #2c2c2e !important;
-    border: 1px solid #3a3a3c !important;
-    border-radius: 12px !important;
-    box-shadow: none !important;
+    box-shadow:
+      0 4px 12px color-mix(in srgb, #000000 45%, transparent),
+      inset 0 1px 0 color-mix(in srgb, #e5e5e7 10%, transparent) !important;
+    transition: box-shadow 140ms ease !important;
+  }
+  .top-site-outer:hover .tile {
+    box-shadow:
+      0 10px 24px color-mix(in srgb, #000000 55%, transparent),
+      inset 0 1px 0 color-mix(in srgb, #e5e5e7 14%, transparent) !important;
+  }
+  .top-site-outer .tile .icon-wrapper,
+  .top-site-outer .tile .top-site-icon {
+    border-radius: 16px !important;
+  }
+  .top-site-outer .tile .tile-letter,
+  .top-site-outer .tile .icon-wrapper.letter-fallback::before {
     color: #e5e5e7 !important;
+    font-size: 24px !important;
+    font-weight: 600 !important;
+  }
+  .top-site-outer .title {
+    font-size: 13px !important;
+    color: #e5e5e7 !important;
+    opacity: 0.8;
+    padding: 0 !important;
+  }
+  .top-site-outer:hover .title {
+    opacity: 1;
+  }
+  /* Pinned favorites: no pin badge */
+  .top-site-outer .title .icon-pin-small,
+  .top-site-outer .icon-pin-small {
+    display: none !important;
+  }
+
+  /* The "+" tile to add a favorite */
+  .top-site-outer.add-button .tile {
+    background: transparent !important;
+    box-shadow: inset 0 0 0 1.5px #3a3a3c !important;
+  }
+
+  /* The ... menu on a tile */
+  .top-site-outer .context-menu-button {
+    border-radius: 8px !important;
+    background-color: #2c2c2e !important;
+  }
+
+  /* Recently visited (Firefox's "Recent activity", when it is on) */
+  .section-title,
+  .section-top-bar h3 {
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    color: #e5e5e7 !important;
+    margin-top: 30px !important;
+  }
+  .card-outer,
+  .ds-card {
+    border-radius: 14px !important;
+    background: #2c2c2e !important;
+    border: none !important;
+    box-shadow: 0 6px 18px color-mix(in srgb, #000000 35%, transparent),
+      inset 0 1px 0 color-mix(in srgb, #e5e5e7 5%, transparent) !important;
+    overflow: hidden !important;
+  }
+
+  /* Edit dialog for a favorite */
+  .modal,
+  .topsite-form {
+    background: #2c2c2e !important;
+    color: #e5e5e7 !important;
+    border-radius: 14px !important;
+    border: 1px solid #3a3a3c !important;
   }
 }

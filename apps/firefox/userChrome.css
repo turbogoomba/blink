@@ -1,8 +1,11 @@
 /* ============================================
-   Blink — Firefox (v4, black and roomy: the same black as the frame,
-   bigger tabs, accent glow and small animations)
+   Blink — Firefox (v5, "dark and clean": layers of grey with soft shadows)
+   Two rows: the window buttons and the tabs, then back / forward / reload,
+   the address bar (sunk into the toolbar) and a few buttons. The active tab is a
+   raised card; the star in the address bar shows (and toggles) a favorite.
    The colors below are replaced by Blink when you pick a theme
    (Settings > Appearance). Restart Firefox to see a new theme.
+   New tab page (favorites): userContent.css. Settings it needs: user.js.
    ============================================ */
 
 :root {
@@ -13,18 +16,27 @@
   --mr-text: #e5e5e7;
   --mr-text-dim: #98989d;
   --mr-accent: #5fa8d3;
-  --mr-radius: 9px;
   color-scheme: dark !important;
 
+  /* The layers, from the theme colors above */
+  --b-toolbar: color-mix(in srgb, var(--mr-surface) 72%, var(--mr-bg));
+  --b-page: var(--mr-surface);
+  --b-tab: color-mix(in srgb, var(--mr-text) 6%, var(--mr-surface));
+  --b-group: color-mix(in srgb, var(--mr-text) 2%, var(--mr-surface));
+  --b-field: color-mix(in srgb, var(--mr-surface-alt) 65%, var(--mr-bg));
+  --b-line: color-mix(in srgb, var(--mr-text) 7%, transparent);
+  --b-hover: color-mix(in srgb, var(--mr-text) 7%, transparent);
+  --b-press: color-mix(in srgb, var(--mr-text) 13%, transparent);
+
   /* Firefox's own color variables */
-  --toolbar-bgcolor: var(--mr-bg) !important;
+  --toolbar-bgcolor: var(--b-toolbar) !important;
   --toolbar-color: var(--mr-text) !important;
-  --lwt-accent-color: var(--mr-bg) !important;
+  --lwt-accent-color: var(--b-toolbar) !important;
   --lwt-text-color: var(--mr-text) !important;
-  --tab-selected-bgcolor: var(--mr-surface) !important;
+  --tab-selected-bgcolor: var(--b-tab) !important;
   --tab-selected-textcolor: var(--mr-text) !important;
-  --toolbar-field-background-color: var(--mr-surface-alt) !important;
-  --toolbar-field-focus-background-color: var(--mr-surface) !important;
+  --toolbar-field-background-color: var(--b-field) !important;
+  --toolbar-field-focus-background-color: var(--b-field) !important;
   --toolbar-field-color: var(--mr-text) !important;
   --toolbar-field-focus-color: var(--mr-text) !important;
   --toolbar-field-border-color: transparent !important;
@@ -34,31 +46,30 @@
   --arrowpanel-color: var(--mr-text) !important;
   --arrowpanel-border-color: var(--mr-border) !important;
   --arrowpanel-border-radius: 12px !important;
-  --sidebar-background-color: var(--mr-bg) !important;
+  --sidebar-background-color: var(--b-toolbar) !important;
   --chrome-content-separator-color: transparent !important;
   --tabs-border-color: transparent !important;
   --toolbarbutton-border-radius: 8px !important;
   --toolbarbutton-icon-fill: var(--mr-text) !important;
   --toolbarbutton-icon-fill-attention: var(--mr-accent) !important;
-  --urlbar-box-bgcolor: var(--mr-surface) !important;
+  --urlbar-box-bgcolor: var(--b-tab) !important;
   --urlbar-box-text-color: var(--mr-text) !important;
-  --tab-hover-background-color: color-mix(in srgb, var(--mr-text) 7%, transparent) !important;
-  --toolbarbutton-hover-background: color-mix(in srgb, var(--mr-text) 8%, transparent) !important;
-  --toolbarbutton-active-background: color-mix(in srgb, var(--mr-text) 14%, transparent) !important;
+  --tab-hover-background-color: var(--b-hover) !important;
+  --toolbarbutton-hover-background: var(--b-hover) !important;
+  --toolbarbutton-active-background: var(--b-press) !important;
 }
 
 * {
   font-family: "IBM Plex Sans", sans-serif !important;
 }
 
-/* ---------- One flat, quiet top ---------- */
+/* ---------- The top: one quiet layer, a hairline above the page ---------- */
 #navigator-toolbox {
-  background: var(--mr-bg) !important;
+  background: var(--b-toolbar) !important;
   color: var(--mr-text) !important;
-  border-bottom: none !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--mr-bg) 70%, transparent) !important;
+  box-shadow: 0 1px 0 var(--b-line) !important;
 }
-/* Text and icons always in the theme's text color, also when Firefox
-   itself thinks it is dark and Blink is light (or the other way) */
 #navigator-toolbox .toolbarbutton-1,
 #navigator-toolbox .toolbarbutton-icon,
 .tab-label,
@@ -85,21 +96,54 @@
   box-shadow: none !important;
   border: none !important;
 }
-#nav-bar {
-  padding-block: 0 6px !important;
-}
+/* Favorites live on the new tab page (userContent.css), so no bookmarks bar */
 #PersonalToolbar {
   display: none !important;
 }
-
-/* Window buttons: Hyprland does not need them */
-.titlebar-spacer,
-.titlebar-buttonbox-container {
+.titlebar-spacer[type="pre-tabs"],
+.titlebar-spacer[type="post-tabs"] {
   display: none !important;
 }
 
+/* ---------- Window buttons: round, like the title bars (hyprbars is off for Firefox) ---------- */
+.titlebar-buttonbox-container {
+  display: flex !important;
+  align-items: center !important;
+  padding-inline: 10px 8px !important;
+}
+.titlebar-buttonbox {
+  gap: 8px !important;
+}
+.titlebar-button {
+  appearance: none !important;
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.titlebar-button > .toolbarbutton-icon {
+  opacity: 0 !important;
+  width: 8px !important;
+  height: 8px !important;
+  transition: opacity 90ms ease !important;
+}
+.titlebar-buttonbox:hover .titlebar-button > .toolbarbutton-icon {
+  opacity: 0.6 !important;
+}
+.titlebar-close { background-color: #ee5d5b !important; }
+.titlebar-min { background-color: #f0b443 !important; }
+.titlebar-max,
+.titlebar-restore { background-color: #4fbf68 !important; }
+/* Grey while Firefox is not the window in focus */
+#navigator-toolbox:-moz-window-inactive .titlebar-button {
+  background-color: color-mix(in srgb, var(--mr-text) 22%, transparent) !important;
+}
+
 /* ---------- Fewer buttons ---------- */
-/* Gone: home, sidebar, the list of all tabs, the extensions puzzle piece */
 #home-button,
 #sidebar-button,
 #alltabs-button,
@@ -107,37 +151,30 @@
 #firefox-view-button {
   display: none !important;
 }
-/* Forward only when you can go forward */
 #forward-button[disabled] {
   display: none !important;
 }
-/* Pinned extensions and the rest: smaller and quieter until you hover */
 #nav-bar .toolbarbutton-1 {
   --toolbarbutton-inner-padding: 7px !important;
 }
-#nav-bar-customization-target > .webextension-browser-action,
-#downloads-button {
+#nav-bar-customization-target > .webextension-browser-action {
   opacity: 0.55;
   transition: opacity 150ms ease;
 }
-#nav-bar:hover #nav-bar-customization-target > .webextension-browser-action,
-#nav-bar:hover #downloads-button,
-#downloads-button[attention] {
+#nav-bar:hover #nav-bar-customization-target > .webextension-browser-action {
   opacity: 1;
 }
 
-/* ---------- Tabs: roomy pills with a bit of life ---------- */
+/* ---------- Tabs: the active one is a raised card ---------- */
 #TabsToolbar {
-  padding-inline: 8px !important;
-  padding-block: 4px 2px !important;
+  padding-inline: 4px 8px !important;
+  padding-block: 8px 2px !important;
 }
 #tabbrowser-tabs,
 #tabbrowser-tabs[orient="horizontal"] {
-  --tab-min-height: 36px !important;
+  --tab-min-height: 34px !important;
   --tab-min-width: 120px !important;
-  /* Wider tabs through Firefox's own variable: a fixed max-width on the tabs
-     would stop the closing animation, and the closed tab stays as a gap */
-  --tab-max-width: 260px !important;
+  --tab-max-width: 240px !important;
   border-inline-start: none !important;
 }
 .tabbrowser-tab {
@@ -145,78 +182,76 @@
 }
 .tab-content {
   padding-inline: 12px 8px !important;
+  gap: 2px !important;
 }
 .tab-background {
-  border-radius: 11px !important;
-  margin-block: 3px !important;
+  border-radius: 9px !important;
+  margin-block: 0 !important;
+  border: none !important;
   box-shadow: none !important;
   outline: none !important;
-  transition: background-color 180ms ease, box-shadow 220ms ease !important;
+  transition: background-color 160ms ease, box-shadow 200ms ease !important;
 }
 .tabbrowser-tab:not([selected]):hover .tab-background {
-  background-color: color-mix(in srgb, var(--mr-text) 7%, transparent) !important;
+  background-color: var(--b-hover) !important;
 }
-/* Active tab: lifted, with a soft accent glow and an accent line at the bottom */
 .tab-background[selected] {
-  background:
-    linear-gradient(to top, color-mix(in srgb, var(--mr-accent) 14%, transparent), transparent 70%),
-    var(--mr-surface) !important;
+  background: var(--b-tab) !important;
   box-shadow:
-    inset 0 -2px 0 var(--mr-accent),
-    0 2px 10px color-mix(in srgb, var(--mr-accent) 18%, transparent) !important;
+    inset 0 1px 0 color-mix(in srgb, var(--mr-text) 6%, transparent),
+    0 2px 8px color-mix(in srgb, var(--mr-bg) 55%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--mr-bg) 30%, transparent) !important;
 }
 .tab-label {
-  font-size: 12.5px !important;
-  transition: opacity 180ms ease !important;
+  font-size: 13px !important;
 }
 .tabbrowser-tab[selected] .tab-label {
-  font-weight: 600 !important;
+  font-weight: 500 !important;
 }
 .tabbrowser-tab:not([selected]) .tab-label,
 .tabbrowser-tab:not([selected]) .tab-icon-image {
-  opacity: 0.6;
-  transition: opacity 180ms ease;
+  opacity: 0.62;
+  transition: opacity 160ms ease;
 }
 .tabbrowser-tab:not([selected]):hover .tab-label,
 .tabbrowser-tab:not([selected]):hover .tab-icon-image {
   opacity: 0.9;
 }
-/* New tabs slide in */
 .tabbrowser-tab[fadein]:not([pinned]) .tab-content {
-  animation: blink-tab-in 260ms cubic-bezier(.2, .9, .3, 1.25);
+  animation: blink-tab-in 240ms cubic-bezier(.2, .9, .3, 1.2);
 }
 @keyframes blink-tab-in {
-  from { opacity: 0; transform: translateY(6px) scale(0.96); }
+  from { opacity: 0; transform: translateY(5px) scale(0.97); }
   to   { opacity: 1; transform: none; }
 }
-/* Loading: the spinner and the throbber in the accent color */
 .tab-throbber,
 .tab-throbber[busy] {
   fill: var(--mr-accent) !important;
   color: var(--mr-accent) !important;
 }
-.tabbrowser-tab[busy] .tab-background[selected] {
-  animation: blink-tab-busy 1.4s ease-in-out infinite;
-}
-@keyframes blink-tab-busy {
-  0%, 100% { box-shadow: inset 0 -2px 0 var(--mr-accent), 0 2px 10px color-mix(in srgb, var(--mr-accent) 10%, transparent); }
-  50%      { box-shadow: inset 0 -2px 0 var(--mr-accent), 0 2px 14px color-mix(in srgb, var(--mr-accent) 35%, transparent); }
-}
-/* Playing sound: the speaker icon in the accent */
 .tab-icon-overlay[soundplaying],
 .tab-audio-button[soundplaying] {
   color: var(--mr-accent) !important;
   fill: var(--mr-accent) !important;
 }
-/* Pinned tabs: square icons */
 .tabbrowser-tab[pinned] .tab-content {
   padding-inline: 10px !important;
 }
-/* Close button only on hover, no "x" on the others */
-.tabbrowser-tab:not(:hover) .tab-close-button {
+/* Close on the active tab and on hover only */
+.tabbrowser-tab:not([selected]):not(:hover) .tab-close-button {
   display: none !important;
 }
-/* No line under the active tab, no blue focus line */
+.tab-close-button {
+  width: 20px !important;
+  height: 20px !important;
+  padding: 4px !important;
+  border-radius: 6px !important;
+  opacity: 0.7;
+}
+.tab-close-button:hover {
+  opacity: 1;
+  background-color: var(--b-press) !important;
+}
 .tab-context-line,
 .tabbrowser-tab::after,
 .tabbrowser-tab::before {
@@ -224,66 +259,92 @@
 }
 #tabs-newtab-button,
 #new-tab-button {
-  opacity: 0.55;
+  opacity: 0.6;
   transition: opacity 150ms ease !important;
 }
 #tabs-newtab-button:hover,
 #new-tab-button:hover {
   opacity: 1;
-  fill: var(--mr-accent) !important;
 }
-
-/* When you close tabs Firefox can keep an empty space so the next close
-   button stays under the mouse. Drop it */
 .closing-tabs-spacer {
   display: none !important;
   width: 0 !important;
 }
 
-/* Toolbar buttons: a small lift and accent on hover */
-#nav-bar .toolbarbutton-1 > .toolbarbutton-icon,
-#nav-bar .toolbarbutton-1 > .toolbarbutton-badge-stack {
-  transition: background-color 150ms ease, transform 150ms ease !important;
+/* ---------- Navigation: back / forward / reload as one small group ---------- */
+#nav-bar {
+  padding-block: 6px 8px !important;
+  padding-inline: 8px !important;
 }
-#nav-bar .toolbarbutton-1:not([disabled]):active > .toolbarbutton-icon,
-#nav-bar .toolbarbutton-1:not([disabled]):active > .toolbarbutton-badge-stack {
+#back-button,
+#forward-button,
+#reload-button,
+#stop-button {
+  background: var(--b-group) !important;
+  margin: 0 !important;
+  padding-block: 2px !important;
+}
+#back-button {
+  border-radius: 10px 0 0 10px !important;
+  padding-inline-start: 2px !important;
+  box-shadow: inset 1px 1px 0 var(--b-line), inset 0 -1px 0 var(--b-line) !important;
+}
+#forward-button {
+  box-shadow: inset 0 1px 0 var(--b-line), inset 0 -1px 0 var(--b-line) !important;
+}
+#reload-button,
+#stop-button {
+  border-radius: 0 10px 10px 0 !important;
+  padding-inline-end: 2px !important;
+  margin-inline-end: 6px !important;
+  box-shadow: inset -1px 1px 0 var(--b-line), inset 0 -1px 0 var(--b-line) !important;
+}
+#nav-bar .toolbarbutton-1:not([disabled]):active > .toolbarbutton-icon {
   transform: scale(0.9);
 }
-#back-button:not([disabled]):hover,
-#forward-button:hover,
-#reload-button:hover {
-  fill: var(--mr-accent) !important;
+#nav-bar .toolbarbutton-1 > .toolbarbutton-icon {
+  transition: background-color 150ms ease, transform 150ms ease !important;
 }
 
-/* ---------- Address bar: clean until you need it ---------- */
+/* ---------- Address bar: sunk into the toolbar ---------- */
+#urlbar {
+  --urlbar-min-height: 38px !important;
+}
 #urlbar-background {
-  border-radius: var(--mr-radius) !important;
+  border-radius: 11px !important;
   border: none !important;
-  box-shadow: none !important;
-}
-#urlbar-background {
-  transition: background-color 180ms ease, box-shadow 220ms ease !important;
-}
-#urlbar:not([focused]):hover #urlbar-background {
-  background-color: var(--mr-surface) !important;
+  background-color: var(--b-field) !important;
+  box-shadow:
+    inset 0 1px 3px color-mix(in srgb, var(--mr-bg) 70%, transparent),
+    0 0 0 1px var(--b-line) !important;
+  transition: box-shadow 200ms ease !important;
 }
 #urlbar[focused] #urlbar-background {
-  outline: 2px solid var(--mr-accent) !important;
-  outline-offset: -1px !important;
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--mr-accent) 16%, transparent) !important;
+  outline: none !important;
+  box-shadow:
+    inset 0 1px 3px color-mix(in srgb, var(--mr-bg) 70%, transparent),
+    0 0 0 1.5px var(--mr-accent),
+    0 0 0 5px color-mix(in srgb, var(--mr-accent) 15%, transparent) !important;
 }
-#urlbar:not([focused]) #urlbar-input {
-  text-align: center !important;
+#urlbar[open] #urlbar-background {
+  background-color: var(--mr-surface) !important;
+  box-shadow: 0 0 0 1px var(--mr-border), 0 16px 40px color-mix(in srgb, var(--mr-bg) 60%, transparent) !important;
 }
-/* Shield, site info, translate, zoom, star, reader: hidden until you hover the bar */
+/* The domain stands out, the rest of the address is dimmer (Firefox's own formatting) */
+#urlbar-input {
+  font-size: 13.5px !important;
+}
+#identity-box > box,
+#identity-icon-box {
+  background: transparent !important;
+}
+/* Quiet icons until you point at the bar; the star always shows */
 #tracking-protection-icon-container,
 #identity-permission-box,
 #translations-button,
 #urlbar-zoom-button,
-#star-button-box,
 #reader-mode-button,
-#picture-in-picture-button,
-#page-action-buttons > :not(#urlbar-go-button) {
+#picture-in-picture-button {
   opacity: 0;
   transition: opacity 150ms ease;
 }
@@ -291,25 +352,34 @@
 #urlbar:hover #identity-permission-box,
 #urlbar:hover #translations-button,
 #urlbar:hover #urlbar-zoom-button,
-#urlbar:hover #star-button-box,
 #urlbar:hover #reader-mode-button,
-#urlbar:hover #picture-in-picture-button,
-#urlbar:hover #page-action-buttons > *,
-#urlbar[focused] #page-action-buttons > * {
+#urlbar:hover #picture-in-picture-button {
   opacity: 1;
 }
-/* The padlock box: no grey background behind it */
-#identity-box > box,
-#identity-icon-box {
-  background: transparent !important;
+/* The star: a favorite shows it filled in the accent */
+#star-button-box {
+  opacity: 0.75;
+  border-radius: 7px !important;
+}
+#star-button-box:hover {
+  opacity: 1;
+  background-color: var(--b-hover) !important;
+}
+#star-button[starred] {
+  fill: var(--mr-accent) !important;
+  color: var(--mr-accent) !important;
+}
+#star-button-box:has(#star-button[starred]) {
+  opacity: 1;
 }
 
-/* ---------- Menus ---------- */
-menupopup {
+/* ---------- Menus and panels ---------- */
+menupopup,
+panel {
   --panel-background: var(--mr-surface) !important;
   --panel-color: var(--mr-text) !important;
   --panel-border-color: var(--mr-border) !important;
-  --panel-border-radius: 10px !important;
+  --panel-border-radius: 12px !important;
 }
 menuitem,
 menu {
@@ -323,7 +393,7 @@ menu[_moz-menuactive] {
 
 /* ---------- The page: flush with the window, Hyprland rounds the corners ---------- */
 #tabbrowser-tabpanels {
-  background: var(--mr-bg) !important;
+  background: var(--b-page) !important;
 }
 .browserStack > browser {
   border-radius: 0 !important;

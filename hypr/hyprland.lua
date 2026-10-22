@@ -55,6 +55,9 @@ require("hyprbars")
 ---- VINDUSREGLER ----
 -- Ignorer apper som ber om å starte maksimert (f.eks. kitty)
 hl.window_rule({ match = { class = ".*" }, suppress_event = "maximize" })
+-- Firefox draws its own green button (apps/firefox/userChrome.css): let its maximize through.
+-- A later rule replaces the value above for Firefox only.
+hl.window_rule({ name = "firefox-maximize", match = { class = "^(firefox)$" }, suppress_event = "fullscreenoutput" })
 
 -- Thunar always opens floating and centered, like a Finder window
 hl.window_rule({

@@ -29,10 +29,13 @@ done
 if [ -n "$PROFILE" ]; then
     link "$APPS/firefox/userChrome.css" "$PROFILE/chrome/userChrome.css"
     link "$APPS/firefox/userContent.css" "$PROFILE/chrome/userContent.css"
-    if ! grep -q "legacyUserProfileCustomizations" "$PROFILE/user.js" 2>/dev/null; then
-        echo 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);' >> "$PROFILE/user.js"
-        echo "  ok: slo på egen CSS i user.js"
-    fi
+    # Blink's settings (apps/firefox/user.js) between markers in the profile's user.js,
+    # replaced each time, so your own lines in user.js stay
+    uj="$PROFILE/user.js"
+    touch "$uj"
+    sed -i '/^\/\/ >>> Blink >>>$/,/^\/\/ <<< Blink <<<$/d' "$uj"
+    { echo "// >>> Blink >>>"; cat "$APPS/firefox/user.js"; echo "// <<< Blink <<<"; } >> "$uj"
+    echo "  ok: Blink settings in user.js (custom CSS, new tab with favorites)"
     echo "  -> Start Firefox på nytt"
 else
     echo "  Fant ingen Firefox-profil. Start Firefox én gang og kjør skriptet igjen."
