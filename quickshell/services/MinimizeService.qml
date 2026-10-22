@@ -130,8 +130,22 @@ Singleton {
         interval: 500
         onTriggered: if (win) { root.setNoAnim(win, false); win = null }
     }
+    // Focus it and put it on top of the other windows (floating windows keep their stacking
+    // order on focus). Again a moment later, once the move to this workspace has settled.
     function focus(t) {
+        raise(t)
+        raiseAgain.win = t
+        raiseAgain.restart()
+    }
+    function raise(t) {
         Hyprland.dispatch(`hl.dsp.focus({ window = "address:${addr(t)}" })`)
+        Hyprland.dispatch(`hl.dsp.window.alter_zorder({ mode = "top", window = "address:${addr(t)}" })`)
+    }
+    Timer {
+        id: raiseAgain
+        property var win: null
+        interval: 80
+        onTriggered: if (win) { root.raise(win); win = null }
     }
 
     // ---------- Requests from apps ----------

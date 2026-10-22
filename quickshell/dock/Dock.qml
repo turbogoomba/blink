@@ -340,7 +340,7 @@ PanelWindow {
         if (isMinimized(w)) {
             MinimizeService.restore(w)   // grows back out of the dock
         } else {
-            Hyprland.dispatch(`hl.dsp.focus({ window = "address:${addr(w)}" })`)
+            MinimizeService.focus(w)   // focused and on top
         }
     }
 
