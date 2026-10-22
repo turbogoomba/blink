@@ -111,6 +111,12 @@
   align-items: center !important;
   padding-inline: 10px 8px !important;
 }
+/* Firefox keeps a second set in the address bar row (for when the tabs are not at the top):
+   only the one next to the tabs */
+#nav-bar .titlebar-buttonbox-container,
+#nav-bar .titlebar-buttonbox {
+  display: none !important;
+}
 .titlebar-buttonbox {
   gap: 8px !important;
 }
@@ -155,7 +161,7 @@
   display: none !important;
 }
 #nav-bar .toolbarbutton-1 {
-  --toolbarbutton-inner-padding: 7px !important;
+  --toolbarbutton-inner-padding: 6px !important;
 }
 #nav-bar-customization-target > .webextension-browser-action {
   opacity: 0.55;
@@ -168,11 +174,12 @@
 /* ---------- Tabs: the active one is a raised card ---------- */
 #TabsToolbar {
   padding-inline: 4px 8px !important;
-  padding-block: 8px 2px !important;
+  padding-block: 5px 0 !important;
 }
 #tabbrowser-tabs,
 #tabbrowser-tabs[orient="horizontal"] {
-  --tab-min-height: 34px !important;
+  --tab-min-height: 28px !important;
+  --tab-block-margin: 0 !important;
   --tab-min-width: 120px !important;
   --tab-max-width: 240px !important;
   border-inline-start: none !important;
@@ -185,7 +192,7 @@
   gap: 2px !important;
 }
 .tab-background {
-  border-radius: 9px !important;
+  border-radius: 8px !important;
   margin-block: 0 !important;
   border: none !important;
   box-shadow: none !important;
@@ -203,7 +210,12 @@
     0 0 0 1px color-mix(in srgb, var(--mr-bg) 30%, transparent) !important;
 }
 .tab-label {
-  font-size: 13px !important;
+  font-size: 12.5px !important;
+}
+.tab-icon-image,
+.tab-icon-stack {
+  width: 14px !important;
+  height: 14px !important;
 }
 .tabbrowser-tab[selected] .tab-label {
   font-weight: 500 !important;
@@ -242,8 +254,8 @@
   display: none !important;
 }
 .tab-close-button {
-  width: 20px !important;
-  height: 20px !important;
+  width: 18px !important;
+  height: 18px !important;
   padding: 4px !important;
   border-radius: 6px !important;
   opacity: 0.7;
@@ -273,7 +285,7 @@
 
 /* ---------- Navigation: back / forward / reload as one small group ---------- */
 #nav-bar {
-  padding-block: 6px 8px !important;
+  padding-block: 4px 6px !important;
   padding-inline: 8px !important;
 }
 #back-button,
@@ -285,7 +297,7 @@
   padding-block: 2px !important;
 }
 #back-button {
-  border-radius: 10px 0 0 10px !important;
+  border-radius: 9px 0 0 9px !important;
   padding-inline-start: 2px !important;
   box-shadow: inset 1px 1px 0 var(--b-line), inset 0 -1px 0 var(--b-line) !important;
 }
@@ -294,7 +306,7 @@
 }
 #reload-button,
 #stop-button {
-  border-radius: 0 10px 10px 0 !important;
+  border-radius: 0 9px 9px 0 !important;
   padding-inline-end: 2px !important;
   margin-inline-end: 6px !important;
   box-shadow: inset -1px 1px 0 var(--b-line), inset 0 -1px 0 var(--b-line) !important;
@@ -308,10 +320,10 @@
 
 /* ---------- Address bar: sunk into the toolbar ---------- */
 #urlbar {
-  --urlbar-min-height: 38px !important;
+  --urlbar-min-height: 32px !important;
 }
 #urlbar-background {
-  border-radius: 11px !important;
+  border-radius: 9px !important;
   border: none !important;
   background-color: var(--b-field) !important;
   box-shadow:
