@@ -110,7 +110,7 @@ Singleton {
     // A fixed accent ("#rrggbb"), used when not matching the wallpaper. "" = the theme's own.
     property alias accentColor: adapter.accentColor
 
-    // Theme for the whole shell (Tokens.themes): blink, paper, fjord, dusk, forest, ember
+    // Theme for the whole shell (Tokens.themes): blink, daylight, paper, fjord, dusk, forest, ember
     property alias theme: adapter.theme
     // Apps that follow the theme (ThemeService writes their colors)
     property alias themeKitty: adapter.themeKitty

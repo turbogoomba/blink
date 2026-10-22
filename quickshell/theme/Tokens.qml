@@ -11,7 +11,8 @@ Singleton {
 	// The black frame around the screen
 	readonly property int frameT: 16
 	// Shadow under the bar, frame and sheets, so they float over the wallpaper
-	readonly property color shadowColor: Qt.rgba(0, 0, 0, 0.75)
+	// Soft shadows on light themes (dark ones need a strong shadow to show at all)
+	readonly property color shadowColor: light ? Qt.rgba(0, 0, 0, 0.22) : Qt.rgba(0, 0, 0, 0.75)
 	readonly property real shadowBlur: 1.0
 	// Text and icons in the top bar
 	readonly property int barFont: 14
@@ -24,6 +25,10 @@ Singleton {
 		blink:  { name: "Blink",  sub: "Black, accent from the wallpaper", light: false,
 		          frame: "#000000", window: "#1c1c1e", sidebar: "#111113", card: "#1e1e21", surface: "#2c2c2e", surfaceAlt: "#242426",
 		          border: "#3a3a3c", text: "#e5e5e7", text2: "#98989d", accent: "#5fa8d3", onAccent: "#d9000000", wall: "#3b3858" },
+		// macOS light: white windows, light grey sidebars and bar, Apple's greys and blue
+		daylight: { name: "Daylight", sub: "Bright and crisp, like macOS in light mode", light: true,
+		          frame: "#ececf0", window: "#ffffff", sidebar: "#f2f2f5", card: "#ffffff", surface: "#f5f5f7", surfaceAlt: "#f0f0f3",
+		          border: "#d2d2d7", text: "#1d1d1f", text2: "#6e6e73", accent: "#007aff", onAccent: "#ffffff", wall: "#c9d6e8" },
 		paper:  { name: "Paper",  sub: "Soft light grey, easy on the eyes", light: true,
 		          frame: "#d3d3d9", window: "#e3e3e8", sidebar: "#d9d9df", card: "#ececf0", surface: "#f1f1f4", surfaceAlt: "#e7e7ec",
 		          border: "#c2c2ca", text: "#1c1c1e", text2: "#5c5c64", accent: "#2f6fd6", onAccent: "#ffffff", wall: "#b4c1d4" },
@@ -40,7 +45,7 @@ Singleton {
 		          frame: "#120d0b", window: "#19120f", sidebar: "#120d0b", card: "#221a16", surface: "#2a201b", surfaceAlt: "#1d1613",
 		          border: "#46352e", text: "#f0e6df", text2: "#a8968c", accent: "#ff8a3d", onAccent: "#d9000000", wall: "#4a2c20" }
 	})
-	readonly property var themeOrder: ["blink", "paper", "fjord", "dusk", "forest", "ember"]
+	readonly property var themeOrder: ["blink", "daylight", "paper", "fjord", "dusk", "forest", "ember"]
 	readonly property var t: themes[themeName] ?? themes.blink
 	readonly property bool light: t.light
 
