@@ -39,7 +39,7 @@ end
 local function colors()
     local ok, c = pcall(dofile, os.getenv("HOME") .. "/.config/blink/hyprbars-colors.lua")
     if ok and type(c) == "table" then return c end
-    return { bar = "rgb(242426)", text = "rgb(e5e5e7)", inactive = "rgb(48484c)" }
+    return { bar = "rgb(242426)", text = "rgb(e5e5e7)", inactive = "rgb(48484c)", win = "rgb(1c1c1e)" }
 end
 
 BlinkBars = {}
@@ -55,6 +55,14 @@ function BlinkBars.apply()
                 inactive_button_color = c.inactive,
             },
         },
+    })
+    -- Terminals: the bar has the same color as the window under it, so it looks like
+    -- one piece (Hyprland still rounds the top corners of the window itself, and with
+    -- the same color on both sides they disappear)
+    hl.window_rule({
+        name = "hyprbars-terminal",
+        match = { class = "^(kitty|com\\.mitchellh\\.ghostty|Alacritty|foot)$" },
+        ["hyprbars:bar_color"] = c.win or c.bar,
     })
 end
 

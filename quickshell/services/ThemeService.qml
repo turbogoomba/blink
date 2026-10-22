@@ -145,7 +145,7 @@ h() { echo "$1" | tr -d '#'; }
 mkdir -p "$HOME/.config/blink"
 cat > "$HOME/.config/blink/hyprbars-colors.lua" <<EOF
 -- Written by Blink (Settings > Appearance). Changes when you pick another theme.
-return { bar = "rgb($(h $SURF2))", text = "rgb($(h $TXT))", inactive = "rgb($(h $BORD))" }
+return { bar = "rgb($(h $SURF2))", text = "rgb($(h $TXT))", inactive = "rgb($(h $BORD))", win = "rgb($(h $WIN))" }
 EOF
 command -v hyprctl >/dev/null 2>&1 && hyprctl eval 'if BlinkBars then BlinkBars.apply() end' >/dev/null 2>&1
 
