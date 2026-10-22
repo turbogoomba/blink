@@ -706,6 +706,14 @@ Flickable {
                     }
                 }
                 SettingRow {
+                    title: "Downloads as a stack"
+                    subtitle: "Show the newest downloads in the dock, instead of the folder icon"
+                    Toggle {
+                        checked: SettingsService.downloadsStack
+                        apply: function(v) { SettingsService.downloadsStack = v }
+                    }
+                }
+                SettingRow {
                     title: "Side drawer"
                     subtitle: "Graphs, favorite apps and folders on the edge opposite the dock"
                     Toggle {

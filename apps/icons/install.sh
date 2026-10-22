@@ -76,6 +76,12 @@ for icns in "${ICNS[@]}"; do
         github) word=io.github.shiftey.Desktop ;;
         acrobat|preview) word=org.gnome.Papers ;;
         vscode|code) word=visual-studio-code ;;
+        # Web apps from apps/webapp.sh are called blink-<name>
+        gmail) word=blink-gmail ;;
+        canvas) word=blink-canvas ;;
+        # The dock's own icons: Downloads and the Trash
+        files|downloads|folder) word=folder-download ;;
+        trash) [[ "$(basename "${icns,,}")" == *full* ]] && word=user-trash-full || word=user-trash ;;
     esac
     out="$SRC/$word.png"
     mkdir -p "$SRC"

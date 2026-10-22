@@ -1568,7 +1568,7 @@ PanelWindow {
             DockIcon {
                 id: downloadsIcon
                 // A stack of the newest downloads, like on a Mac (the folder when it is empty)
-                stack: dock.downloadsStack
+                stack: SettingsService.downloadsStack ? dock.downloadsStack : []
                 source: stack.length > 0 ? "" : Quickshell.iconPath("folder-download", "folder")
                 label: "Downloads"
                 running: dock.downloadsOpen

@@ -115,6 +115,10 @@ mkdir -p "$HOME/.local/share/applications"
 ln -sf "$APPS/nvim/blink-nvim.desktop" "$HOME/.local/share/applications/blink-nvim.desktop"
 echo "  ok: Neovim app (blink-nvim)"
 
+# Web apps in their own windows (dock and launcher); not pinned again if you unpinned them
+[ -e "$HOME/.local/share/applications/blink-gmail.desktop" ] || "$APPS/webapp.sh" "Gmail" https://mail.google.com/ || true
+[ -e "$HOME/.local/share/applications/blink-canvas.desktop" ] || "$APPS/webapp.sh" "Canvas" https://oslomet.instructure.com/ || true
+
 # Default apps for files (PDF, pictures, video, text)
 "$APPS/defaults.sh"
 

@@ -57,6 +57,8 @@ Singleton {
     property alias dockGlass: adapter.dockGlass
     // Minimized windows go into their app's icon (like the macOS setting), not tiles after a divider
     property alias minimizeIntoApp: adapter.minimizeIntoApp
+    // Downloads in the dock: the newest files as a stack, or the folder icon
+    property alias downloadsStack: adapter.downloadsStack
     // Pinned apps (desktop entry ids), in order
     property alias dockApps: adapter.dockApps
 
@@ -236,6 +238,7 @@ Singleton {
             property bool dockFloating: true
             property bool dockGlass: true
             property bool minimizeIntoApp: true
+            property bool downloadsStack: false
             property list<string> dockApps: ["firefox", "org.gnome.Nautilus", "kitty"]
             property list<string> favApps: []
             property list<string> favFolders: []
