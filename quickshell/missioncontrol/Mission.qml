@@ -14,14 +14,37 @@ Scope {
         if (!open) Hyprland.refreshToplevels()   // ferske posisjoner og størrelser
         open = !open
     }
-    function close() { open = false }
+    // Close, and end up on `ws` (default: the workspace you are looking at).
+    // While open, Mission Control holds the keyboard. When it lets go, Hyprland gives focus back
+    // to the window you used last, and if that one is on another workspace it jumps back there.
+    // So: let go first, switch a moment later.
+    property var landOn: null
+    property var landWindow: null   // or on this window (clicked in the grid)
+    function close(ws, w) {
+        landOn = ws ?? Hyprland.focusedWorkspace?.id ?? null
+        landWindow = w ?? null
+        open = false
+        land.restart()
+    }
+    Timer {
+        id: land
+        interval: 60
+        onTriggered: {
+            const ws = root.landOn
+            const w = root.landWindow
+            root.landOn = null
+            root.landWindow = null
+            if (w) Hyprland.dispatch(`hl.dsp.focus({ window = "address:${root.addr(w)}" })`)
+            else if (ws !== null && ws !== undefined && Hyprland.focusedWorkspace?.id !== ws)
+                Hyprland.dispatch(`hl.dsp.focus({ workspace = "${ws}" })`)
+        }
+    }
 
-    // Go to a workspace (a number, or "+" for a new empty one after the last).
-    // stay = keep Mission Control open, to look around with the keys.
+    // Go to a workspace. stay = keep Mission Control open, to look around with the keys.
     function goTo(ws, stay) {
+        if (!stay) { close(ws); return }
         Hyprland.dispatch(`hl.dsp.focus({ workspace = "${ws}" })`)
-        if (stay) Qt.callLater(() => Hyprland.refreshToplevels())
-        else close()
+        Qt.callLater(() => Hyprland.refreshToplevels())
     }
 
     function addr(t) {
@@ -354,9 +377,8 @@ Scope {
                             }
                             onReleased: {
                                 if (!moved) {
-                                    // Klikk: hopp til vinduet
-                                    Hyprland.dispatch(`hl.dsp.focus({ window = "address:${root.addr(tile.modelData)}" })`)
-                                    root.close()
+                                    // Klikk: hopp til vinduet (after letting go of the keyboard, see close())
+                                    root.close(tile.modelData.workspace?.id, tile.modelData)
                                     return
                                 }
                                 // Slipp: flytt til arbeidsflaten under musen
