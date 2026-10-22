@@ -1,7 +1,8 @@
 ---@diagnostic disable: undefined-global
 -- Drag a floating window to the edge of the screen, like macOS Sequoia:
 --   left or right edge -> fills that half,  top edge -> fills the screen.
--- While you hold it at an edge, Blink shows where it will go (quickshell/snap).
+-- While you hold it at an edge, Blink shows where it will go (quickshell/snap, which
+-- watches $XDG_RUNTIME_DIR/blink-snap).
 -- Drag a snapped window away and it gets its old size back.
 --
 -- Hyprland tells nothing about drags, so a small timer watches the focused window: when it
@@ -67,14 +68,22 @@ local function zone_at(c, mon)
     return nil
 end
 
+-- Tell Blink where the preview goes by writing a small file it watches (much quicker than
+-- starting "qs ipc" for every change): "<monitor> x y w h", or empty to hide it.
+local PREVIEW = (os.getenv("XDG_RUNTIME_DIR") or "/tmp") .. "/blink-snap"
+local function write_preview(text)
+    local f = io.open(PREVIEW, "w")
+    if f then f:write(text); f:close() end
+end
+
 local function preview(zone, mon)
     if not zone then
-        hl.exec_cmd("qs -c blink ipc call snap clear")
+        write_preview("")
         return
     end
     local r = target(zone, area(mon))
-    hl.exec_cmd(string.format("qs -c blink ipc call snap place %s %d %d %d %d",
-        mon.name, math.floor(r.x - mon.x), math.floor(r.y - mon.y), math.floor(r.w), math.floor(r.h)))
+    write_preview(string.format("%s %d %d %d %d", mon.name,
+        math.floor(r.x - mon.x), math.floor(r.y - mon.y), math.floor(r.w), math.floor(r.h)))
 end
 
 local function tick()

@@ -4,9 +4,10 @@ import Quickshell.Io
 import Quickshell.Wayland
 import "../theme"
 
-// Where a window will go when you let go of it at the edge of the screen (hypr/snap.lua
-// tells us: qs -c blink ipc call snap place <monitor> x y w h / clear). A soft rounded
-// box grows into place, like on macOS.
+// Where a window will go when you let go of it at the edge of the screen. hypr/snap.lua
+// writes "<monitor> x y w h" (or nothing, to hide it) to $XDG_RUNTIME_DIR/blink-snap and
+// this watches the file. qs -c blink ipc call snap place/clear does the same by hand.
+// A soft rounded box grows into place, like on macOS.
 PanelWindow {
     id: p
     WlrLayershell.layer: WlrLayer.Overlay
@@ -22,6 +23,23 @@ PanelWindow {
     property string monitor: ""
     property bool shown: false
     property rect target: Qt.rect(0, 0, 0, 0)
+
+    FileView {
+        path: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/blink-snap"
+        watchChanges: true
+        printErrors: false
+        onFileChanged: reload()
+        onLoaded: {
+            const v = text().trim().split(/\s+/)
+            if (v.length === 5) {
+                p.monitor = v[0]
+                p.target = Qt.rect(+v[1], +v[2], +v[3], +v[4])
+                p.shown = true
+            } else {
+                p.shown = false
+            }
+        }
+    }
 
     IpcHandler {
         target: "snap"
@@ -51,6 +69,7 @@ PanelWindow {
         Behavior on y { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
         Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
         Behavior on height { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-        Behavior on opacity { NumberAnimation { duration: 160 } }
+        // Gone quickly when the window lands in it
+        Behavior on opacity { NumberAnimation { duration: p.shown ? 140 : 70 } }
     }
 }
