@@ -68,6 +68,10 @@ for icns in "$SRC"/*.icns "$HOME/Downloads"/*.icns; do
         settings|systemsettings) word=preferences-system ;;
         discord) [ -e /usr/share/applications/vesktop.desktop ] && word=vesktop ;;
         terminal) word=kitty ;;
+        whatsapp) word=com.rtosta.zapzap ;;
+        github) word=io.github.shiftey.Desktop ;;
+        acrobat|preview) word=org.gnome.Papers ;;
+        vscode|code) word=visual-studio-code ;;
     esac
     out="$SRC/$word.png"
     mkdir -p "$SRC"
